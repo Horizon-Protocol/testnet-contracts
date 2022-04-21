@@ -1,0 +1,113 @@
+[
+	{
+		"asset": "USD",
+		"category": "forex",
+		"sign": "$",
+		"description": "US Dollars",
+		"name": "zUSD",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"asset": "BNB",
+		"category": "crypto",
+		"sign": "",
+		"description": "Binance Coin",
+		"name": "zBNB",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"name": "zBTC",
+		"asset": "BTC",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"name": "zETH",
+		"asset": "ETH",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"name": "zADA",
+		"asset": "ADA",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"name": "zDOT",
+		"asset": "DOT",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"name": "zSOL",
+		"asset": "SOL",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"name": "zXRP",
+		"asset": "XRP",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"name": "zCAKE",
+		"asset": "CAKE",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"name": "zLINK",
+		"asset": "LINK",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"name": "zXAU",
+		"asset": "XAU",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"name": "zXAG",
+		"asset": "XAG",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"name": "zWTI",
+		"asset": "WTI",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"name": "zEUR",
+		"asset": "EUR",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"name": "zJPY",
+		"asset": "JPY",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"name": "zSPY",
+		"asset": "SPY",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"name": "zQQQ",
+		"asset": "QQQ",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"name": "zGOOGL",
+		"asset": "GOOGL",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"name": "zAAPL",
+		"asset": "AAPL",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"name": "zTSLA",
+		"asset": "TSLA",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"name": "zCOIN",
+		"asset": "COIN",
+		"subclass": "MultiCollateralSynth"
+	}
+]

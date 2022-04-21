@@ -1,0 +1,86 @@
+{
+	"HZN": {
+		"asset": "HZN",
+		"feed": "0xf4F9EEeB9338b4B7F53CA754C9C43f1a20622B33"
+	},
+	"BNB": {
+		"asset": "BNB",
+		"feed": "0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE"
+	},
+	"BTC": {
+		"asset": "BTC",
+		"feed": "0x264990fbd0A4796A3E3d8E37C4d5F87a3aCa5Ebf"
+	},
+	"ETH": {
+		"asset": "ETH",
+		"feed": "0x9ef1B8c0E4F7dc8bF5719Ea496883DC6401d5b2e"
+	},
+	"ADA": {
+		"asset": "ADA",
+		"feed": "0xa767f745331D267c7751297D982b050c93985627"
+	},
+	"DOT": {
+		"asset": "DOT",
+		"feed": "0xC333eb0086309a16aa7c8308DfD32c8BBA0a2592"
+	},
+	"SOL": {
+		"asset": "SOL",
+		"feed": "0x0E8a53DD9c13589df6382F13dA6B3Ec8F919B323"
+	},
+	"XRP": {
+		"asset": "XRP",
+		"feed": "0x93A67D414896A280bF8FFB3b389fE3686E014fda"
+	},
+	"CAKE": {
+		"asset": "CAKE",
+		"feed": "0xB6064eD41d4f67e353768aA239cA86f4F73665a1"
+	},
+	"LINK": {
+		"asset": "LINK",
+		"feed": "0xca236E327F629f9Fc2c30A4E95775EbF0B89fac8"
+	},
+	"XAU": {
+		"asset": "XAU",
+		"feed": "0x86896fEB19D8A607c3b11f2aF50A0f239Bd71CD0"
+	},
+	"XAG": {
+		"asset": "XAG",
+		"feed": "0x817326922c909b16944817c207562B25C4dF16aD"
+	},
+	"WTI": {
+		"asset": "WTI",
+		"feed": "0xb1BED6C1fC1adE2A975F54F24851c7F410e27718"
+	},
+	"EUR": {
+		"asset": "EUR",
+		"feed": "0x0bf79F617988C472DcA68ff41eFe1338955b9A80"
+	},
+	"JPY": {
+		"asset": "JPY",
+		"feed": "0x22Db8397a6E77E41471dE256a7803829fDC8bC57"
+	},
+	"SPY": {
+		"asset": "SPY",
+		"feed": "0xb24D1DeE5F9a3f761D286B56d2bC44CE1D02DF7e"
+	},
+	"QQQ": {
+		"asset": "QQQ",
+		"feed": "0x9A41B56b2c24683E2f23BdE15c14BC7c4a58c3c4"
+	},
+	"GOOGL": {
+		"asset": "GOOGL",
+		"feed": "0xeDA73F8acb669274B15A977Cb0cdA57a84F18c2a"
+	},
+	"AAPL": {
+		"asset": "AAPL",
+		"feed": "0xb7Ed5bE7977d61E83534230f3256C021e0fae0B6"
+	},
+	"TSLA": {
+		"asset": "TSLA",
+		"feed": "0xEEA2ae9c074E87596A85ABE698B2Afebc9B57893"
+	},
+	"COIN": {
+		"asset": "COIN",
+		"feed": "0x2d1AB79D059e21aE519d88F978cAF39d74E31AEB"
+	}
+}

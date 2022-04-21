@@ -1,0 +1,83 @@
+[
+	{
+		"asset": "USD",
+		"category": "forex",
+		"sign": "$",
+		"description": "US Dollars",
+		"name": "zUSD",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"asset": "BNB",
+		"category": "crypto",
+		"sign": "",
+		"description": "Binance Coin",
+		"name": "zBNB",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"name": "zBTC",
+		"asset": "BTC",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"name": "zETH",
+		"asset": "ETH",
+		"subclass": "PurgeableSynth"
+	},
+	{
+		"name": "zADA",
+		"asset": "ADA",
+		"subclass": "PurgeableSynth"
+	},
+	{
+		"name": "zCAKE",
+		"asset": "CAKE",
+		"subclass": "PurgeableSynth"
+	},
+	{
+		"name": "zDOT",
+		"asset": "DOT",
+		"subclass": "PurgeableSynth"
+	},
+	{
+		"name": "zLINK",
+		"asset": "LINK",
+		"subclass": "PurgeableSynth"
+	},
+	{
+		"name": "zMATIC",
+		"asset": "MATIC",
+		"subclass": "PurgeableSynth"
+	},
+	{
+		"name": "zXRP",
+		"asset": "XRP",
+		"subclass": "PurgeableSynth"
+	},
+	{
+		"name": "zDOGE",
+		"asset": "DOGE",
+		"subclass": "PurgeableSynth"
+	},
+	{
+		"name": "iBNB",
+		"asset": "BNB",
+		"subclass": "PurgeableSynth",
+		"inverted": {
+			"entryPoint": 587.8,
+			"upperLimit": 881.7,
+			"lowerLimit": 293.9
+		}
+	},
+	{
+		"name": "iBTC",
+		"asset": "BTC",
+		"subclass": "PurgeableSynth",
+		"inverted": {
+			"entryPoint": 58785,
+			"upperLimit": 88177.5,
+			"lowerLimit": 29392.5
+		}
+	}
+]
