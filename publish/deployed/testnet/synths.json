@@ -56,11 +56,6 @@
 		"subclass": "PurgeableSynth"
 	},
 	{
-		"name": "zDOGE",
-		"asset": "DOGE",
-		"subclass": "PurgeableSynth"
-	},
-	{
 		"name": "iBNB",
 		"asset": "BNB",
 		"subclass": "PurgeableSynth",

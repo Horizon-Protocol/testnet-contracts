@@ -603,24 +603,6 @@
 			"txn": "",
 			"network": "testnet"
 		},
-		"TokenStatezDOGE": {
-			"name": "TokenStatezDOGE",
-			"address": "0x73fF47640F542eF3BD70093C67E84b05c9D76CA1",
-			"source": "TokenState",
-			"link": "https://testnet.bscscan.com/address/0x73fF47640F542eF3BD70093C67E84b05c9D76CA1",
-			"timestamp": "2022-04-21T07:04:26.228Z",
-			"txn": "",
-			"network": "testnet"
-		},
-		"ProxyzDOGE": {
-			"name": "ProxyzDOGE",
-			"address": "0xeD64563224e9E1A5447Fb351A0eE05395D5F5129",
-			"source": "ProxyERC20",
-			"link": "https://testnet.bscscan.com/address/0xeD64563224e9E1A5447Fb351A0eE05395D5F5129",
-			"timestamp": "2022-04-21T07:04:37.040Z",
-			"txn": "",
-			"network": "testnet"
-		},
 		"ZassetzDOGE": {
 			"name": "ZassetzDOGE",
 			"address": "0x445368C39FfDa0e918ce50fD534F63e533bEc8c9",
