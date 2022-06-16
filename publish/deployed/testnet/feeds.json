@@ -42,5 +42,9 @@
 	"DOGE": {
 		"asset": "DOGE",
 		"feed": "0x963D5e7f285Cc84ed566C486c3c1bC911291be38"
+	},
+	"TRX": {
+		"asset": "TRX",
+		"feed": "0x135deD16bFFEB51E01afab45362D3C4be31AA2B0"
 	}
 }

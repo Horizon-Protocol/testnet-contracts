@@ -549,24 +549,6 @@
 			"txn": "",
 			"network": "testnet"
 		},
-		"TokenStatezMATIC": {
-			"name": "TokenStatezMATIC",
-			"address": "0x836226E9f89E85B7Df093423B1edAA4D447f8986",
-			"source": "TokenState",
-			"link": "https://testnet.bscscan.com/address/0x836226E9f89E85B7Df093423B1edAA4D447f8986",
-			"timestamp": "2022-04-21T07:03:23.802Z",
-			"txn": "",
-			"network": "testnet"
-		},
-		"ProxyzMATIC": {
-			"name": "ProxyzMATIC",
-			"address": "0xd930ECa68883d9F803215498409D6006e0971489",
-			"source": "ProxyERC20",
-			"link": "https://testnet.bscscan.com/address/0xd930ECa68883d9F803215498409D6006e0971489",
-			"timestamp": "2022-04-21T07:03:34.903Z",
-			"txn": "",
-			"network": "testnet"
-		},
 		"ZassetzMATIC": {
 			"name": "ZassetzMATIC",
 			"address": "0xfC4A7C8754E91fc2A6334fc38017F906509BF0Af",
@@ -790,6 +772,15 @@
 			"link": "https://testnet.bscscan.com/address/0xD10836aE0F23a42AC1C9A9D497f879451318F38b",
 			"timestamp": "2022-04-21T07:08:12.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0xa831e76a680ed22ea257ca6d5165601ef5342ec566fa47cd09dad510b8971f92",
+			"network": "testnet"
+		},
+		"ZassetzTRX": {
+			"name": "ZassetzTRX",
+			"address": "0x06A47957927C40F21cA65476f1bB093FF67dD8bC",
+			"source": "PurgeableSynth",
+			"link": "https://testnet.bscscan.com/address/0x06A47957927C40F21cA65476f1bB093FF67dD8bC",
+			"timestamp": "2022-06-15T10:15:16.548Z",
+			"txn": "",
 			"network": "testnet"
 		}
 	},

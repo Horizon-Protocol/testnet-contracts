@@ -46,11 +46,6 @@
 		"subclass": "PurgeableSynth"
 	},
 	{
-		"name": "zMATIC",
-		"asset": "MATIC",
-		"subclass": "PurgeableSynth"
-	},
-	{
 		"name": "zXRP",
 		"asset": "XRP",
 		"subclass": "PurgeableSynth"

@@ -45,7 +45,7 @@ const purgeSynths = async ({
 	ensureNetwork(network);
 	deploymentPath = deploymentPath || getDeploymentPathForNetwork({ network });
 	ensureDeploymentPath(deploymentPath);
-
+	console.log('******************deploymentPath******************', deploymentPath);
 	const { synths, deployment } = loadAndCheckRequiredSources({
 		deploymentPath,
 		network,
@@ -161,11 +161,11 @@ const purgeSynths = async ({
 		}
 
 		// step 1. fetch all holders via ethplorer api
-		if (network === 'mainnet') {
+		/*		if (network === 'mainnet') {
 			const topTokenHoldersUrl = `http://api.bscscan.com/getTopTokenHolders/${proxyAddress}`;
 			const response = await axios.get(topTokenHoldersUrl, {
 				params: {
-					apiKey: process.env.ETHPLORER_API_KEY || 'freekey',
+					apiKey: process.env.ETHERSCAN_KEY || 'freekey',
 					limit: 1000,
 				},
 			});
@@ -178,7 +178,14 @@ const purgeSynths = async ({
 			);
 			addresses = topTokenHolders.filter((e, i) => supplyPerEntry[i] !== '0');
 			console.log(gray(`Filtered to ${addresses.length} with supply`));
+		
 		}
+
+*/
+		addresses = [
+			'0x852AD4Eee1679CD64057F50480b3A7c6e89955f6',
+			'0x0b56a002f55EF92c75c1b73011D0c4b427E9161D',
+		];
 
 		const totalSupplyBefore = ethers.utils.formatEther(await Synth.totalSupply());
 
