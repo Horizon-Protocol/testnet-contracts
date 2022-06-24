@@ -229,7 +229,7 @@ const replaceSynths = async ({
 
 	for (const { currencyKey, Synth, Proxy, TokenState } of deployedSynths) {
 		const currencyKeyInBytes = toBytes32(currencyKey);
-		const synthContractName = `Synth${currencyKey}`;
+		const synthContractName = `Zasset${currencyKey}`;
 
 		// STEPS
 		// 1. set old ExternTokenState.setTotalSupply(0) // owner

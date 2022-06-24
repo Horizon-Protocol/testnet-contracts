@@ -124,7 +124,7 @@ const defaults = {
 	},
 	RENBTC_ERC20_ADDRESSES: {
 		mainnet: '0xfCe146bF3146100cfe5dB4129cf6C82b0eF4Ad8c',
-		testnet: '0x5eB4F537889eC3C7Ec397F1acB33c70D8C0ee438',
+		testnet: '0x765b1e342734fA9001C7497190BAbd8f706f47db',
 	},
 	WETH_ERC20_ADDRESSES: {
 		mainnet: '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c',
