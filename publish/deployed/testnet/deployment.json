@@ -731,11 +731,11 @@
 		},
 		"CollateralErc20": {
 			"name": "CollateralErc20",
-			"address": "0xB440D92816EeBb561f157c1624E67E0A0835DF15",
+			"address": "0x3599C1f55Da0af135dAeF37A9fED22342fC3B0CD",
 			"source": "CollateralErc20",
-			"link": "https://testnet.bscscan.com/address/0xB440D92816EeBb561f157c1624E67E0A0835DF15",
-			"timestamp": "2022-04-21T07:07:30.000Z",
-			"txn": "https://testnet.bscscan.com/tx/0xf0f5b874a0c75d69990db90ed702b3f088948dc06034078fd411a1b25cbec39b",
+			"link": "https://testnet.bscscan.com/address/0x3599C1f55Da0af135dAeF37A9fED22342fC3B0CD",
+			"timestamp": "2022-06-28T08:08:57.927Z",
+			"txn": "",
 			"network": "testnet"
 		},
 		"CollateralStateShort": {

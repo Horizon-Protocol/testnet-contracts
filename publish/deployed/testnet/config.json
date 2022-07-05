@@ -141,7 +141,7 @@
 		"deploy": false
 	},
 	"CollateralErc20": {
-		"deploy": true
+		"deploy": false
 	},
 	"CollateralEth": {
 		"deploy": false
