@@ -1,6 +1,6 @@
 'use strict';
 
-const { artifacts, contract, web3 } = require('hardhat');
+const { contract, web3 } = require('hardhat');
 
 const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 
@@ -10,39 +10,32 @@ const { setupAllContracts, setupContract, mockToken } = require('./setup');
 
 const { ensureOnlyExpectedMutativeFunctions } = require('./helpers');
 
-const {
-	toBytes32,
-	constants: { ZERO_ADDRESS },
-} = require('../..');
-
-let CollateralState;
+const { toBytes32 } = require('../..');
 
 contract('CollateralUtil', async accounts => {
-	const sUSD = toBytes32('zUSD');
-	const sETH = toBytes32('zBNB');
-	const sBTC = toBytes32('zBTC');
+	const zUSD = toBytes32('zUSD');
+	const zBNB = toBytes32('zBNB');
+	const zBTC = toBytes32('zBTC');
 
 	const oneRenBTC = web3.utils.toBN('100000000');
-	const oneThousandsUSD = toUnit(1000);
-	const fiveThousandsUSD = toUnit(5000);
+	const oneThousandzUSD = toUnit(1000);
+	const fiveThousandzUSD = toUnit(5000);
 
 	let tx;
-	let loan;
 	let id;
 
 	const name = 'Some name';
 	const symbol = 'TOKEN';
 
-	const [deployerAccount, owner, oracle, , account1] = accounts;
+	const [, owner, oracle, , account1] = accounts;
 
 	let cerc20,
-		state,
 		managerState,
 		feePool,
 		exchangeRates,
 		addressResolver,
-		sUSDSynth,
-		sBTCSynth,
+		zUSDSynth,
+		zBTCSynth,
 		renBTC,
 		synths,
 		manager,
@@ -55,15 +48,15 @@ contract('CollateralUtil', async accounts => {
 		return event.args.id;
 	};
 
-	const issuesUSDToAccount = async (issueAmount, receiver) => {
+	const issuezUSDToAccount = async (issueAmount, receiver) => {
 		// Set up the depositor with an amount of synths to deposit.
-		await sUSDSynth.issue(receiver, issueAmount, {
+		await zUSDSynth.issue(receiver, issueAmount, {
 			from: owner,
 		});
 	};
 
-	const issuesBTCtoAccount = async (issueAmount, receiver) => {
-		await sBTCSynth.issue(receiver, issueAmount, { from: owner });
+	const issuezBTCtoAccount = async (issueAmount, receiver) => {
+		await zBTCSynth.issue(receiver, issueAmount, { from: owner });
 	};
 
 	const issueRenBTCtoAccount = async (issueAmount, receiver) => {
@@ -73,19 +66,18 @@ contract('CollateralUtil', async accounts => {
 	const updateRatesWithDefaults = async () => {
 		const timestamp = await currentTime();
 
-		await exchangeRates.updateRates([sETH], ['100'].map(toUnit), timestamp, {
+		await exchangeRates.updateRates([zBNB], ['100'].map(toUnit), timestamp, {
 			from: oracle,
 		});
 
-		const sBTC = toBytes32('zBTC');
+		const zBTC = toBytes32('zBTC');
 
-		await exchangeRates.updateRates([sBTC], ['10000'].map(toUnit), timestamp, {
+		await exchangeRates.updateRates([zBTC], ['10000'].map(toUnit), timestamp, {
 			from: oracle,
 		});
 	};
 
 	const deployCollateral = async ({
-		state,
 		owner,
 		manager,
 		resolver,
@@ -98,7 +90,7 @@ contract('CollateralUtil', async accounts => {
 		return setupContract({
 			accounts,
 			contract: 'CollateralErc20',
-			args: [state, owner, manager, resolver, collatKey, minColat, minSize, underCon, decimals],
+			args: [owner, manager, resolver, collatKey, minColat, minSize, underCon, decimals],
 		});
 	};
 
@@ -106,8 +98,8 @@ contract('CollateralUtil', async accounts => {
 		synths = ['zUSD', 'zBTC'];
 		({
 			ExchangeRates: exchangeRates,
-			ZassetzUSD: sUSDSynth,
-			ZassetzBTC: sBTCSynth,
+			ZassetzUSD: zUSDSynth,
+			ZassetzBTC: zBTCSynth,
 			FeePool: feePool,
 			AddressResolver: addressResolver,
 			Issuer: issuer,
@@ -135,8 +127,6 @@ contract('CollateralUtil', async accounts => {
 
 		await managerState.setAssociatedContract(manager.address, { from: owner });
 
-		state = await CollateralState.new(owner, ZERO_ADDRESS, { from: deployerAccount });
-
 		({ token: renBTC } = await mockToken({
 			accounts,
 			name,
@@ -145,18 +135,15 @@ contract('CollateralUtil', async accounts => {
 		}));
 
 		cerc20 = await deployCollateral({
-			state: state.address,
 			owner: owner,
 			manager: manager.address,
 			resolver: addressResolver.address,
-			collatKey: sBTC,
+			collatKey: zBTC,
 			minColat: toUnit(1.5),
 			minSize: toUnit(0.1),
 			underCon: renBTC.address,
 			decimals: 8,
 		});
-
-		await state.setAssociatedContract(cerc20.address, { from: owner });
 
 		await addressResolver.importAddresses(
 			[toBytes32('CollateralErc20'), toBytes32('CollateralManager')],
@@ -193,8 +180,6 @@ contract('CollateralUtil', async accounts => {
 	};
 
 	before(async () => {
-		CollateralState = artifacts.require(`CollateralState`);
-
 		await setupMultiCollateral();
 	});
 
@@ -203,8 +188,8 @@ contract('CollateralUtil', async accounts => {
 	beforeEach(async () => {
 		await updateRatesWithDefaults();
 
-		await issuesUSDToAccount(toUnit(1000), owner);
-		await issuesBTCtoAccount(toUnit(10), owner);
+		await issuezUSDToAccount(toUnit(1000), owner);
+		await issuezBTCtoAccount(toUnit(10), owner);
 
 		await debtCache.takeDebtSnapshot();
 	});
@@ -219,66 +204,61 @@ contract('CollateralUtil', async accounts => {
 
 	describe('liquidation amount test', async () => {
 		let amountToLiquidate;
-		let minCratio;
-		let collateralKey;
 
 		/**
 		 * r = target issuance ratio
-		 * D = debt balance in sUSD
-		 * V = Collateral VALUE in sUSD
+		 * D = debt balance in zUSD
+		 * V = Collateral VALUE in zUSD
 		 * P = liquidation penalty
-		 * Calculates amount of sUSD = (D - V * r) / (1 - (1 + P) * r)
+		 * Calculates amount of zUSD = (D - V * r) / (1 - (1 + P) * r)
 		 *
 		 * To go back to another synth, remember to do effective value
 		 */
 
 		beforeEach(async () => {
-			tx = await cerc20.open(oneRenBTC, fiveThousandsUSD, sUSD, {
+			tx = await cerc20.open(oneRenBTC, fiveThousandzUSD, zUSD, {
 				from: account1,
 			});
 
 			id = getid(tx);
-			loan = await state.getLoan(account1, id);
-			minCratio = await cerc20.minCratio();
-			collateralKey = await cerc20.collateralKey();
 		});
 
 		it('when we start at 200%, we can take a 25% reduction in collateral prices', async () => {
-			await exchangeRates.updateRates([sBTC], ['7500'].map(toUnit), await currentTime(), {
+			await exchangeRates.updateRates([zBTC], ['7500'].map(toUnit), await currentTime(), {
 				from: oracle,
 			});
 
-			amountToLiquidate = await util.liquidationAmount(loan, minCratio, collateralKey);
+			amountToLiquidate = await cerc20.liquidationAmount(id);
 
 			assert.bnEqual(amountToLiquidate, toUnit(0));
 		});
 
 		it('when we start at 200%, a price shock of 30% in the collateral requires 25% of the loan to be liquidated', async () => {
-			await exchangeRates.updateRates([sBTC], ['7000'].map(toUnit), await currentTime(), {
+			await exchangeRates.updateRates([zBTC], ['7000'].map(toUnit), await currentTime(), {
 				from: oracle,
 			});
 
-			amountToLiquidate = await util.liquidationAmount(loan, minCratio, collateralKey);
+			amountToLiquidate = await cerc20.liquidationAmount(id);
 
 			assert.bnClose(amountToLiquidate, toUnit(1250), '10000');
 		});
 
 		it('when we start at 200%, a price shock of 40% in the collateral requires 75% of the loan to be liquidated', async () => {
-			await exchangeRates.updateRates([sBTC], ['6000'].map(toUnit), await currentTime(), {
+			await exchangeRates.updateRates([zBTC], ['6000'].map(toUnit), await currentTime(), {
 				from: oracle,
 			});
 
-			amountToLiquidate = await util.liquidationAmount(loan, minCratio, collateralKey);
+			amountToLiquidate = await cerc20.liquidationAmount(id);
 
 			assert.bnClose(amountToLiquidate, toUnit(3750), '10000');
 		});
 
 		it('when we start at 200%, a price shock of 45% in the collateral requires 100% of the loan to be liquidated', async () => {
-			await exchangeRates.updateRates([sBTC], ['5500'].map(toUnit), await currentTime(), {
+			await exchangeRates.updateRates([zBTC], ['5500'].map(toUnit), await currentTime(), {
 				from: oracle,
 			});
 
-			amountToLiquidate = await util.liquidationAmount(loan, minCratio, collateralKey);
+			amountToLiquidate = await cerc20.liquidationAmount(id);
 
 			assert.bnClose(amountToLiquidate, toUnit(5000), '10000');
 		});
@@ -292,42 +272,42 @@ contract('CollateralUtil', async accounts => {
 			collateralKey = await cerc20.collateralKey();
 		});
 
-		it('when BTC is @ $10000 and we are liquidating 1000 sUSD, then redeem 0.11 BTC', async () => {
-			collateralRedeemed = await util.collateralRedeemed(sUSD, oneThousandsUSD, collateralKey);
+		it('when BTC is @ $10000 and we are liquidating 1000 zUSD, then redeem 0.11 BTC', async () => {
+			collateralRedeemed = await util.collateralRedeemed(zUSD, oneThousandzUSD, collateralKey);
 
 			assert.bnEqual(collateralRedeemed, toUnit(0.11));
 		});
 
-		it('when BTC is @ $20000 and we are liquidating 1000 sUSD, then redeem 0.055 BTC', async () => {
-			await exchangeRates.updateRates([sBTC], ['20000'].map(toUnit), await currentTime(), {
+		it('when BTC is @ $20000 and we are liquidating 1000 zUSD, then redeem 0.055 BTC', async () => {
+			await exchangeRates.updateRates([zBTC], ['20000'].map(toUnit), await currentTime(), {
 				from: oracle,
 			});
 
-			collateralRedeemed = await util.collateralRedeemed(sUSD, oneThousandsUSD, collateralKey);
+			collateralRedeemed = await util.collateralRedeemed(zUSD, oneThousandzUSD, collateralKey);
 
 			assert.bnEqual(collateralRedeemed, toUnit(0.055));
 		});
 
-		it('when BTC is @ $7000 and we are liquidating 2500 sUSD, then redeem 0.36666 ETH', async () => {
-			await exchangeRates.updateRates([sBTC], ['7000'].map(toUnit), await currentTime(), {
+		it('when BTC is @ $7000 and we are liquidating 2500 zUSD, then redeem 0.36666 ETH', async () => {
+			await exchangeRates.updateRates([zBTC], ['7000'].map(toUnit), await currentTime(), {
 				from: oracle,
 			});
 
-			collateralRedeemed = await util.collateralRedeemed(sUSD, toUnit(2500), collateralKey);
+			collateralRedeemed = await util.collateralRedeemed(zUSD, toUnit(2500), collateralKey);
 
 			assert.bnClose(collateralRedeemed, toUnit(0.392857142857142857), '100');
 		});
 
-		it('regardless of BTC price, we liquidate 1.1 * amount when doing sETH', async () => {
-			collateralRedeemed = await util.collateralRedeemed(sBTC, toUnit(1), collateralKey);
+		it('regardless of BTC price, we liquidate 1.1 * amount when doing zBNB', async () => {
+			collateralRedeemed = await util.collateralRedeemed(zBTC, toUnit(1), collateralKey);
 
 			assert.bnEqual(collateralRedeemed, toUnit(1.1));
 
-			await exchangeRates.updateRates([sBTC], ['1000'].map(toUnit), await currentTime(), {
+			await exchangeRates.updateRates([zBTC], ['1000'].map(toUnit), await currentTime(), {
 				from: oracle,
 			});
 
-			collateralRedeemed = await util.collateralRedeemed(sBTC, toUnit(1), collateralKey);
+			collateralRedeemed = await util.collateralRedeemed(zBTC, toUnit(1), collateralKey);
 
 			assert.bnEqual(collateralRedeemed, toUnit(1.1));
 		});
