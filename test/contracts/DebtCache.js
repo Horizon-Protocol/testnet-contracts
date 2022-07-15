@@ -1375,7 +1375,7 @@ contract('DebtCache', async accounts => {
 				await sETHContract.issue(account1, amount, { from: owner });
 
 				await setupShort();
-				await short.setMinCratio(toUnit(1.5), { from: owner });
+				await systemSettings.setMinCratio(short.address, toUnit(1.5), { from: owner });
 				await short.setIssueFeeRate(toUnit('0'), { from: owner });
 				await short.open(amount, oneETH, sETH, { from: account1 });
 			});

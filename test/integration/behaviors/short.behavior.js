@@ -6,6 +6,7 @@ const {
 const { approveIfNeeded } = require('../utils/approve');
 const { assert } = require('../../contracts/common');
 const { toBytes32 } = require('../../../index');
+const { getLoan, getShortInteractionDelay, setShortInteractionDelay } = require('../utils/loans');
 const { ensureBalance } = require('../utils/balances');
 const { exchangeSynths } = require('../utils/exchanging');
 const { updateCache } = require('../utils/rates');
@@ -13,19 +14,16 @@ const { skipWaitingPeriod } = require('../utils/skip');
 
 function itCanOpenAndCloseShort({ ctx }) {
 	describe('shorting', () => {
-		const amountToDeposit = parseEther('10000'); // sUSD
-		const amountToBorrow = parseEther('1'); // sETH
+		const amountOfsUSDRequired = parseEther('2000'); // sUSD
+		const amountToDeposit = parseEther('1000'); // sUSD
+		const amountToBorrow = parseEther('0.000001'); // sETH
+		const amountToExchange = parseEther('100'); // sUSD
 
 		let user;
-		let CollateralShort,
-			Synthetix,
-			SynthsUSD,
-			CollateralStateShort,
-			CollateralShortAsOwner,
-			interactionDelay;
+		let CollateralShort, Synthetix, SynthsUSD, interactionDelay;
 
 		before('target contracts and users', () => {
-			({ CollateralShort, Synthetix, SynthsUSD, CollateralStateShort } = ctx.contracts);
+			({ CollateralShort, Synthetix, SynthsUSD } = ctx.contracts);
 
 			user = ctx.users.someUser;
 
@@ -34,7 +32,7 @@ function itCanOpenAndCloseShort({ ctx }) {
 		});
 
 		before('ensure user should have sUSD', async () => {
-			await ensureBalance({ ctx, symbol: 'sUSD', user, balance: parseEther('100000') });
+			await ensureBalance({ ctx, symbol: 'sUSD', user, balance: amountOfsUSDRequired });
 		});
 
 		before('ensure sETH supply exists', async () => {
@@ -43,27 +41,26 @@ function itCanOpenAndCloseShort({ ctx }) {
 				ctx,
 				src: 'zUSD',
 				dest: 'zBNB',
-				amount: parseEther('10'),
+				amount: parseEther('1'),
 				user: ctx.users.otherUser,
 			});
 		});
 
 		before('skip waiting period by setting interaction delay to zero', async () => {
-			CollateralShortAsOwner = CollateralShort.connect(ctx.users.owner);
-			interactionDelay = await CollateralShortAsOwner.interactionDelay();
+			interactionDelay = await getShortInteractionDelay({ ctx });
 
-			await CollateralShortAsOwner.setInteractionDelay('0');
+			await setShortInteractionDelay({ ctx, delay: 0 });
 		});
 
 		after('restore waiting period', async () => {
-			await CollateralShortAsOwner.setInteractionDelay(interactionDelay);
+			await setShortInteractionDelay({ ctx, delay: interactionDelay });
 		});
 
 		describe('open, close, deposit, withdraw, and draw a short', async () => {
 			let tx, loan, loanId;
 
 			describe('open a loan, deposit and withdraw collateral, draw, and close the loan', () => {
-				before('skip if max borrowing power reached', async function() {
+				before('skip if max borrowing power reached', async function () {
 					const maxBorrowingPower = await CollateralShort.maxLoan(
 						amountToDeposit,
 						toBytes32('zBNB')
@@ -85,7 +82,7 @@ function itCanOpenAndCloseShort({ ctx }) {
 						token: SynthsUSD,
 						owner: user,
 						beneficiary: CollateralShort,
-						amount: parseEther('100000'), // sUSD
+						amount: amountOfsUSDRequired, // sUSD
 					});
 				});
 
@@ -96,11 +93,11 @@ function itCanOpenAndCloseShort({ ctx }) {
 					const event = events.find(l => l.event === 'LoanCreated');
 					loanId = event.args.id;
 
-					loan = await CollateralStateShort.getLoan(user.address, loanId);
+					loan = await getLoan({ ctx, id: loanId, user });
 				});
 
-				before('deposit more collateral', async () => {
-					assert.bnEqual(loan.collateral, parseEther('10000'));
+				before('deposit more collateral (doubling it)', async () => {
+					assert.bnEqual(loan.collateral, amountToDeposit);
 					tx = await CollateralShort.deposit(user.address, loanId, amountToDeposit);
 
 					const { events } = await tx.wait();
@@ -108,12 +105,12 @@ function itCanOpenAndCloseShort({ ctx }) {
 					const event = events.find(l => l.event === 'CollateralDeposited');
 					loanId = event.args.id;
 
-					loan = await CollateralStateShort.getLoan(user.address, loanId);
-					assert.bnEqual(loan.collateral, parseEther('20000'));
+					loan = await getLoan({ ctx, id: loanId, user });
+					assert.bnEqual(loan.collateral, amountToDeposit.mul(2));
 				});
 
-				before('withdraw some collateral', async () => {
-					assert.bnEqual(loan.collateral, parseEther('20000'));
+				before('withdraw some collateral(removing the added double)', async () => {
+					assert.bnEqual(loan.collateral, amountToDeposit);
 					tx = await CollateralShort.withdraw(loanId, parseEther('5000'));
 
 					const { events } = await tx.wait();
@@ -121,26 +118,26 @@ function itCanOpenAndCloseShort({ ctx }) {
 					const event = events.find(l => l.event === 'CollateralWithdrawn');
 					loanId = event.args.id;
 
-					loan = await CollateralStateShort.getLoan(user.address, loanId);
-					assert.bnEqual(loan.collateral, parseEther('15000'));
+					loan = await getLoan({ ctx, id: loanId, user });
+					assert.bnEqual(loan.collateral, amountToDeposit);
 				});
 
-				before('draw down the loan', async () => {
-					assert.bnEqual(loan.amount, parseEther('1'));
-					tx = await CollateralShort.draw(loanId, parseEther('1'));
+				before('draw down the loan (doubling it)', async () => {
+					assert.bnEqual(loan.amount, amountToBorrow);
+					tx = await CollateralShort.draw(loanId, amountToBorrow);
 
 					const { events } = await tx.wait();
 
 					const event = events.find(l => l.event === 'LoanDrawnDown');
 					loanId = event.args.id;
 
-					loan = await CollateralStateShort.getLoan(user.address, loanId);
-					assert.bnEqual(loan.amount, parseEther('2'));
+					loan = await getLoan({ ctx, id: loanId, user });
+					assert.bnEqual(loan.amount, amountToBorrow.mul(2));
 				});
 
 				it('shows the loan amount and collateral are correct', async () => {
-					assert.bnEqual(loan.amount, parseEther('2'));
-					assert.bnEqual(loan.collateral, parseEther('15000'));
+					assert.bnEqual(loan.amount, amountToBorrow.mul(2));
+					assert.bnEqual(loan.collateral, amountToBorrow);
 				});
 
 				describe('closing a loan', () => {
@@ -149,9 +146,9 @@ function itCanOpenAndCloseShort({ ctx }) {
 
 						await exchangeSynths({
 							ctx,
-							src: 'sUSD',
+							src: 'zUSD',
 							dest: 'zBNB',
-							amount: parseEther('50000'),
+							amount: amountToExchange,
 							user,
 						});
 					});
@@ -168,7 +165,10 @@ function itCanOpenAndCloseShort({ ctx }) {
 
 					before('close the loan', async () => {
 						tx = await CollateralShort.close(loanId);
-						loan = await CollateralStateShort.getLoan(user.address, loanId);
+						const { events } = await tx.wait();
+						const event = events.find(l => l.event === 'LoanClosed');
+						loanId = event.args.id;
+						loan = await getLoan({ ctx, id: loanId, user });
 					});
 
 					it('shows the loan amount is zero when closed', async () => {
