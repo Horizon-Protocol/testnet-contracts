@@ -21,8 +21,6 @@ const {
 
 const { mockToken, setupAllContracts } = require('./setup');
 
-const { GAS_PRICE } = require('../../hardhat.config');
-
 const { toBytes32 } = require('../..');
 
 contract('Depot', async accounts => {
@@ -468,6 +466,8 @@ contract('Depot', async accounts => {
 			});
 
 			it('exactly matches one deposit (and that the queue is correctly updated) [ @cov-skip ]', async () => {
+				const gasPrice = 1e9;
+
 				const synthsToDeposit = ethUsd;
 				const ethToSend = toUnit('1');
 				const depositorStartingBalance = await getEthBalance(depositor);
@@ -475,15 +475,16 @@ contract('Depot', async accounts => {
 				// Send the synths to the Depot.
 				const approveTxn = await synth.approve(depot.address, synthsToDeposit, {
 					from: depositor,
+					gasPrice,
 				});
-				const gasPaidApprove = web3.utils.toBN(approveTxn.receipt.gasUsed * GAS_PRICE);
+				const gasPaidApprove = web3.utils.toBN(approveTxn.receipt.gasUsed * gasPrice);
 
 				// Deposit hUSD in Depot
 				const depositTxn = await depot.depositSynths(synthsToDeposit, {
 					from: depositor,
 				});
 
-				const gasPaidDeposit = web3.utils.toBN(depositTxn.receipt.gasUsed * GAS_PRICE);
+				const gasPaidDeposit = web3.utils.toBN(depositTxn.receipt.gasUsed * gasPrice);
 
 				const depositStartIndex = await depot.depositStartIndex();
 				const depositEndIndex = await depot.depositEndIndex();
@@ -664,6 +665,8 @@ contract('Depot', async accounts => {
 			});
 
 			xit('exceeds available synths (and that the remainder of the BNB is correctly refunded)', async () => {
+				const gasPrice = 1e9;
+
 				const ethToSend = toUnit('2');
 				const synthsToDeposit = multiplyDecimal(ethToSend, ethRate); // 344
 				const purchaserInitialBalance = await getEthBalance(purchaser);
@@ -691,10 +694,11 @@ contract('Depot', async accounts => {
 					txn = await depot.exchangeEtherForSynths({
 						from: purchaser,
 						value: ethToSend,
+						gasPrice,
 					});
 				}
 
-				const gasPaid = web3.utils.toBN(txn.receipt.gasUsed * GAS_PRICE);
+				const gasPaid = web3.utils.toBN(txn.receipt.gasUsed * gasPrice);
 
 				// Exchange("BNB", msg.value, "hUSD", fulfilled);
 				const exchangeEvent = txn.logs.find(log => log.event === 'Exchange');
