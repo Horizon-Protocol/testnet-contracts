@@ -133,8 +133,9 @@
 			},
 			"DebtCache": {
 				"address": "0x6eDa37ABDcbD47F8946D76Cc951074E609Ef46B4",
-				"status": "current",
-				"keccak256": "0x006963b7893fb3b5347407ef95cb456c1ad65ad50afb69832f1238264202a363"
+				"status": "replaced",
+				"keccak256": "0x006963b7893fb3b5347407ef95cb456c1ad65ad50afb69832f1238264202a363",
+				"replaced_in": "v1.1.0"
 			},
 			"Exchanger": {
 				"address": "0x7E18Bbda74C4cF00A57f95eEA4203888C8E8F2D4",
@@ -153,8 +154,9 @@
 			},
 			"Issuer": {
 				"address": "0xD749b6c44526dAE0649F3560E6cab8380ee72DFd",
-				"status": "current",
-				"keccak256": "0xd0b4e07dbdb55ec4d7f0c0c2543fb16573e37e30cd52bba6f11d8a742e3fd2dd"
+				"status": "replaced",
+				"keccak256": "0xd0b4e07dbdb55ec4d7f0c0c2543fb16573e37e30cd52bba6f11d8a742e3fd2dd",
+				"replaced_in": "v1.1.0"
 			},
 			"TradingRewards": {
 				"address": "0x5C894b248a89865429aa907785A564beaaD6a871",
@@ -442,6 +444,24 @@
 				"keccak256": "0x8d9714e95ba7232aa5f18320ffe015b7acec369b0783eeddf474946b2862a271"
 			}
 		}
+	},
+	"v1.1.0": {
+		"tag": "v1.1.0",
+		"fulltag": "v1.1.0",
+		"network": "testnet",
+		"date": "2022-07-12T19:28:30+05:30",
+		"commit": "b0deaee8ad52f9a4187ea51a39abbeeab5402678",
+		"contracts": {
+			"DebtCache": {
+				"address": "0x84054f3B56F9A63B1F2c6EA28BF3dF30fF7B2c16",
+				"status": "current",
+				"keccak256": "0x500b404c3c7be5b20379adf5a17bbb7cf63de4822cadcec0e549a066178cf423"
+			},
+			"Issuer": {
+				"address": "0xe45Db3cF242061cBC04E228c496808448AA0961D",
+				"status": "current",
+				"keccak256": "0x45577cb287e4d6242b9c3918ed199b56b203fa36c3c499f287ca8e1147412fca"
+			}
+		}
 	}
 }
-

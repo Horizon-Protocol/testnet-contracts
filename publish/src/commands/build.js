@@ -54,7 +54,7 @@ const build = async ({
 	const contracts = findSolFiles({
 		sourcePath: CONTRACTS_FOLDER,
 		ignore: []
-			.concat(!migrations ? /^migrations\// : [])
+			// .concat(!migrations ? /^migrations\// : [])
 			.concat(!testHelpers ? /^test-helpers\// : []),
 	});
 
