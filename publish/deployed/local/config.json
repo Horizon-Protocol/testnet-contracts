@@ -41,6 +41,9 @@
 	"CollateralUtil": {
 		"deploy": true
 	},
+	"WrapperFactory": {
+		"deploy": true
+	},
 	"DebtCache": {
 		"deploy": true
 	},

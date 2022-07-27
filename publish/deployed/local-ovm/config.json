@@ -38,6 +38,9 @@
 	"FeePool": {
 		"deploy": true
 	},
+	"WrapperFactory": {
+		"deploy": true
+	},
 	"FeePoolState": {
 		"deploy": true
 	},

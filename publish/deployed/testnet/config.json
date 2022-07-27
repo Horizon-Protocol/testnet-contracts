@@ -164,6 +164,9 @@
 	"CollateralShort": {
 		"deploy": false
 	},
+	"WrapperFactory": {
+		"deploy": false
+	},
 	"RewardEscrowV2": {
 		"deploy": false
 	},
