@@ -28,7 +28,7 @@
 	{
 		"name": "zADA",
 		"asset": "ADA",
-		"subclass": "PurgeableSynth"
+		"subclass": "MultiCollateralSynth"
 	},
 	{
 		"name": "zCAKE",
