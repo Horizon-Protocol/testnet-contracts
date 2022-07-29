@@ -29,7 +29,7 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
     bytes32 internal constant sUSD = "zUSD";
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
-    bytes32 private constant CONTRACT_SYNTH_SUSD = "SynthzUSD ZassetzUSD";
+    bytes32 private constant CONTRACT_SYNTH_SUSD = "ZassetzUSD";
     bytes32 private constant CONTRACT_EXRATES = "ExchangeRates";
     bytes32 private constant CONTRACT_DEBTCACHE = "DebtCache";
     bytes32 private constant CONTRACT_SYSTEMSTATUS = "SystemStatus";
