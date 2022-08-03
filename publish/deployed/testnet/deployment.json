@@ -47,10 +47,10 @@
 		},
 		"SystemSettings": {
 			"name": "SystemSettings",
-			"address": "0x95e601DEb567b7a03df241181bcC1e41b88168e2",
+			"address": "0x5D5984030A5cc459A59b2FCe2599d852D6c9C3f6",
 			"source": "SystemSettings",
-			"link": "https://testnet.bscscan.com/address/0x95e601DEb567b7a03df241181bcC1e41b88168e2",
-			"timestamp": "2022-07-29T17:45:39.123Z",
+			"link": "https://testnet.bscscan.com/address/0x5D5984030A5cc459A59b2FCe2599d852D6c9C3f6",
+			"timestamp": "2022-08-01T18:52:51.325Z",
 			"txn": "",
 			"network": "testnet"
 		},
@@ -164,10 +164,10 @@
 		},
 		"FeePool": {
 			"name": "FeePool",
-			"address": "0x9C9b3F247f7E63860490DD7Ae7ce07133De8e2DF",
+			"address": "0xf840fc5Fb9477bA6C61e3d4128371Aaf10e42d0D",
 			"source": "FeePool",
-			"link": "https://testnet.bscscan.com/address/0x9C9b3F247f7E63860490DD7Ae7ce07133De8e2DF",
-			"timestamp": "2022-07-29T17:46:14.786Z",
+			"link": "https://testnet.bscscan.com/address/0xf840fc5Fb9477bA6C61e3d4128371Aaf10e42d0D",
+			"timestamp": "2022-08-01T18:53:18.618Z",
 			"txn": "",
 			"network": "testnet"
 		},
@@ -227,10 +227,10 @@
 		},
 		"DebtCache": {
 			"name": "DebtCache",
-			"address": "0x94EB73877d1A2B0eF691Ed094ecB2ac8A039Fb0A",
+			"address": "0x413E56E9971E3999dd01F137797708E68B53ADA0",
 			"source": "DebtCache",
-			"link": "https://testnet.bscscan.com/address/0x94EB73877d1A2B0eF691Ed094ecB2ac8A039Fb0A",
-			"timestamp": "2022-07-29T17:46:39.985Z",
+			"link": "https://testnet.bscscan.com/address/0x413E56E9971E3999dd01F137797708E68B53ADA0",
+			"timestamp": "2022-08-01T18:53:41.148Z",
 			"txn": "",
 			"network": "testnet"
 		},
@@ -263,10 +263,10 @@
 		},
 		"Issuer": {
 			"name": "Issuer",
-			"address": "0xEfA4d65FA9f5724bA48C1849C1121b56573E2b22",
+			"address": "0x1f530FF0D6C6eab2D7fA9Abe5ca8937404367EeC",
 			"source": "Issuer",
-			"link": "https://testnet.bscscan.com/address/0xEfA4d65FA9f5724bA48C1849C1121b56573E2b22",
-			"timestamp": "2022-07-29T17:47:07.351Z",
+			"link": "https://testnet.bscscan.com/address/0x1f530FF0D6C6eab2D7fA9Abe5ca8937404367EeC",
+			"timestamp": "2022-08-01T18:54:05.143Z",
 			"txn": "",
 			"network": "testnet"
 		},
@@ -353,10 +353,10 @@
 		},
 		"ZassetzUSD": {
 			"name": "ZassetzUSD",
-			"address": "0x2D9D0f4B28C2Cb64DAFEFA4054fe797a3d855c64",
+			"address": "0x84441540DbE2ed6F777532562B146545a4C463f6",
 			"source": "MultiCollateralSynth",
-			"link": "https://testnet.bscscan.com/address/0x2D9D0f4B28C2Cb64DAFEFA4054fe797a3d855c64",
-			"timestamp": "2022-07-29T19:55:03.244Z",
+			"link": "https://testnet.bscscan.com/address/0x84441540DbE2ed6F777532562B146545a4C463f6",
+			"timestamp": "2022-08-01T18:54:58.523Z",
 			"txn": "",
 			"network": "testnet"
 		},
@@ -380,10 +380,10 @@
 		},
 		"ZassetzBNB": {
 			"name": "ZassetzBNB",
-			"address": "0x6Af20471e194B1bb7866DC937AEA156c18992ef6",
+			"address": "0xBCa3b068fAf56dfD223095e953f9ec2421BCCA0D",
 			"source": "MultiCollateralSynth",
-			"link": "https://testnet.bscscan.com/address/0x6Af20471e194B1bb7866DC937AEA156c18992ef6",
-			"timestamp": "2022-07-29T19:57:07.212Z",
+			"link": "https://testnet.bscscan.com/address/0xBCa3b068fAf56dfD223095e953f9ec2421BCCA0D",
+			"timestamp": "2022-07-30T11:02:22.966Z",
 			"txn": "",
 			"network": "testnet"
 		},
@@ -434,11 +434,11 @@
 		},
 		"ZassetzETH": {
 			"name": "ZassetzETH",
-			"address": "0xF9250237c73FCeE33F2Eac58Cfc387c86F3e8357",
-			"source": "PurgeableSynth",
-			"link": "https://testnet.bscscan.com/address/0xF9250237c73FCeE33F2Eac58Cfc387c86F3e8357",
-			"timestamp": "2022-04-21T07:01:03.000Z",
-			"txn": "https://testnet.bscscan.com/tx/0xc2f638782a8990af02906acf059055ad4817cb65ca6cc7ce114a78914bb1b3d9",
+			"address": "0xe7aa9D240bC1c54990C2BfEBE5e4bC4F13463AA0",
+			"source": "MultiCollateralSynth",
+			"link": "https://testnet.bscscan.com/address/0xe7aa9D240bC1c54990C2BfEBE5e4bC4F13463AA0",
+			"timestamp": "2022-08-01T16:21:29.010Z",
+			"txn": "",
 			"network": "testnet"
 		},
 		"TokenStatezADA": {
@@ -785,10 +785,10 @@
 		},
 		"WrapperFactory": {
 			"name": "WrapperFactory",
-			"address": "0x57BEfCD09Fd43176CAd5cc72B53ac3BFE2ec1bc6",
+			"address": "0xb0ceE6aA9bbc6F679C6FfF1bd47F1334b29d757c",
 			"source": "WrapperFactory",
-			"link": "https://testnet.bscscan.com/address/0x57BEfCD09Fd43176CAd5cc72B53ac3BFE2ec1bc6",
-			"timestamp": "2022-07-29T17:47:30.277Z",
+			"link": "https://testnet.bscscan.com/address/0xb0ceE6aA9bbc6F679C6FfF1bd47F1334b29d757c",
+			"timestamp": "2022-08-01T18:54:34.594Z",
 			"txn": "",
 			"network": "testnet"
 		}

@@ -23,7 +23,7 @@
 	{
 		"name": "zETH",
 		"asset": "ETH",
-		"subclass": "PurgeableSynth"
+		"subclass": "MultiCollateralSynth"
 	},
 	{
 		"name": "zADA",

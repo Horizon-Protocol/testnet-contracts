@@ -216,8 +216,6 @@ const replaceSynths = async ({
 			...opts,
 			deployer,
 			signer,
-			gasLimit: methodCallGasLimit,
-			gasPrice,
 			explorerLinkPrefix,
 		});
 
@@ -271,6 +269,7 @@ const replaceSynths = async ({
 			maxFeePerGas,
 			maxPriorityFeePerGas,
 		});
+
 		const tx = await replacementSynth.rebuildCache(overrides);
 		await tx.wait();
 
