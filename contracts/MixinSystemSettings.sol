@@ -168,7 +168,7 @@ contract MixinSystemSettings is MixinResolver {
                 keccak256(abi.encodePacked(SETTING_WRAPPER_MINT_FEE_RATE, wrapper))
             );
     }
-    
+
     function getWrapperBurnFeeRate(address wrapper) internal view returns (int) {
         return
             flexibleStorage().getIntValue(
