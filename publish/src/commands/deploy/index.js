@@ -524,10 +524,6 @@ module.exports = {
 				'The private key to deploy with (only works in local mode, otherwise set in .env).'
 			)
 			.option(
-				'-u, --force-update-inverse-synths-on-testnet',
-				'Allow inverse synth pricing to be updated on testnet regardless of total supply'
-			)
-			.option(
 				'-x, --specify-contracts <value>',
 				'Ignore config.json  and specify contracts to be deployed (Comma separated list)'
 			)

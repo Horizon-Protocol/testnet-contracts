@@ -57,7 +57,8 @@ module.exports = async ({
 
 	await deployer.deployContract({
 		name: 'ExchangeRates',
-		source: useOvm ? 'ExchangeRates' : 'ExchangeRatesWithDexPricing',
+		source: useOvm ? 'ExchangeRates' : 'ExchangeRates',
+		// source: useOvm ? 'ExchangeRates' : 'ExchangeRatesWithDexPricing',
 		args: [account, oracleAddress, addressOf(readProxyForResolver), [], []],
 	});
 
@@ -183,7 +184,8 @@ module.exports = async ({
 
 	const exchanger = await deployer.deployContract({
 		name: 'Exchanger',
-		source: useOvm ? 'Exchanger' : 'ExchangerWithFeeRecAlternatives',
+		source: useOvm ? 'Exchanger' : 'ExchangerWithVirtualSynth',
+		// source: useOvm ? 'Exchanger' : 'ExchangerWithFeeRecAlternatives',
 		deps: ['AddressResolver'],
 		args: [account, addressOf(readProxyForResolver)],
 	});

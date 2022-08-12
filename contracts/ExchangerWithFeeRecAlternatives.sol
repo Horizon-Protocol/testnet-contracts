@@ -135,10 +135,10 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
         address destinationAddress
     ) internal returns (uint amountReceived, uint fee) {
         _ensureCanExchange(sourceCurrencyKey, sourceAmount, destinationCurrencyKey);
-        // One of src/dest synth must be sUSD (checked below for gas optimization reasons)
+        // One of src/dest synth must be zUSD (checked below for gas optimization reasons)
         require(
             !exchangeRates().synthTooVolatileForAtomicExchange(
-                sourceCurrencyKey == sUSD ? destinationCurrencyKey : sourceCurrencyKey
+                sourceCurrencyKey == zUSD ? destinationCurrencyKey : sourceCurrencyKey
             ),
             "Src/dest synth too volatile"
         );
@@ -180,16 +180,16 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
             "Atomic rate deviates too much"
         );
 
-        // Ensure src/dest synth is sUSD and determine sUSD value of exchange
+        // Ensure src/dest synth is zUSD and determine zUSD value of exchange
         uint sourceSusdValue;
-        if (sourceCurrencyKey == sUSD) {
+        if (sourceCurrencyKey == zUSD) {
             // Use after-settled amount as this is amount converted (not sourceAmount)
             sourceSusdValue = sourceAmountAfterSettlement;
-        } else if (destinationCurrencyKey == sUSD) {
-            // In this case the systemConvertedAmount would be the fee-free sUSD value of the source synth
+        } else if (destinationCurrencyKey == zUSD) {
+            // In this case the systemConvertedAmount would be the fee-free zUSD value of the source synth
             sourceSusdValue = systemConvertedAmount;
         } else {
-            revert("Src/dest synth must be sUSD");
+            revert("Src/dest synth must be zUSD");
         }
 
         // Check and update atomic volume limit
@@ -210,18 +210,18 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
 
         // Remit the fee if required
         if (fee > 0) {
-            // Normalize fee to sUSD
+            // Normalize fee to zUSD
             // Note: `fee` is being reused to avoid stack too deep errors.
-            fee = exchangeRates().effectiveValue(destinationCurrencyKey, fee, sUSD);
+            fee = exchangeRates().effectiveValue(destinationCurrencyKey, fee, zUSD);
 
             // Remit the fee in sUSDs
-            issuer().synths(sUSD).issue(feePool().FEE_ADDRESS(), fee);
+            issuer().synths(zUSD).issue(feePool().FEE_ADDRESS(), fee);
 
             // Tell the fee pool about this
             feePool().recordFeePaid(fee);
         }
 
-        // Note: As of this point, `fee` is denominated in sUSD.
+        // Note: As of this point, `fee` is denominated in zUSD.
 
         // Note: this update of the debt snapshot will not be accurate because the atomic exchange
         // was executed with a different rate than the system rate. To be perfect, issuance data,
