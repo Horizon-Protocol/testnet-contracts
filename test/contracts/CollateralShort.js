@@ -186,10 +186,13 @@ contract('CollateralShort', async accounts => {
 
 		// The market is balanced between long and short.
 
-		await debtCache.takeDebtSnapshot();
 	});
 
 	addSnapshotBeforeRestoreAfterEach();
+
+	beforeEach(async () => {
+		await debtCache.takeDebtSnapshot();
+	});
 	
 	it('should ensure only expected functions are mutative', () => {
 		ensureOnlyExpectedMutativeFunctions({

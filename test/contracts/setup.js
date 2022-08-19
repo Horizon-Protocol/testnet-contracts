@@ -314,11 +314,11 @@ const setupContract = async ({
 			await Promise.all(
 				[
 					(cache['TokenStateSynthetix'].setAssociatedContract(instance.address, { from: owner }),
-					cache['ProxySynthetix'].setTarget(instance.address, { from: owner }),
-					cache['ProxyERC20Synthetix'].setTarget(instance.address, { from: owner }),
-					instance.setProxy(cache['ProxyERC20Synthetix'].address, {
-						from: owner,
-					})),
+						cache['ProxySynthetix'].setTarget(instance.address, { from: owner }),
+						cache['ProxyERC20Synthetix'].setTarget(instance.address, { from: owner }),
+						instance.setProxy(cache['ProxyERC20Synthetix'].address, {
+							from: owner,
+						})),
 				]
 					.concat(
 						// If there's a SupplySchedule and it has the method we need (i.e. isn't a mock)
@@ -374,11 +374,11 @@ const setupContract = async ({
 					(cache['TokenStateBaseSynthetix'].setAssociatedContract(instance.address, {
 						from: owner,
 					}),
-					cache['ProxyBaseSynthetix'].setTarget(instance.address, { from: owner }),
-					cache['ProxyERC20BaseSynthetix'].setTarget(instance.address, { from: owner }),
-					instance.setProxy(cache['ProxyERC20BaseSynthetix'].address, {
-						from: owner,
-					})),
+						cache['ProxyBaseSynthetix'].setTarget(instance.address, { from: owner }),
+						cache['ProxyERC20BaseSynthetix'].setTarget(instance.address, { from: owner }),
+						instance.setProxy(cache['ProxyERC20BaseSynthetix'].address, {
+							from: owner,
+						})),
 				]
 					.concat(
 						// If there's a rewards distribution that's not a mock
@@ -410,11 +410,11 @@ const setupContract = async ({
 					(cache['TokenStateMintableSynthetix'].setAssociatedContract(instance.address, {
 						from: owner,
 					}),
-					cache['ProxyMintableSynthetix'].setTarget(instance.address, { from: owner }),
-					cache['ProxyERC20MintableSynthetix'].setTarget(instance.address, { from: owner }),
-					instance.setProxy(cache['ProxyERC20MintableSynthetix'].address, {
-						from: owner,
-					})),
+						cache['ProxyMintableSynthetix'].setTarget(instance.address, { from: owner }),
+						cache['ProxyERC20MintableSynthetix'].setTarget(instance.address, { from: owner }),
+						instance.setProxy(cache['ProxyERC20MintableSynthetix'].address, {
+							from: owner,
+						})),
 				]
 					.concat(
 						// If there's a rewards distribution that's not a mock
@@ -989,7 +989,7 @@ const setupAllContracts = async ({
 		const forContractName = forContract || '';
 		// some contracts should be registered to the address resolver with a different name
 		const contractRegistered = resolverAlias || contract;
-		
+
 		// deploy the contract
 		returnObj[contractRegistered + forContractName] = await setupContract({
 			accounts,
@@ -1125,11 +1125,11 @@ const setupAllContracts = async ({
 		]);
 	}
 
-	// finally if any of our contracts have setSystemStatus (from MockSynth), then invoke it
+	// finally if any of our contracts have setAddressResolver (from MockSynth), then invoke it
 	await Promise.all(
 		Object.values(returnObj)
-			.filter(contract => contract.setSystemStatus)
-			.map(mock => mock.setSystemStatus(returnObj['SystemStatus'].address))
+			.filter(contract => contract.setAddressResolver)
+			.map(mock => mock.setAddressResolver(returnObj['AddressResolver'].address))
 	);
 
 	return returnObj;
