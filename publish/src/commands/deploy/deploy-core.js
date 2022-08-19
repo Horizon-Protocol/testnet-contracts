@@ -4,6 +4,7 @@ const { gray } = require('chalk');
 
 const {
 	constants: { ZERO_ADDRESS },
+	defaults: { TEMP_OWNER_DEFAULT_DURATION },
 } = require('../../../..');
 
 module.exports = async ({
@@ -202,7 +203,7 @@ module.exports = async ({
 
 	await deployer.deployContract({
 		name: 'Issuer',
-		source: useOvm ? 'IssuerWithoutLiquidations' : 'Issuer',
+	
 		deps: ['AddressResolver'],
 		args: [account, addressOf(readProxyForResolver)],
 	});
@@ -243,6 +244,18 @@ module.exports = async ({
 		deps: ['AddressResolver'],
 		args: [account],
 	});
+	await deployer.deployContract({
+		name: 'OwnerRelayOnEthereum',
+		deps: ['AddressResolver'],
+		args: [account, addressOf(readProxyForResolver)],
+	});
+
+	await deployer.deployContract({
+		name: 'OwnerRelayOnOptimism',
+		deps: ['AddressResolver'],
+		args: [addressOf(readProxyForResolver), account, TEMP_OWNER_DEFAULT_DURATION],
+	});
+
 
 	await deployer.deployContract({
 		name: 'SynthRedeemer',

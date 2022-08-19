@@ -32,8 +32,8 @@ module.exports = async ({
 
 	let previousSystemSettings = deployer.getExistingContract({ contract: 'SystemSettings' });
 
-	// when there is no new system settings, than just read from ourself
-	if (SystemSettings.address === previousSystemSettings.address) {
+	// when there is no new system settings, or when not doing generateSolidity, than just read from ourself
+	if (SystemSettings.address === previousSystemSettings.address || !generateSolidity) {
 		previousSystemSettings = undefined;
 	} else {
 		// otherwise when there's a new system setting, we want to be reading from the old
@@ -259,7 +259,7 @@ module.exports = async ({
 		writeArg: [1, await getDeployParameter('CROSS_DOMAIN_ESCROW_GAS_LIMIT')],
 		comment: 'Set the gas limit for migrating escrowed SNX to L2',
 	});
-
+	
 	await runStep({
 		contract: 'SystemSettings',
 		target: SystemSettings,
@@ -282,6 +282,18 @@ module.exports = async ({
 		writeArg: [3, await getDeployParameter('CROSS_DOMAIN_WITHDRAWAL_GAS_LIMIT')],
 		comment: 'Set the gas limit for withdrawing from L2',
 	});
+	await runStep({
+		contract: 'SystemSettings',
+		target: SystemSettings,
+		read: 'crossDomainMessageGasLimit',
+		readArg: 4,
+		readTarget: previousSystemSettings,
+		expected: input => input !== '0', // only change if zero
+		write: 'setCrossDomainMessageGasLimit',
+		writeArg: [4, await getDeployParameter('CROSS_DOMAIN_RELAY_GAS_LIMIT')],
+		comment: 'Set the gas limit for relaying owner actions to L2',
+	});
+
 
 	const aggregatorWarningFlags = (await getDeployParameter('AGGREGATOR_WARNING_FLAGS'))[network];
 	// If deploying to OVM avoid ivoking setAggregatorWarningFlags for now.
