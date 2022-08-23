@@ -259,8 +259,5 @@
 	},
 	"ZassetzDOGE": {
 		"deploy": false
-	},
-	"OwnerRelayOnEthereum": {
-		"deploy": false
 	}
 }
