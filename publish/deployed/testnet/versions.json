@@ -481,8 +481,9 @@
 		"contracts": {
 			"SystemSettings": {
 				"address": "0x5D5984030A5cc459A59b2FCe2599d852D6c9C3f6",
-				"status": "current",
-				"keccak256": "0xe60864b41fca45d5b956d4b96a1997b60617d1eba77046ad72e515bb1d8878bf"
+				"status": "replaced",
+				"keccak256": "0xe60864b41fca45d5b956d4b96a1997b60617d1eba77046ad72e515bb1d8878bf",
+				"replaced_in": "v1.3.0"
 			},
 			"FeePool": {
 				"address": "0xf840fc5Fb9477bA6C61e3d4128371Aaf10e42d0D",
@@ -521,8 +522,28 @@
 			},
 			"WrapperFactory": {
 				"address": "0xb0ceE6aA9bbc6F679C6FfF1bd47F1334b29d757c",
+				"status": "replaced",
+				"keccak256": "0x9a136fe7304da851702b1a3cd5970bb8a7ecdef06e9cfe7aff37c97b007f6672",
+				"replaced_in": "v1.3.0"
+			}
+		}
+	},
+	"v1.3.0": {
+		"tag": "v1.3.0",
+		"fulltag": "v1.3.0",
+		"network": "testnet",
+		"date": "2022-08-24T00:22:08+05:30",
+		"commit": "69bd09288a81e3d10fceced9547747e501777aba",
+		"contracts": {
+			"SystemSettings": {
+				"address": "0xA266b57828a9a44c01b1Cda2f3C29A089B7b9987",
 				"status": "current",
-				"keccak256": "0x9a136fe7304da851702b1a3cd5970bb8a7ecdef06e9cfe7aff37c97b007f6672"
+				"keccak256": "0x968535ddde020be8d005daef34b1dfa5ca2ccd6337d4566a1724d0955eeb75b0"
+			},
+			"WrapperFactory": {
+				"address": "0x5Bb00d61Ff6CbaB3e64CA5e44DE7f484E8de6406",
+				"status": "current",
+				"keccak256": "0x55685d98a4098f7b86c41b539c8e1c21885b2378d568db19ac68090e6a11ad21"
 			}
 		}
 	}

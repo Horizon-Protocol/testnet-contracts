@@ -79,25 +79,25 @@ module.exports = async ({
 
 	// OVM pre-regenesis // Horizon - Add wrapper addresses manually
 	// if (network === 'mainnet' && useOvm) {
-		// console.log(gray('Adding 3 known OVM wrapper pre-regenesis'));
-		wrappers.push(
-			[
-				'TESTAADAWrapper',
-				new ethers.Contract(
-					'0xd88689eba8ed3f3e84c94d3ea21c640fdf095988',
-					WrapperFactory.interface,
-					deployer.provider
-				),
-			],
-			[
-				'TESTABNBWrapper',
-				new ethers.Contract(
-					'0xd2f370d78a8d1b42a201515b16e9ca48d367be07',
-					WrapperFactory.interface,
-					deployer.provider
-				),
-			]
-		);
+	// console.log(gray('Adding 3 known OVM wrapper pre-regenesis'));
+	wrappers.push(
+		[
+			'TESTAADAWrapper',
+			new ethers.Contract(
+				'0xd88689eba8ed3f3e84c94d3ea21c640fdf095988',
+				WrapperFactory.interface,
+				deployer.provider
+			),
+		],
+		[
+			'TESTABNBWrapper',
+			new ethers.Contract(
+				'0xd2f370d78a8d1b42a201515b16e9ca48d367be07',
+				WrapperFactory.interface,
+				deployer.provider
+			),
+		]
+	);
 	// }
 
 	console.log(gray(`found ${yellow(wrappers.length)} wrapper addresses`));
@@ -211,8 +211,7 @@ module.exports = async ({
 		}
 	}
 
-		console.log("*********contractsToRebuildCache*********", contractsToRebuildCache);
-
+	console.log('*********contractsToRebuildCache*********', contractsToRebuildCache);
 
 	const addressesChunkSize = useOvm ? 5 : 20;
 	let batchCounter = 1;
