@@ -166,22 +166,6 @@ contract Synthetix is BaseSynthetix {
         return true;
     }
 
-    function liquidateDelinquentAccount(address account, uint zUSDAmount)
-        external
-        systemActive
-        optionalProxy
-        returns (bool)
-    {
-        (uint totalRedeemed, uint amountLiquidated) =
-            issuer().liquidateDelinquentAccount(account, zUSDAmount, messageSender);
-
-        emitAccountLiquidated(account, totalRedeemed, amountLiquidated, messageSender);
-
-        // Transfer HZN redeemed to messageSender
-        // Reverts if amount to redeem is more than balanceOf account, ie due to escrowed balance
-        return _transferByProxy(account, messageSender, totalRedeemed);
-    }
-
     /* Once off function for SIP-60 to migrate HZN balances in the RewardEscrow contract
      * To the new RewardEscrowV2 contract
      */
@@ -195,24 +179,6 @@ contract Synthetix is BaseSynthetix {
     }
 
     // ========== EVENTS ==========
-    event AccountLiquidated(address indexed account, uint hznRedeemed, uint amountLiquidated, address liquidator);
-    bytes32 internal constant ACCOUNTLIQUIDATED_SIG = keccak256("AccountLiquidated(address,uint256,uint256,address)");
-
-    function emitAccountLiquidated(
-        address account,
-        uint256 hznRedeemed,
-        uint256 amountLiquidated,
-        address liquidator
-    ) internal {
-        proxy._emit(
-            abi.encode(hznRedeemed, amountLiquidated, liquidator),
-            2,
-            ACCOUNTLIQUIDATED_SIG,
-            addressToBytes32(account),
-            0,
-            0
-        );
-    }
 
     event AtomicSynthExchange(
         address indexed account,

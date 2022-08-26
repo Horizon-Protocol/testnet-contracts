@@ -29,12 +29,12 @@ const pcentToColorFnc = ({ pcent, content }) => {
 	return percentage > 95
 		? bgRed(content)
 		: percentage > 85
-		? red(content)
-		: percentage > 60
-		? yellow(content)
-		: percentage > 25
-		? content
-		: gray(content);
+			? red(content)
+			: percentage > 60
+				? yellow(content)
+				: percentage > 25
+					? content
+					: gray(content);
 };
 
 const sizeChange = ({ prevSizeIfAny, length }) => {
@@ -100,12 +100,12 @@ module.exports = {
 		};
 		const entries = sizeOfContracts({ contractToObjectMap });
 		const tableData = [
-			['Contract', 'Size', 'Percent of Limit', 'Increase'].map(x => yellow(x)),
+			['Contract', 'Length', 'KB', 'Percent of Limit', 'Increase'].map(x => yellow(x)),
 		].concat(
-			entries.reverse().map(({ file, length, pcent }) => {
+			entries.reverse().map(({ file, length, bytes, pcent }) => {
 				const prevSizeIfAny = previousSizes.find(candidate => candidate.file === file);
 
-				return [file, length, pcent, sizeChange({ prevSizeIfAny, length })].map(content =>
+				return [file, length, bytes, pcent, sizeChange({ prevSizeIfAny, length })].map(content =>
 					pcentToColorFnc({ pcent, content })
 				);
 			})
