@@ -173,7 +173,7 @@ contract('BaseSynthetix', async accounts => {
 				reason: 'Cannot be run on this layer',
 			});
 		});
-		
+
 		it('mint should revert no matter who the caller is', async () => {
 			await onlyGivenAddressCanInvoke({
 				fnc: baseSynthetix.mint,

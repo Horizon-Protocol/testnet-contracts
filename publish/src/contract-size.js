@@ -29,12 +29,12 @@ const pcentToColorFnc = ({ pcent, content }) => {
 	return percentage > 95
 		? bgRed(content)
 		: percentage > 85
-			? red(content)
-			: percentage > 60
-				? yellow(content)
-				: percentage > 25
-					? content
-					: gray(content);
+		? red(content)
+		: percentage > 60
+		? yellow(content)
+		: percentage > 25
+		? content
+		: gray(content);
 };
 
 const sizeChange = ({ prevSizeIfAny, length }) => {
