@@ -14,7 +14,6 @@ module.exports = async ({
 	currentSynthetixSupply,
 	currentWeekOfInflation,
 	deployer,
-	oracleAddress,
 	useOvm,
 }) => {
 	console.log(gray(`\n------ DEPLOY LIBRARIES ------\n`));
@@ -25,6 +24,11 @@ module.exports = async ({
 
 	await deployer.deployContract({
 		name: 'Math',
+	});
+
+	await deployer.deployContract({
+		name: 'SystemSettingsLib',
+		library: true,
 	});
 
 	console.log(gray(`\n------ DEPLOY CORE PROTOCOL ------\n`));
@@ -60,7 +64,7 @@ module.exports = async ({
 		name: 'ExchangeRates',
 		source: useOvm ? 'ExchangeRates' : 'ExchangeRates',
 		// source: useOvm ? 'ExchangeRates' : 'ExchangeRatesWithDexPricing',
-		args: [account, oracleAddress, addressOf(readProxyForResolver), [], []],
+		args: [account, addressOf(readProxyForResolver)],
 	});
 
 	await deployer.deployContract({

@@ -24,6 +24,13 @@ task('test:integration:l1', 'run isolated layer 1 production tests')
 		'The target port for the running local chain to test on',
 		'8545'
 	)
+	.addFlag('useSips', 'Use sources from SIPs directly, instead of releases')
+	.addFlag('useFork', 'Run the tests against a fork of mainnet')
+	.addOptionalParam(
+		'providerPort',
+		'The target port for the running local chain to test on',
+		'8545'
+	)
 	.setAction(async (taskArguments, hre) => {
 		hre.config.paths.tests = './test/integration/l1/';
 
@@ -89,25 +96,47 @@ task('test:integration:l2', 'run isolated layer 2 production tests')
 
 		const providerUrl = (hre.config.providerUrl = 'http://localhost');
 		hre.config.providerPortL1 = '9545';
-		const providerPortL2 = (hre.config.providerPortL2 = '8545');
+		const providerPortL2 = (hre.config.providerPortL2 = taskArguments.providerPort);
 		const useOvm = true;
-		const buildPath = path.join(__dirname, '..', '..', `${BUILD_FOLDER}-ovm`);
+		const buildPath = path.join(__dirname, '..', '..', BUILD_FOLDER);
 
 		if (taskArguments.compile) {
 			await compileInstance({ useOvm, buildPath });
 		}
+		if (taskArguments.useFork) {
+			hre.config.fork = true;
+		}
 
 		if (taskArguments.deploy) {
-			const network = 'local';
-			await prepareDeploy({ network, synthsToAdd, useOvm });
-			await deployInstance({
-				addNewSynths: true,
-				buildPath,
-				network,
-				providerPort: providerPortL2,
-				providerUrl,
-				useOvm,
-			});
+			if (taskArguments.useFork) {
+				await prepareDeploy({
+					network: 'mainnet',
+					synthsToAdd,
+					useOvm,
+					useSips: taskArguments.useSips,
+				});
+				await deployInstance({
+					addNewSynths: true,
+					buildPath,
+					freshDeploy: false,
+					network: 'mainnet',
+					providerPort: providerPortL2,
+					providerUrl,
+					useFork: true,
+					useOvm,
+				});
+			} else {
+				const network = 'local';
+				await prepareDeploy({ network, synthsToAdd, useOvm, useReleases: false, useSips: false });
+				await deployInstance({
+					addNewSynths: true,
+					buildPath,
+					network,
+					providerPort: providerPortL2,
+					providerUrl,
+					useOvm,
+				});
+			}
 			hre.config.addedSynths = synthsToAdd;
 		}
 
@@ -127,12 +156,9 @@ task('test:integration:dual', 'run integrated layer 1 and layer 2 production tes
 		const providerUrl = (hre.config.providerUrl = 'http://localhost');
 		const providerPortL1 = (hre.config.providerPortL1 = '9545');
 		const providerPortL2 = (hre.config.providerPortL2 = '8545');
-		const buildPathEvm = path.join(__dirname, '..', '..', BUILD_FOLDER);
-		const buildPathOvm = path.join(__dirname, '..', '..', `${BUILD_FOLDER}-ovm`);
 
 		if (taskArguments.compile) {
-			await compileInstance({ useOvm: false, buildPath: buildPathEvm });
-			await compileInstance({ useOvm: true, buildPath: buildPathOvm });
+			await compileInstance({ useOvm: true, buildPath: buildPath });
 		}
 
 		if (taskArguments.deploy) {
@@ -140,14 +166,14 @@ task('test:integration:dual', 'run integrated layer 1 and layer 2 production tes
 				useOvm: false,
 				providerUrl,
 				providerPort: providerPortL1,
-				buildPath: buildPathEvm,
+				buildPath: buildPath,
 			});
 
 			await deployInstance({
 				useOvm: true,
 				providerUrl,
 				providerPort: providerPortL2,
-				buildPath: buildPathOvm,
+				buildPath: buildPath,
 			});
 		}
 

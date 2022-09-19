@@ -62,7 +62,6 @@ const deploy = async ({
 	ignoreSafetyChecks,
 	manageNonces,
 	network = DEFAULTS.network,
-	oracleExrates,
 	privateKey,
 	providerUrl,
 	skipFeedChecks = false,
@@ -212,7 +211,6 @@ const deploy = async ({
 		currentSynthetixSupply,
 		currentLastMintEvent,
 		currentWeekOfInflation,
-		oracleAddress,
 		systemSuspended,
 	} = await systemAndParameterCheck({
 		account,
