@@ -403,10 +403,8 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
                 (bool success, bytes memory returnData) = address(aggregator).staticcall(payload);
 
                 if (success) {
-                    (, int256 answer, , uint256 updatedAt, ) = abi.decode(
-                        returnData,
-                        (uint80, int256, uint256, uint256, uint80)
-                    );
+                    (, int256 answer, , uint256 updatedAt, ) =
+                        abi.decode(returnData, (uint80, int256, uint256, uint256, uint80));
                     return
                         RateAndUpdatedTime({
                             rate: uint216(_formatAggregatorAnswer(currencyKey, answer)),
@@ -443,10 +441,8 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
                 (bool success, bytes memory returnData) = address(aggregator).staticcall(payload);
 
                 if (success) {
-                    (, int256 answer, , uint256 updatedAt, ) = abi.decode(
-                        returnData,
-                        (uint80, int256, uint256, uint256, uint80)
-                    );
+                    (, int256 answer, , uint256 updatedAt, ) =
+                        abi.decode(returnData, (uint80, int256, uint256, uint256, uint80));
                     return (_formatAggregatorAnswer(currencyKey, answer), updatedAt);
                 } // else return defaults, to avoid reverting in views
             } // else return defaults, to avoid reverting in views
@@ -491,7 +487,7 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
 
     function _rateIsStale(bytes32 currencyKey, uint _rateStalePeriod) internal view returns (bool) {
         // zUSD is a special case and is never stale (check before an SLOAD of getRateAndUpdatedTime)
-        if (currencyKey == "zUSD") {
+        if (currencyKey == zUSD) {
             return false;
         }
         return _rateIsStaleWithTime(_rateStalePeriod, _getUpdatedTime(currencyKey));
@@ -516,9 +512,9 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
 
     function _rateIsFlagged(bytes32 currencyKey, FlagsInterface flags) internal view returns (bool) {
         // zUSD is a special case and is never invalid
-        if (currencyKey == "zUSD") {
+        if (currencyKey == zUSD) {
             return false;
-        };
+        }
         address aggregator = address(aggregators[currencyKey]);
         // when no aggregator or when the flags haven't been setup
         if (aggregator == address(0) || flags == FlagsInterface(0)) {
