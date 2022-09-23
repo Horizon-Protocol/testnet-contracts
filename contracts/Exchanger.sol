@@ -206,13 +206,14 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
             (uint srcRoundIdAtPeriodEnd, uint destRoundIdAtPeriodEnd) = getRoundIdsAtPeriodEnd(exchangeEntry);
 
             // given these round ids, determine what effective value they should have received
-            (uint destinationAmount, , ) = exchangeRates().effectiveValueAndRatesAtRound(
-                exchangeEntry.src,
-                exchangeEntry.amount,
-                exchangeEntry.dest,
-                srcRoundIdAtPeriodEnd,
-                destRoundIdAtPeriodEnd
-            );
+            (uint destinationAmount, , ) =
+                exchangeRates().effectiveValueAndRatesAtRound(
+                    exchangeEntry.src,
+                    exchangeEntry.amount,
+                    exchangeEntry.dest,
+                    srcRoundIdAtPeriodEnd,
+                    destRoundIdAtPeriodEnd
+                );
 
             // and deduct the fee from this amount using the exchangeFeeRate from storage
             uint amountShouldHaveReceived = _deductFeesFromAmount(destinationAmount, exchangeEntry.exchangeFeeRate);
@@ -709,12 +710,8 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     {
         require(maxSecsLeftInWaitingPeriod(from, currencyKey) == 0, "Cannot settle during waiting period");
 
-        (
-            uint reclaimAmount,
-            uint rebateAmount,
-            uint entries,
-            IExchanger.ExchangeEntrySettlement[] memory settlements
-        ) = _settlementOwing(from, currencyKey);
+        (uint reclaimAmount, uint rebateAmount, uint entries, IExchanger.ExchangeEntrySettlement[] memory settlements) =
+            _settlementOwing(from, currencyKey);
 
         if (reclaimAmount > rebateAmount) {
             reclaimed = reclaimAmount.sub(rebateAmount);
@@ -787,12 +784,10 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     /// @param sourceCurrencyKey The source currency key
     /// @param destinationCurrencyKey The destination currency key
     /// @return The exchange fee rate, and whether the rates are too volatile
-    function feeRateForExchange(bytes32 sourceCurrencyKey, bytes32 destinationCurrencyKey)
-        external
-        view
-        returns (uint feeRate, bool tooVolatile)
-    {
-        return _feeRateForExchange(sourceCurrencyKey, destinationCurrencyKey);
+    function feeRateForExchange(bytes32 sourceCurrencyKey, bytes32 destinationCurrencyKey) external view returns (uint) {
+        (uint feeRate, bool tooVolatile) = _feeRateForExchange(sourceCurrencyKey, destinationCurrencyKey);
+        require(!tooVolatile, "too volatile");
+        return feeRate;
     }
 
     /// @notice public function to get the dynamic fee rate for a given exchange
@@ -871,11 +866,8 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         uint roundIdForDest
     ) internal view returns (uint dynamicFee, bool tooVolatile) {
         DynamicFeeConfig memory config = getExchangeDynamicFeeConfig();
-        (uint dynamicFeeDst, bool dstVolatile) = _dynamicFeeRateForCurrencyRound(
-            destinationCurrencyKey,
-            roundIdForDest,
-            config
-        );
+        (uint dynamicFeeDst, bool dstVolatile) =
+            _dynamicFeeRateForCurrencyRound(destinationCurrencyKey, roundIdForDest, config);
         (uint dynamicFeeSrc, bool srcVolatile) = _dynamicFeeRateForCurrencyRound(sourceCurrencyKey, roundIdForSrc, config);
         dynamicFee = dynamicFeeDst.add(dynamicFeeSrc);
         // cap to maxFee
@@ -1011,11 +1003,8 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         // check rates volatility result
         require(!tooVolatile, "exchange rates too volatile");
 
-        (uint destinationAmount, , ) = exchangeRates().effectiveValueAndRates(
-            sourceCurrencyKey,
-            sourceAmount,
-            destinationCurrencyKey
-        );
+        (uint destinationAmount, , ) =
+            exchangeRates().effectiveValueAndRates(sourceCurrencyKey, sourceAmount, destinationCurrencyKey);
 
         amountReceived = _deductFeesFromAmount(destinationAmount, exchangeFeeRate);
         fee = destinationAmount.sub(amountReceived);
