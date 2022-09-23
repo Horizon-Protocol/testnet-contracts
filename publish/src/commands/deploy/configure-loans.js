@@ -203,6 +203,7 @@ module.exports = async ({
 	});
 
 	if (CollateralManager.maxSkewRate) {
+		const maxSkewRate = collateralManagerDefaults['MAX_SKEW_RATE'];
 		await runStep({
 			contract: 'CollateralManager',
 			target: CollateralManager,
@@ -224,7 +225,8 @@ module.exports = async ({
 		writeArg: [baseBorrowRate],
 		comment: 'Set the base borrow rate in the CollateralManager',
 	});
-	
+
+	const baseShortRate = collateralManagerDefaults['BASE_SHORT_RATE'];
 	await runStep({
 		contract: 'CollateralManager',
 		target: CollateralManager,

@@ -181,8 +181,6 @@ class Deployer {
 				);
 			}
 
-			
-
 			// Any contract after SafeDecimalMath can automatically get linked.
 			// Doing this with bytecode that doesn't require the library is a no-op.
 			let bytecode = compiled.evm.bytecode.object;
@@ -223,8 +221,6 @@ class Deployer {
 				});
 				deployedContract.address = '0x' + this._dryRunCounter.toString().padStart(40, '0');
 			} else {
-				
-
 				const factory = new ethers.ContractFactory(compiled.abi, bytecode, this.signer);
 
 				const overrides = await this.sendOverrides();

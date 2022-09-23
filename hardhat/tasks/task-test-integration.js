@@ -24,13 +24,6 @@ task('test:integration:l1', 'run isolated layer 1 production tests')
 		'The target port for the running local chain to test on',
 		'8545'
 	)
-	.addFlag('useSips', 'Use sources from SIPs directly, instead of releases')
-	.addFlag('useFork', 'Run the tests against a fork of mainnet')
-	.addOptionalParam(
-		'providerPort',
-		'The target port for the running local chain to test on',
-		'8545'
-	)
 	.setAction(async (taskArguments, hre) => {
 		hre.config.paths.tests = './test/integration/l1/';
 
@@ -88,6 +81,13 @@ task('test:integration:l2', 'run isolated layer 2 production tests')
 	.addFlag('debugOptimism', 'Debug Optimism activity')
 	.addFlag('compile', 'Compile an l2 instance before running the tests')
 	.addFlag('deploy', 'Deploy an l2 instance before running the tests')
+	.addFlag('useSips', 'Use sources from SIPs directly, instead of releases')
+	.addFlag('useFork', 'Run the tests against a fork of mainnet')
+	.addOptionalParam(
+		'providerPort',
+		'The target port for the running local chain to test on',
+		'8545'
+	)
 	.setAction(async (taskArguments, hre) => {
 		hre.config.paths.tests = './test/integration/l2/';
 		hre.config.debugOptimism = taskArguments.debugOptimism;
@@ -156,9 +156,10 @@ task('test:integration:dual', 'run integrated layer 1 and layer 2 production tes
 		const providerUrl = (hre.config.providerUrl = 'http://localhost');
 		const providerPortL1 = (hre.config.providerPortL1 = '9545');
 		const providerPortL2 = (hre.config.providerPortL2 = '8545');
+		const buildPath = path.join(__dirname, '..', '..', BUILD_FOLDER);
 
 		if (taskArguments.compile) {
-			await compileInstance({ useOvm: true, buildPath: buildPath });
+			await compileInstance({ useOvm: false, buildPath: buildPath });
 		}
 
 		if (taskArguments.deploy) {

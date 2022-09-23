@@ -227,7 +227,6 @@ const deploy = async ({
 		maxPriorityFeePerGas,
 		getDeployParameter,
 		network,
-		oracleExrates,
 		providerUrl,
 		skipFeedChecks,
 		standaloneFeeds,
@@ -274,7 +273,6 @@ const deploy = async ({
 		currentSynthetixSupply,
 		currentWeekOfInflation,
 		deployer,
-		oracleAddress,
 		useOvm,
 	});
 

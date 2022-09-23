@@ -259,5 +259,8 @@
 	},
 	"ZassetzDOGE": {
 		"deploy": false
+	},
+	"SystemSettingsLib": {
+		"deploy": false
 	}
 }

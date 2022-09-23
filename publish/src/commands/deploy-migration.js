@@ -22,7 +22,6 @@ const {
 	loadAndCheckRequiredSources,
 	appendOwnerActionGenerator,
 } = require('../util');
-
 const { performTransactionalStep } = require('../command-utils/transact');
 
 const {
@@ -134,6 +133,7 @@ const deployMigration = async ({
 	// const deployedContract = new ethers.Contract(
 	// 	"0xbla", compiled['Migration_' + releaseName].abi, signer
 	// );
+
 	const { getPathToNetwork } = wrap({
 		network,
 		useOvm,
@@ -188,6 +188,7 @@ const deployMigration = async ({
 	};
 
 	appendOwnerAction(ownerAction);
+
 	await verifyMigrationContract({ deployedContract, releaseName, buildPath, etherscanUrl });
 
 	console.log(gray(`Done.`));
