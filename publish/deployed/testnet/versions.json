@@ -590,13 +590,28 @@
 			},
 			"Exchanger": {
 				"address": "0xdc2946a7D121bD759859d6e0532A712D367C1dC1",
-				"status": "current",
-				"keccak256": "0x0d9a771eebd79d276deb42429149b96313c8028bf194766d987ee709c807d3c5"
+				"status": "replaced",
+				"keccak256": "0x0d9a771eebd79d276deb42429149b96313c8028bf194766d987ee709c807d3c5",
+				"replaced_in": "v1.6.0"
 			},
 			"SystemSettingsLib": {
 				"address": "0xa2b4E480fed8a3b26F273593bF0a1A3fEBE9fA89",
 				"status": "current",
 				"keccak256": "0x074e28226a845ab7ab170a318b2aad7e2a49b1efd56dc660968010f13b4b9e2f"
+			}
+		}
+	},
+	"v1.6.0": {
+		"tag": "v1.6.0",
+		"fulltag": "v1.6.0",
+		"network": "testnet",
+		"date": "2022-09-23T17:21:34+05:30",
+		"commit": "44f881c67cbc7e5e94b37926c2e4a1fb988d49db",
+		"contracts": {
+			"Exchanger": {
+				"address": "0x5Cb64df83a4C9C101a9d56c412E1854f7F4ED662",
+				"status": "current",
+				"keccak256": "0xf09b25fc1be146e80d889209c0f81cad85b36ba5696185170d9579b4d4f61f44"
 			}
 		}
 	}
