@@ -69,5 +69,10 @@
 			"upperLimit": 88177.5,
 			"lowerLimit": 29392.5
 		}
+	},
+	{
+		"name": "zUSDT",
+		"asset": "USDT",
+		"subclass": "MultiCollateralSynth"
 	}
 ]

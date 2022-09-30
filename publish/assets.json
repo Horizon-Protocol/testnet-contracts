@@ -481,5 +481,11 @@
 		"category": "crypto",
 		"sign": "",
 		"description": "Alpha Finance"
+	},
+	"USDT": {
+		"asset": "USDT",
+		"category": "crypto",
+		"sign": "",
+		"description": "Tether USD"
 	}
 }

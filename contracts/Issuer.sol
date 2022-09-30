@@ -659,7 +659,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint amount,
         bool issueMax
     ) internal {
-        (uint maxIssuable, uint existingDebt, uint totalSystemDebt, bool anyRateIsInvalid) = _remainingIssuableSynths(from);
+        (uint maxIssuable, uint totalSystemDebt, bool anyRateIsInvalid) = _remainingIssuableSynths(from);
         _requireRatesNotInvalid(anyRateIsInvalid);
 
         if (!issueMax) {

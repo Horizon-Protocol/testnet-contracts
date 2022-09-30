@@ -191,24 +191,6 @@
 	"CollateralUtil": {
 		"deploy": false
 	},
-	"TokenStateiBTC": {
-		"deploy": false
-	},
-	"ProxyiBTC": {
-		"deploy": false
-	},
-	"ZassetiBTC": {
-		"deploy": false
-	},
-	"TokenStateiBNB": {
-		"deploy": false
-	},
-	"ProxyiBNB": {
-		"deploy": false
-	},
-	"ZassetiBNB": {
-		"deploy": false
-	},
 	"TokenStatezADA": {
 		"deploy": false
 	},
@@ -261,6 +243,15 @@
 		"deploy": false
 	},
 	"SystemSettingsLib": {
+		"deploy": false
+	},
+	"TokenStatezUSDT": {
+		"deploy": false
+	},
+	"ProxyzUSDT": {
+		"deploy": false
+	},
+	"ZassetzUSDT": {
 		"deploy": false
 	}
 }
