@@ -253,5 +253,8 @@
 	},
 	"ZassetzUSDT": {
 		"deploy": false
+	},
+	"SynthetixDebtShare": {
+		"deploy": false
 	}
 }

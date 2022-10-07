@@ -75,7 +75,16 @@ const migrateDebtShares = async ({
 	console.log(gray(`Using account with public key ${signer.address}`));
 
 	// get synthetix system contract
-	const { address: synthetixAddress } = deployment.targets['ProxySynthetix'];
+	const { address: synthetixAddress } = {
+		address: '0x6bd710296a3e3d128d12e3e3b5b8a300b4d22dab',
+	};
+	// const { address: synthetixAddress } = deployment.targets['ProxySynthetix'];
+	console.log(
+		'********** Migrate-Debt-Shares, synthetixAddress',
+		synthetixAddress,
+		typeof synthetixAddress
+	);
+
 	const { abi: synthetixABI } = deployment.sources[deployment.targets['Synthetix'].source];
 	const Synthetix = new ethers.Contract(synthetixAddress, synthetixABI, provider);
 
@@ -92,7 +101,7 @@ const migrateDebtShares = async ({
 
 	const addressCollateralAmounts = [];
 
-	const sUSD = ethers.utils.formatBytes32String('sUSD');
+	const sUSD = ethers.utils.formatBytes32String('zUSD');
 
 	let totalDebtAccounted = ethers.BigNumber.from(0);
 	let totalDebtForgiven = ethers.BigNumber.from(0);
