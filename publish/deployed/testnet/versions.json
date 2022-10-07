@@ -126,8 +126,9 @@
 			},
 			"Synthetix": {
 				"address": "0x6bd710296A3E3d128d12e3E3b5B8A300B4d22dAB",
-				"status": "current",
-				"keccak256": "0x3b4a456057b67b251b1ac9333e472f4885df64a4bfaa80d40c5ae37adc77b698"
+				"status": "replaced",
+				"keccak256": "0x3b4a456057b67b251b1ac9333e472f4885df64a4bfaa80d40c5ae37adc77b698",
+				"replaced_in": "v1.7.0"
 			},
 			"ProxySynthetix": {
 				"address": "0xc7815D983cbE593a49c361c82918d63E14b2ecd9",
@@ -500,8 +501,9 @@
 			},
 			"Issuer": {
 				"address": "0x1f530FF0D6C6eab2D7fA9Abe5ca8937404367EeC",
-				"status": "current",
-				"keccak256": "0xb5406c16a43a37cf85ad10025d76676094bfada68a799b5b75104a17e17a3029"
+				"status": "replaced",
+				"keccak256": "0xb5406c16a43a37cf85ad10025d76676094bfada68a799b5b75104a17e17a3029",
+				"replaced_in": "v1.7.0"
 			},
 			"ZassetzUSD": {
 				"address": "0x84441540DbE2ed6F777532562B146545a4C463f6",
@@ -585,8 +587,9 @@
 			},
 			"FeePool": {
 				"address": "0xD5c622d78Ea2F1E1473eE7faD78FdAe4d2CbE996",
-				"status": "current",
-				"keccak256": "0x51709d8a06b91c3df78ac201b74f627101e0f34e3d6955dac7781ec0427f593f"
+				"status": "replaced",
+				"keccak256": "0x51709d8a06b91c3df78ac201b74f627101e0f34e3d6955dac7781ec0427f593f",
+				"replaced_in": "v1.7.0"
 			},
 			"Exchanger": {
 				"address": "0xdc2946a7D121bD759859d6e0532A712D367C1dC1",
@@ -612,6 +615,35 @@
 				"address": "0x5Cb64df83a4C9C101a9d56c412E1854f7F4ED662",
 				"status": "current",
 				"keccak256": "0xf09b25fc1be146e80d889209c0f81cad85b36ba5696185170d9579b4d4f61f44"
+			}
+		}
+	},
+	"v1.7.0": {
+		"tag": "v1.7.0",
+		"fulltag": "v1.7.0",
+		"network": "testnet",
+		"date": "2022-09-27T18:53:56+05:30",
+		"commit": "62671792c3d690a77296113af77f3228ca3e5b15",
+		"contracts": {
+			"FeePool": {
+				"address": "0x55355412494C9e85bEeA35E2c2267D07912da914",
+				"status": "current",
+				"keccak256": "0x934f1dae9875132283f28bf9d712e9a58f87deb27f0d331fc4bba835b024cf93"
+			},
+			"Synthetix": {
+				"address": "0x07f09bDBAe0f8C99Fbe639D3721F7784b24F050a",
+				"status": "current",
+				"keccak256": "0xd5eb76bdd745aa80a637de8bb0231fbe1c5e5e472a7447e62492d481504491c5"
+			},
+			"Issuer": {
+				"address": "0x56180f1e6a75b37BA90622cf7a03139a4E3e22FD",
+				"status": "current",
+				"keccak256": "0xb15dfe9e74544d7b5360fdcdd76629bce5a7be63d7940b6064f0090ca77b85a6"
+			},
+			"SynthetixDebtShare": {
+				"address": "0x354621394B2ba379E5Ac1d95101e0D6992dB71a8",
+				"status": "current",
+				"keccak256": "0x692efee0eff5820baf1a69b70aa20701a74eb3cc4aeb72b9b1e7fafa28865782"
 			}
 		}
 	}
