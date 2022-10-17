@@ -403,7 +403,9 @@ class Deployer {
 				useOvm: this.useOvm,
 				byContract: true,
 			})[contract];
+			console.log('**********contract version**********', contractVersion);
 			const lastEntry = contractVersion.slice(-1)[0];
+			console.log('**********lastEntry**********', lastEntry);
 			address = lastEntry.address;
 		}
 

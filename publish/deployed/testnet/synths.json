@@ -51,28 +51,8 @@
 		"subclass": "PurgeableSynth"
 	},
 	{
-		"name": "iBNB",
-		"asset": "BNB",
-		"subclass": "PurgeableSynth",
-		"inverted": {
-			"entryPoint": 587.8,
-			"upperLimit": 881.7,
-			"lowerLimit": 293.9
-		}
-	},
-	{
-		"name": "iBTC",
-		"asset": "BTC",
-		"subclass": "PurgeableSynth",
-		"inverted": {
-			"entryPoint": 58785,
-			"upperLimit": 88177.5,
-			"lowerLimit": 29392.5
-		}
-	},
-	{
-		"name": "zUSDT",
-		"asset": "USDT",
+		"name": "zDAI",
+		"asset": "DAI",
 		"subclass": "MultiCollateralSynth"
 	}
 ]

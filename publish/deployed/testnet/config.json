@@ -242,16 +242,16 @@
 	"ZassetzDOGE": {
 		"deploy": false
 	},
+	"TokenStatezDAI": {
+		"deploy": false
+	},
+	"ProxyzDAI": {
+		"deploy": false
+	},
+	"ZassetzDAI": {
+		"deploy": true
+	},
 	"SystemSettingsLib": {
-		"deploy": false
-	},
-	"TokenStatezUSDT": {
-		"deploy": false
-	},
-	"ProxyzUSDT": {
-		"deploy": false
-	},
-	"ZassetzUSDT": {
 		"deploy": false
 	},
 	"SynthetixDebtShare": {
