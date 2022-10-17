@@ -47,8 +47,8 @@
 		"asset": "TRX",
 		"feed": "0x135deD16bFFEB51E01afab45362D3C4be31AA2B0"
 	},
-	"USDT": {
-		"asset": "USDT",
-		"feed": "0x135deD16bFFEB51E01afab45362D3C4be31AA2B0"
+	"DAI": {
+		"asset": "DAI",
+		"feed": "0xE4eE17114774713d2De0eC0f035d4F7665fc025D"
 	}
 }

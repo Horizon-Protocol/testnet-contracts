@@ -482,10 +482,10 @@
 		"sign": "",
 		"description": "Alpha Finance"
 	},
-	"USDT": {
-		"asset": "USDT",
+	"DAI": {
+		"asset": "DAI",
 		"category": "crypto",
 		"sign": "",
-		"description": "Tether USD"
+		"description": "Maker Dao Dai"
 	}
 }
