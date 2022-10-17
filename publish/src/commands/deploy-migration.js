@@ -132,15 +132,15 @@ const deployMigration = async ({
 		signer
 	);
 
-	// const deployedContract = await migrationContract.deploy();
-	// console.log(green(`\nSuccessfully deployed: ${deployedContract.address}\n`));
+	const deployedContract = await migrationContract.deploy();
+	console.log(green(`\nSuccessfully deployed: ${deployedContract.address}\n`));
 
 	// TODO: hardcode the contract address to avoid re-deploying when
-	const deployedContract = new ethers.Contract(
-		'0x26f0675d542CF9d0C48485313C2E34C839D7f89f',
-		compiled['Migration_' + releaseName].abi,
-		signer
-	);
+	// const deployedContract = new ethers.Contract(
+	// 	'0x26f0675d542CF9d0C48485313C2E34C839D7f89f',
+	// 	compiled['Migration_' + releaseName].abi,
+	// 	signer
+	// );
 
 	// always appending to mainnet owner actions now
 	const { ownerActions, ownerActionsFile } = loadAndCheckRequiredSources({

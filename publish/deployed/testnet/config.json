@@ -242,6 +242,12 @@
 	"ZassetzDOGE": {
 		"deploy": false
 	},
+	"SystemSettingsLib": {
+		"deploy": false
+	},
+	"SynthetixDebtShare": {
+		"deploy": false
+	},
 	"TokenStatezDAI": {
 		"deploy": false
 	},
@@ -249,12 +255,6 @@
 		"deploy": false
 	},
 	"ZassetzDAI": {
-		"deploy": true
-	},
-	"SystemSettingsLib": {
-		"deploy": false
-	},
-	"SynthetixDebtShare": {
 		"deploy": false
 	}
 }
