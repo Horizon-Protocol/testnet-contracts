@@ -167,16 +167,13 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
         ) = _getAmountsForAtomicExchangeMinusFees(sourceAmountAfterSettlement, sourceCurrencyKey, destinationCurrencyKey);
 
         // SIP-65: Decentralized Circuit Breaker (checking current system rates)
-        if (
-            _suspendIfRateInvalid(sourceCurrencyKey, systemSourceRate) ||
-            _suspendIfRateInvalid(destinationCurrencyKey, systemDestinationRate)
-        ) {
+        if (_exchangeRatesCircuitBroken(sourceCurrencyKey, destinationCurrencyKey)) {
             return (0, 0);
         }
 
         // Sanity check atomic output's value against current system value (checking atomic rates)
         require(
-            !_isDeviationAboveThreshold(systemConvertedAmount, amountReceived.add(fee)),
+            !exchangeCircuitBreaker().isDeviationAboveThreshold(systemConvertedAmount, amountReceived.add(fee)),
             "Atomic rate deviates too much"
         );
 
@@ -272,7 +269,7 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
         view
         returns (uint)
     {
-         // unused
+        // unused
         sourceCurrencyKey;
 
         // Get the exchange fee rate as per destination currencyKey

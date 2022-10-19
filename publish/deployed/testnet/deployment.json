@@ -212,8 +212,8 @@
 			"address": "0x6A712bd1Ff4B04Fb1F47C6637E714A45c2f4A2E4",
 			"source": "Synthetix",
 			"link": "https://testnet.bscscan.com/address/0x6A712bd1Ff4B04Fb1F47C6637E714A45c2f4A2E4",
-			"timestamp": "2022-10-17T15:51:20.043Z",
-			"txn": "",
+			"timestamp": "2022-10-17T15:51:18.000Z",
+			"txn": "https://testnet.bscscan.com/tx/0xb7bc670773bb5e8a97886c74b7f194a90404843ba13994a24f2c835b8c3989c3",
 			"network": "testnet"
 		},
 		"ProxySynthetix": {
@@ -284,8 +284,8 @@
 			"address": "0xeC2856dE8EcC1e16066f448FC560439571EE7300",
 			"source": "SupplySchedule",
 			"link": "https://testnet.bscscan.com/address/0xeC2856dE8EcC1e16066f448FC560439571EE7300",
-			"timestamp": "2022-10-17T15:51:48.493Z",
-			"txn": "",
+			"timestamp": "2022-10-17T15:51:48.000Z",
+			"txn": "https://testnet.bscscan.com/tx/0xd9f201362eb9497a94377eb8ed862228e0d0a6e3593163242b72ec07d9255ff9",
 			"network": "testnet"
 		},
 		"EscrowChecker": {
@@ -824,8 +824,8 @@
 			"address": "0xeb61C7b3eCC07089a5EfeBb7B1F228d7b3ba5174",
 			"source": "ProxyERC20",
 			"link": "https://testnet.bscscan.com/address/0xeb61C7b3eCC07089a5EfeBb7B1F228d7b3ba5174",
-			"timestamp": "2022-10-17T05:41:03.461Z",
-			"txn": "",
+			"timestamp": "2022-10-17T05:41:00.000Z",
+			"txn": "https://testnet.bscscan.com/tx/0xf695cdb2ed9c91ee2494d99473dd21111b8af92ef157e5145a44b7d444785383",
 			"network": "testnet"
 		},
 		"ZassetzDAI": {
@@ -833,8 +833,8 @@
 			"address": "0x97F4D509F48484c085e79887097e50e4745C9Aa6",
 			"source": "MultiCollateralSynth",
 			"link": "https://testnet.bscscan.com/address/0x97F4D509F48484c085e79887097e50e4745C9Aa6",
-			"timestamp": "2022-10-17T05:41:47.912Z",
-			"txn": "",
+			"timestamp": "2022-10-17T05:41:39.000Z",
+			"txn": "https://testnet.bscscan.com/tx/0xb662e20e588cf640caa9a7538bef38c2d594d5b8aa13cffffbd1a98fe1c7d5b3",
 			"network": "testnet"
 		}
 	},
