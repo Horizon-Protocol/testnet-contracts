@@ -54,5 +54,10 @@
 		"name": "zDAI",
 		"asset": "DAI",
 		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"name": "zCREAM",
+		"asset": "CREAM",
+		"subclass": "MultiCollateralSynth"
 	}
 ]

@@ -31,7 +31,12 @@ module.exports = async ({
 		library: true,
 	});
 
-	console.log(gray(`\n------ DEPLOY CORE PROTOCOL ------\n`));
+	await deployer.deployContract({
+		name: 'SignedSafeDecimalMath',
+		library: true,
+	});
+
+	console.log(gray(`\n------ DEPLOY ADDRESS RESOLVER ------\n`));
 
 	await deployer.deployContract({
 		name: 'AddressResolver',
@@ -43,6 +48,20 @@ module.exports = async ({
 		source: 'ReadProxy',
 		args: [account],
 	});
+
+	console.log(gray(`\n------ DEPLOY SELF ORACLES ------\n`));
+
+	await deployer.deployContract({
+		name: 'OneNetAggregatorIssuedSynths',
+		args: [addressOf(readProxyForResolver)],
+	});
+
+	await deployer.deployContract({
+		name: 'OneNetAggregatorDebtRatio',
+		args: [addressOf(readProxyForResolver)],
+	});
+
+	console.log(gray(`\n------ DEPLOY CORE PROTOCOL ------\n`));
 
 	await deployer.deployContract({
 		name: 'FlexibleStorage',
@@ -197,6 +216,13 @@ module.exports = async ({
 		name: 'Exchanger',
 		source: useOvm ? 'Exchanger' : 'ExchangerWithVirtualSynth',
 		// source: useOvm ? 'Exchanger' : 'ExchangerWithFeeRecAlternatives',
+		deps: ['AddressResolver'],
+		args: [account, addressOf(readProxyForResolver)],
+	});
+
+	await deployer.deployContract({
+		name: 'ExchangeCircuitBreaker',
+		source: 'ExchangeCircuitBreaker',
 		deps: ['AddressResolver'],
 		args: [account, addressOf(readProxyForResolver)],
 	});
