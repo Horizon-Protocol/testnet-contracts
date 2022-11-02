@@ -589,8 +589,9 @@
 		"contracts": {
 			"SystemSettings": {
 				"address": "0x15355adF2A107D30325C44246EaB24EfaFcCfCc7",
-				"status": "current",
-				"keccak256": "0xdec0a846a239e800c64b9624af2b4ebeebe600f8927df2f2ce85121a0b32d78e"
+				"status": "replaced",
+				"keccak256": "0xdec0a846a239e800c64b9624af2b4ebeebe600f8927df2f2ce85121a0b32d78e",
+				"replaced_in": "v1.10.0"
 			},
 			"ExchangeRates": {
 				"address": "0x0c759151A9E1B07f79CC0B5f4CCE566b14190665",
@@ -733,8 +734,9 @@
 			},
 			"Issuer": {
 				"address": "0x8FcDBaA9b3C9a3762DEb0a30adfc38b14CCAbBD9",
-				"status": "current",
-				"keccak256": "0x173436079258d8b7958f9883a6145d112303d188726d1a12a7b1d10a786488af"
+				"status": "replaced",
+				"keccak256": "0x173436079258d8b7958f9883a6145d112303d188726d1a12a7b1d10a786488af",
+				"replaced_in": "v1.10.0"
 			},
 			"ZassetzUSD": {
 				"address": "0x51dEFd3646bBF79CaA4Bf4c79F2F3c603C72D475",
@@ -835,6 +837,25 @@
 				"address": "0x961A568775882F18Ec8273e9b6337e5A89B8e737",
 				"status": "current",
 				"keccak256": "0xcc9c30407c09afc8120bd5295baf90b20ac3161f767a46d907c7a51534a489c7"
+			}
+		}
+	},
+	"v1.10.0": {
+		"tag": "v1.10.0",
+		"fulltag": "v1.10.0",
+		"network": "testnet",
+		"date": "2022-11-02T23:51:05+05:30",
+		"commit": "819a08fc9c2386d5a601d355c4aaf79cc1986252",
+		"contracts": {
+			"SystemSettings": {
+				"address": "0x596422FD7eaD6Cac84616bb456e3b44b10A2Fd50",
+				"status": "current",
+				"keccak256": "0x2ff8466177b924d687323e3420a0cd3775e6e0cd7d869aecdfa4712f461d37f0"
+			},
+			"Issuer": {
+				"address": "0xC86CFF94C6Ef518579A703313ca2dbDc81595Eb0",
+				"status": "current",
+				"keccak256": "0x173436079258d8b7958f9883a6145d112303d188726d1a12a7b1d10a786488af"
 			}
 		}
 	}
