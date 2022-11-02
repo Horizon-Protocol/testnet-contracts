@@ -33,31 +33,26 @@
 	{
 		"name": "zCAKE",
 		"asset": "CAKE",
-		"subclass": "PurgeableSynth"
+		"subclass": "MultiCollateralSynth"
 	},
 	{
 		"name": "zDOT",
 		"asset": "DOT",
-		"subclass": "PurgeableSynth"
+		"subclass": "MultiCollateralSynth"
 	},
 	{
 		"name": "zLINK",
 		"asset": "LINK",
-		"subclass": "PurgeableSynth"
+		"subclass": "MultiCollateralSynth"
 	},
 	{
 		"name": "zXRP",
 		"asset": "XRP",
-		"subclass": "PurgeableSynth"
+		"subclass": "MultiCollateralSynth"
 	},
 	{
 		"name": "zDAI",
 		"asset": "DAI",
-		"subclass": "MultiCollateralSynth"
-	},
-	{
-		"name": "zCREAM",
-		"asset": "CREAM",
 		"subclass": "MultiCollateralSynth"
 	}
 ]

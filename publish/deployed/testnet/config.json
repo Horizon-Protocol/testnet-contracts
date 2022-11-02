@@ -256,5 +256,35 @@
 	},
 	"ZassetzDAI": {
 		"deploy": false
+	},
+	"SignedSafeDecimalMath": {
+		"deploy": false
+	},
+	"OneNetAggregatorIssuedSynths": {
+		"deploy": false
+	},
+	"OneNetAggregatorDebtRatio": {
+		"deploy": false
+	},
+	"ExchangeCircuitBreaker": {
+		"deploy": false
+	},
+	"FuturesMarketManager": {
+		"deploy": false
+	},
+	"FuturesMarketData": {
+		"deploy": false
+	},
+	"FuturesMarketSettings": {
+		"deploy": false
+	},
+	"FuturesMarketBTC": {
+		"deploy": false
+	},
+	"FuturesMarketBNB": {
+		"deploy": false
+	},
+	"FuturesMarketLINK": {
+		"deploy": false
 	}
 }
