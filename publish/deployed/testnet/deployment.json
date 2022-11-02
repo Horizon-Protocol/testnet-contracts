@@ -263,11 +263,11 @@
 		},
 		"Issuer": {
 			"name": "Issuer",
-			"address": "0x5d09859C191F7cfAe24DCc6D007eb3C67e5c28a3",
+			"address": "0x8FcDBaA9b3C9a3762DEb0a30adfc38b14CCAbBD9",
 			"source": "Issuer",
-			"link": "https://testnet.bscscan.com/address/0x5d09859C191F7cfAe24DCc6D007eb3C67e5c28a3",
-			"timestamp": "2022-10-28T17:46:12.000Z",
-			"txn": "https://testnet.bscscan.com/tx/0xde4ef433cc198caa29056c34968db2eddde4c5811c10cfc76e3abef67476688e",
+			"link": "https://testnet.bscscan.com/address/0x8FcDBaA9b3C9a3762DEb0a30adfc38b14CCAbBD9",
+			"timestamp": "2022-11-02T17:56:05.888Z",
+			"txn": "",
 			"network": "testnet"
 		},
 		"TradingRewards": {
