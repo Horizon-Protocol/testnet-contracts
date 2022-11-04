@@ -613,8 +613,9 @@
 			},
 			"SystemSettingsLib": {
 				"address": "0xa2b4E480fed8a3b26F273593bF0a1A3fEBE9fA89",
-				"status": "current",
-				"keccak256": "0x074e28226a845ab7ab170a318b2aad7e2a49b1efd56dc660968010f13b4b9e2f"
+				"status": "replaced",
+				"keccak256": "0x074e28226a845ab7ab170a318b2aad7e2a49b1efd56dc660968010f13b4b9e2f",
+				"replaced_in": "v1.12.0"
 			}
 		}
 	},
@@ -674,8 +675,9 @@
 		"contracts": {
 			"Synthetix": {
 				"address": "0x6A712bd1Ff4B04Fb1F47C6637E714A45c2f4A2E4",
-				"status": "current",
-				"keccak256": "0x1adc1cef08588ca9c1d4b69004d60f75ab13f43f6285f709b0e5c4481a111ce3"
+				"status": "replaced",
+				"keccak256": "0x1adc1cef08588ca9c1d4b69004d60f75ab13f43f6285f709b0e5c4481a111ce3",
+				"replaced_in": "v1.12.0"
 			},
 			"SupplySchedule": {
 				"address": "0xeC2856dE8EcC1e16066f448FC560439571EE7300",
@@ -714,8 +716,9 @@
 			},
 			"ExchangeRates": {
 				"address": "0x3F35a39640eA74B8230C0D698728B432fb2C7425",
-				"status": "current",
-				"keccak256": "0xdeba0833bcd38c8f461d33a007d75c07e0b0e5bb5bf1017ffc1483a1c756b0e8"
+				"status": "replaced",
+				"keccak256": "0xdeba0833bcd38c8f461d33a007d75c07e0b0e5bb5bf1017ffc1483a1c756b0e8",
+				"replaced_in": "v1.12.0"
 			},
 			"FeePool": {
 				"address": "0xF59148754393fACa09C0F3e5666d3B258Bd05846",
@@ -729,8 +732,9 @@
 			},
 			"Exchanger": {
 				"address": "0xf673e48DE63dc07ee175Bc6F82b7883AfbD4DE12",
-				"status": "current",
-				"keccak256": "0x86750b6636424d467daabc422c665b1eba21396e5a78f020e75353a178ddf6c3"
+				"status": "replaced",
+				"keccak256": "0x86750b6636424d467daabc422c665b1eba21396e5a78f020e75353a178ddf6c3",
+				"replaced_in": "v1.12.0"
 			},
 			"Issuer": {
 				"address": "0x8FcDBaA9b3C9a3762DEb0a30adfc38b14CCAbBD9",
@@ -849,13 +853,15 @@
 		"contracts": {
 			"SystemSettings": {
 				"address": "0x596422FD7eaD6Cac84616bb456e3b44b10A2Fd50",
-				"status": "current",
-				"keccak256": "0x2ff8466177b924d687323e3420a0cd3775e6e0cd7d869aecdfa4712f461d37f0"
+				"status": "replaced",
+				"keccak256": "0x2ff8466177b924d687323e3420a0cd3775e6e0cd7d869aecdfa4712f461d37f0",
+				"replaced_in": "v1.12.0"
 			},
 			"Issuer": {
 				"address": "0xC86CFF94C6Ef518579A703313ca2dbDc81595Eb0",
-				"status": "current",
-				"keccak256": "0x173436079258d8b7958f9883a6145d112303d188726d1a12a7b1d10a786488af"
+				"status": "replaced",
+				"keccak256": "0x173436079258d8b7958f9883a6145d112303d188726d1a12a7b1d10a786488af",
+				"replaced_in": "v1.12.0"
 			}
 		}
 	},
@@ -875,6 +881,45 @@
 				"address": "0xe04A435f8d545D5701D7eB6645F72743F4a85773",
 				"status": "current",
 				"keccak256": "0xcc9c30407c09afc8120bd5295baf90b20ac3161f767a46d907c7a51534a489c7"
+			}
+		}
+	},
+	"v1.12.0": {
+		"tag": "v1.12.0",
+		"fulltag": "v1.12.0",
+		"network": "testnet",
+		"date": "2022-11-04T08:52:38+05:30",
+		"commit": "3a28ae3b5d0953284089f2f2a5aa4cfd535cbc70",
+		"contracts": {
+			"SystemSettings": {
+				"address": "0x64499e2b9F50afccE8d635eCe3c109b062343Cd7",
+				"status": "current",
+				"keccak256": "0x3aed3cb84980a75bd1874f6af69c78712fca1b7bb8cdcd71f879258e8344f949"
+			},
+			"ExchangeRates": {
+				"address": "0x84EfF8482F3ee95d538Cca8EA20a736d1BD7Ff5d",
+				"status": "current",
+				"keccak256": "0xffcca9ba3e974158cf72d469b55e133c0eed5197269ab0e2d633f3d097917936"
+			},
+			"Synthetix": {
+				"address": "0x25E3B3c75f32929C4E64792f241Ab42F56892C49",
+				"status": "current",
+				"keccak256": "0x50d34ff1014dfb6093ab80c7ff62c4f3767980661011e5c575d5c0b5197016e4"
+			},
+			"Exchanger": {
+				"address": "0x2dc0902ddD31C32EFaE85a8b3cB9c1019779447D",
+				"status": "current",
+				"keccak256": "0x1bd8bee21d86b577b912fd2139f633398f9fca4ee6283ee092698c605187f7aa"
+			},
+			"Issuer": {
+				"address": "0xd589295df1d8Df2C6d67c38058BAca89520D533B",
+				"status": "current",
+				"keccak256": "0x7075ba588a7bdc68ebe1c1c438992b02458ed140411d2e343ba02d70fb0c8507"
+			},
+			"SystemSettingsLib": {
+				"address": "0x556A45124b2649e001a8461711440444E80854ae",
+				"status": "current",
+				"keccak256": "0x7930b998b9a21fec89ffeaeb5a860f52c626950a6eff700aa484117134b8709f"
 			}
 		}
 	}
