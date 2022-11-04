@@ -50,8 +50,8 @@
 			"address": "0x596422FD7eaD6Cac84616bb456e3b44b10A2Fd50",
 			"source": "SystemSettings",
 			"link": "https://testnet.bscscan.com/address/0x596422FD7eaD6Cac84616bb456e3b44b10A2Fd50",
-			"timestamp": "2022-11-02T18:53:51.938Z",
-			"txn": "",
+			"timestamp": "2022-11-02T18:53:50.000Z",
+			"txn": "https://testnet.bscscan.com/tx/0x1b8f603b3b74760be2a03977bbc14c48688f78c9cc2f88c2e60200e9d852acca",
 			"network": "testnet"
 		},
 		"SystemStatus": {
@@ -905,8 +905,8 @@
 			"address": "0xE689Ab1C61A6d860fE84e5F55D02a3AFAeda18b6",
 			"source": "FuturesMarket",
 			"link": "https://testnet.bscscan.com/address/0xE689Ab1C61A6d860fE84e5F55D02a3AFAeda18b6",
-			"timestamp": "2022-10-28T19:46:14.931Z",
-			"txn": "",
+			"timestamp": "2022-10-28T19:46:15.000Z",
+			"txn": "https://testnet.bscscan.com/tx/0xea67ff9a909fb5d003c31c5e5ba6ed435b0dc289f95f89ef6611254c1a70ea36",
 			"network": "testnet"
 		},
 		"FuturesMarketBNB": {
@@ -924,6 +924,24 @@
 			"source": "FuturesMarket",
 			"link": "https://testnet.bscscan.com/address/0x961A568775882F18Ec8273e9b6337e5A89B8e737",
 			"timestamp": "2022-10-28T19:59:39.532Z",
+			"txn": "",
+			"network": "testnet"
+		},
+		"FuturesMarketADA": {
+			"name": "FuturesMarketADA",
+			"address": "0x0c86e869EB7DD952827EE7Ce3dF57528dB96A151",
+			"source": "FuturesMarket",
+			"link": "https://testnet.bscscan.com/address/0x0c86e869EB7DD952827EE7Ce3dF57528dB96A151",
+			"timestamp": "2022-11-02T19:56:15.558Z",
+			"txn": "",
+			"network": "testnet"
+		},
+		"FuturesMarketCAKE": {
+			"name": "FuturesMarketCAKE",
+			"address": "0xe04A435f8d545D5701D7eB6645F72743F4a85773",
+			"source": "FuturesMarket",
+			"link": "https://testnet.bscscan.com/address/0xe04A435f8d545D5701D7eB6645F72743F4a85773",
+			"timestamp": "2022-11-02T19:57:10.023Z",
 			"txn": "",
 			"network": "testnet"
 		}

@@ -37,5 +37,33 @@
 		"maxMarketValueUSD": "2000000",
 		"maxFundingRate": "0.1",
 		"skewScaleUSD": "300000000"
+	},
+	{
+		"marketKey": "zADA",
+		"asset": "ADA",
+		"takerFee": "0.01",
+		"makerFee": "0.01",
+		"takerFeeNextPrice": "0.01",
+		"makerFeeNextPrice": "0.01",
+		"nextPriceConfirmWindow": "2",
+		"maxLeverage": "10",
+		"maxMarketValueUSD": "2000000",
+		"maxFundingRate": "0.1",
+		"skewScaleUSD": "10000000",
+		"paused": true
+	},
+	{
+		"marketKey": "zCAKE",
+		"asset": "CAKE",
+		"takerFee": "0.01",
+		"makerFee": "0.01",
+		"takerFeeNextPrice": "0.01",
+		"makerFeeNextPrice": "0.01",
+		"nextPriceConfirmWindow": "2",
+		"maxLeverage": "10",
+		"maxMarketValueUSD": "2000000",
+		"maxFundingRate": "0.1",
+		"skewScaleUSD": "10000000",
+		"paused": true
 	}
 ]

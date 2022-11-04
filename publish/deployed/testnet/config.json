@@ -286,5 +286,11 @@
 	},
 	"FuturesMarketLINK": {
 		"deploy": false
+	},
+	"FuturesMarketCAKE": {
+		"deploy": false
+	},
+	"FuturesMarketADA": {
+		"deploy": false
 	}
 }

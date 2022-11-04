@@ -858,5 +858,24 @@
 				"keccak256": "0x173436079258d8b7958f9883a6145d112303d188726d1a12a7b1d10a786488af"
 			}
 		}
+	},
+	"v1.11.0": {
+		"tag": "v1.11.0",
+		"fulltag": "v1.11.0",
+		"network": "testnet",
+		"date": "2022-11-03T01:08:10+05:30",
+		"commit": "0797ba88b95c49f71cfceb0b00acd645849dcbb5",
+		"contracts": {
+			"FuturesMarketADA": {
+				"address": "0x0c86e869EB7DD952827EE7Ce3dF57528dB96A151",
+				"status": "current",
+				"keccak256": "0xcc9c30407c09afc8120bd5295baf90b20ac3161f767a46d907c7a51534a489c7"
+			},
+			"FuturesMarketCAKE": {
+				"address": "0xe04A435f8d545D5701D7eB6645F72743F4a85773",
+				"status": "current",
+				"keccak256": "0xcc9c30407c09afc8120bd5295baf90b20ac3161f767a46d907c7a51534a489c7"
+			}
+		}
 	}
 }
