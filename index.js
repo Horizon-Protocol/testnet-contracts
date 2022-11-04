@@ -115,10 +115,10 @@ const defaults = {
 		crypto: w3utils.toWei('0.01'),
 		index: w3utils.toWei('0.01'),
 	},
-	EXCHANGE_DYNAMIC_FEE_THRESHOLD: w3utils.toWei('0.004'), // 40 bps
-	EXCHANGE_DYNAMIC_FEE_WEIGHT_DECAY: w3utils.toWei('0.9'), // dynamic fee weight decay for each round
-	EXCHANGE_DYNAMIC_FEE_ROUNDS: '10', // dynamic fee rounds
-	EXCHANGE_MAX_DYNAMIC_FEE: w3utils.toWei('0.05'), // cap max dynamic fee to 5%
+	EXCHANGE_DYNAMIC_FEE_THRESHOLD: w3utils.toWei('0.0025'), // 40 bps
+	EXCHANGE_DYNAMIC_FEE_WEIGHT_DECAY: w3utils.toWei('0.95'), // dynamic fee weight decay for each round
+	EXCHANGE_DYNAMIC_FEE_ROUNDS: '6', // dynamic fee rounds
+	EXCHANGE_MAX_DYNAMIC_FEE: w3utils.toWei('0.015'), // cap max dynamic fee to 5%
 	MINIMUM_STAKE_TIME: (3600 * 24).toString(), // 1 days
 	DEBT_SNAPSHOT_STALE_TIME: (43800).toString(), // 12 hour heartbeat + 10 minutes mining time
 	AGGREGATOR_WARNING_FLAGS: {
@@ -174,7 +174,7 @@ const defaults = {
 	ETHER_WRAPPER_MINT_FEE_RATE: w3utils.toWei('0.005'), // 5 bps
 	ETHER_WRAPPER_BURN_FEE_RATE: w3utils.toWei('0'), // 0 bps
 
-	FUTURES_MIN_KEEPER_FEE: w3utils.toWei('20'), // 20 zUSD liquidation fee
+	FUTURES_MIN_KEEPER_FEE: w3utils.toWei('5'), // 5 zUSD liquidation fee
 	FUTURES_LIQUIDATION_FEE_RATIO: w3utils.toWei('0.0035'), // 35 basis points liquidation incentive
 	FUTURES_LIQUIDATION_BUFFER_RATIO: w3utils.toWei('0.0025'), // 25 basis points liquidation buffer
 	FUTURES_MIN_INITIAL_MARGIN: w3utils.toWei('40'), // minimum initial margin for all markets
@@ -397,22 +397,37 @@ const getFuturesMarkets = ({
 	fs,
 	deploymentPath,
 } = {}) => {
+	let futuresMarkets;
 	if (!deploymentPath && (!path || !fs)) {
-		return data[getFolderNameForNetwork({ network, useOvm })].futuresMarkets;
+		futuresMarkets = data[getFolderNameForNetwork({ network, useOvm })].futuresMarkets;
+	} else {
+		const pathToFuturesMarketsList = deploymentPath
+			? path.join(deploymentPath, constants.FUTURES_MARKETS_FILENAME)
+			: getPathToNetwork({
+					network,
+					path,
+					useOvm,
+					file: constants.FUTURES_MARKETS_FILENAME,
+			  });
+		if (!fs.existsSync(pathToFuturesMarketsList)) {
+			futuresMarkets = [];
+		} else {
+			futuresMarkets = JSON.parse(fs.readFileSync(pathToFuturesMarketsList)) || [];
+		}
 	}
 
-	const pathToFuturesMarketsList = deploymentPath
-		? path.join(deploymentPath, constants.FUTURES_MARKETS_FILENAME)
-		: getPathToNetwork({
-				network,
-				path,
-				useOvm,
-				file: constants.FUTURES_MARKETS_FILENAME,
-		  });
-	if (!fs.existsSync(pathToFuturesMarketsList)) {
-		return [];
-	}
-	return JSON.parse(fs.readFileSync(pathToFuturesMarketsList));
+	return futuresMarkets.map(futuresMarket => {
+		/**
+		 * We expect the asset key to not start with an 's'. ie. AVAX rather than sAVAX
+		 * Unfortunately due to some historical reasons 'sBTC', 'sETH' and 'sLINK' does not follow this format
+		 * We adjust for that here.
+		 */
+		const marketsWithIncorrectAssetKey = ['zBTC', 'zETH', 'zLINK'];
+		const assetKeyNeedsAdjustment = marketsWithIncorrectAssetKey.includes(futuresMarket.asset);
+		const assetKey = assetKeyNeedsAdjustment ? futuresMarket.asset.slice(1) : futuresMarket.asset;
+		// mixin the asset details
+		return Object.assign({}, assets[assetKey], futuresMarket);
+	});
 };
 
 /**
@@ -558,6 +573,8 @@ const getSuspensionReasons = ({ code = undefined } = {}) => {
 		6: 'Index Rebalance',
 		55: 'Circuit Breaker (Phase one)', // https://sips.synthetix.io/SIPS/sip-55
 		65: 'Decentralized Circuit Breaker (Phase two)', // https://sips.synthetix.io/SIPS/sip-65
+		80: 'Futures configuration', // pausing according to deployment configuration
+		231: 'Latency Breaker', // https://sips.synthetix.io/sips/sip-231/
 		99999: 'Emergency',
 	};
 
@@ -578,7 +595,7 @@ const getTokens = ({ network = 'mainnet', path, fs, useOvm = false } = {}) => {
 				symbol: 'HZN',
 				asset: 'HZN',
 				name: 'Synthetix',
-				address: targets.ProxyERC20.address,
+				address: targets.ProxySynthetix.address,
 				decimals: 18,
 			},
 			feeds['HZN'].feed ? { feed: feeds['HZN'].feed } : {}
@@ -590,8 +607,7 @@ const getTokens = ({ network = 'mainnet', path, fs, useOvm = false } = {}) => {
 				symbol: synth.name,
 				asset: synth.asset,
 				name: synth.description,
-				address: (targets[`Proxy${synth.name === 'zUSD' ? 'ERC20zUSD' : synth.name}`] || {})
-					.address,
+				address: (targets[`Proxy${synth.name}`] || {}).address,
 				index: synth.index,
 				decimals: 18,
 				feed: synth.feed,

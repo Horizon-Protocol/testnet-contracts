@@ -43,30 +43,12 @@ module.exports = async ({
 			force: addNewSynths,
 		});
 
-		// Legacy proxy will be around until May 30, 2020
-		// https://docs.synthetix.io/integrations/guide/#proxy-deprecation
-		// Until this time, on mainnet we will still deploy ProxyERC20zUSD and ensure that
-		// SynthzUSD.proxy is ProxyERC20zUSD, SynthzUSD.integrationProxy is ProxyzUSD
-		const synthProxyIsLegacy = currencyKey === 'zUSD' && network === 'mainnet';
-
 		const proxyForSynth = await deployer.deployContract({
 			name: `Proxy${currencyKey}`,
-			source: synthProxyIsLegacy ? 'Proxy' : 'ProxyERC20',
+			source: 'ProxyERC20',
 			args: [account],
 			force: addNewSynths,
 		});
-
-		// additionally deploy an ERC20 proxy for the synth if it's legacy (zUSD)
-		let proxyERC20ForSynth;
-		if (currencyKey === 'zUSD') {
-			proxyERC20ForSynth = await deployer.deployContract({
-				name: `ProxyERC20zUSD`,
-				// name: `ProxyERC20${currencyKey}`,
-				source: `ProxyERC20`,
-				args: [account],
-				force: addNewSynths,
-			});
-		}
 
 		const currencyKeyInBytes = toBytes32(currencyKey);
 
@@ -119,7 +101,7 @@ module.exports = async ({
 			source: sourceContract,
 			deps: [`TokenState${currencyKey}`, `Proxy${currencyKey}`, 'Synthetix', 'FeePool'],
 			args: [
-				proxyERC20ForSynth ? addressOf(proxyERC20ForSynth) : addressOf(proxyForSynth),
+				addressOf(proxyForSynth),
 				addressOf(tokenStateForSynth),
 				`Zasset ${currencyKey}`,
 				currencyKey,

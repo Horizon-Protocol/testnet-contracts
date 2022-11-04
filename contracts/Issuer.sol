@@ -95,6 +95,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     bytes32 private constant CONTRACT_DEBTCACHE = "DebtCache";
     bytes32 private constant CONTRACT_SYNTHREDEEMER = "SynthRedeemer";
     bytes32 private constant CONTRACT_SYSTEMSTATUS = "SystemStatus";
+    bytes32 private constant CONTRACT_SYNTHETIXBRIDGETOOPTIMISM = "SynthetixBridgeToOptimism";
+    bytes32 private constant CONTRACT_SYNTHETIXBRIDGETOBASE = "SynthetixBridgeToBase";
 
     bytes32 private constant CONTRACT_EXT_AGGREGATOR_ISSUED_SYNTHS = "ext:AggregatorIssuedSynths";
     bytes32 private constant CONTRACT_EXT_AGGREGATOR_DEBT_RATIO = "ext:AggregatorDebtRatio";
@@ -561,6 +563,49 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
     }
 
+    function issueSynthsWithoutDebt(
+        bytes32 currencyKey,
+        address to,
+        uint amount
+    ) external onlyTrustedMinters returns (bool rateInvalid) {
+        require(address(synths[currencyKey]) != address(0), "Issuer: synth doesn't exist");
+        require(amount > 0, "Issuer: cannot issue 0 synths");
+
+        // record issue timestamp
+        _setLastIssueEvent(to);
+
+        // Create their synths
+        synths[currencyKey].issue(to, amount);
+
+        // Account for the issued debt in the cache
+        (uint rate, bool rateInvalid) = exchangeRates().rateAndInvalid(currencyKey);
+        debtCache().updateCachedsUSDDebt(SafeCast.toInt256(amount.multiplyDecimal(rate)));
+
+        // returned so that the caller can decide what to do if the rate is invalid
+        return rateInvalid;
+    }
+
+    function burnSynthsWithoutDebt(
+        bytes32 currencyKey,
+        address from,
+        uint amount
+    ) external onlyTrustedMinters returns (bool rateInvalid) {
+        require(address(synths[currencyKey]) != address(0), "Issuer: synth doesn't exist");
+        require(amount > 0, "Issuer: cannot issue 0 synths");
+
+        exchanger().settle(from, currencyKey);
+
+        // Burn some synths
+        synths[currencyKey].burn(from, amount);
+
+        // Account for the burnt debt in the cache. If rate is invalid, the user won't be able to exchange
+        (uint rate, bool rateInvalid) = exchangeRates().rateAndInvalid(currencyKey);
+        debtCache().updateCachedsUSDDebt(-SafeCast.toInt256(amount.multiplyDecimal(rate)));
+
+        // returned so that the caller can decide what to do if the rate is invalid
+        return rateInvalid;
+    }
+
     function issueSynths(address from, uint amount) external onlySynthetix {
         require(amount > 0, "Issuer: cannot issue 0 synths");
 
@@ -737,7 +782,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         address debtAccount,
         address burnAccount,
         uint amount,
-        uint existingDebtS
+        uint existingDebt
     ) internal returns (uint amountBurnt) {
         // check breaker
         if (!_verifyCircuitBreaker()) {
@@ -783,7 +828,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             }
         }
 
-        (uint existingDebt, bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(synthetixDebtShare().balanceOf(from), zUSD);
+        (uint existingDebt, , bool anyRateIsInvalid) =
+            _debtBalanceOfAndTotalDebt(synthetixDebtShare().balanceOf(from), zUSD);
         (uint maxIssuableSynthsForAccount, bool snxRateInvalid) = _maxIssuableSynths(from);
         _requireRatesNotInvalid(anyRateIsInvalid || snxRateInvalid);
         require(existingDebt > 0, "No debt to forgive");
@@ -869,12 +915,17 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     /* ========== MODIFIERS ========== */
 
-    function _onlySynthetix() internal view {
+    modifier onlySynthetix() {
         require(msg.sender == address(synthetix()), "Issuer: Only the synthetix contract can perform this action");
+        _;
     }
 
-    modifier onlySynthetix() {
-        _onlySynthetix(); // Use an internal function to save code size.
+    modifier onlyTrustedMinters() {
+        require(
+            msg.sender == resolver.getAddress(CONTRACT_SYNTHETIXBRIDGETOOPTIMISM) ||
+                msg.sender == resolver.getAddress(CONTRACT_SYNTHETIXBRIDGETOBASE),
+            "Issuer: Only trusted minters can perform this action"
+        );
         _;
     }
 
@@ -885,6 +936,24 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     modifier onlySynthRedeemer() {
         _onlySynthRedeemer();
         _;
+    }
+
+    modifier issuanceActive() {
+        _issuanceActive();
+        _;
+    }
+
+    function _issuanceActive() private {
+        systemStatus().requireIssuanceActive();
+    }
+
+    modifier synthActive(bytes32 currencyKey) {
+        _synthActive(currencyKey);
+        _;
+    }
+
+    function _synthActive(bytes32 currencyKey) private {
+        systemStatus().requireSynthActive(currencyKey);
     }
 
     /* ========== EVENTS ========== */

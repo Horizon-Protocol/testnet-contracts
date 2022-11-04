@@ -17,14 +17,16 @@ contract SynthetixBridgeToOptimism is BaseSynthetixBridge, ISynthetixBridgeToOpt
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
-    bytes32 public constant CONTRACT_NAME = "SynthetixBridgeToOptimism";
-
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_REWARDSDISTRIBUTION = "RewardsDistribution";
     bytes32 private constant CONTRACT_OVM_SYNTHETIXBRIDGETOBASE = "ovm:SynthetixBridgeToBase";
     bytes32 private constant CONTRACT_SYNTHETIXBRIDGEESCROW = "SynthetixBridgeEscrow";
 
     uint8 private constant MAX_ENTRIES_MIGRATED_PER_MESSAGE = 26;
+
+    function CONTRACT_NAME() public pure returns (bytes32) {
+        return "SynthetixBridgeToOptimism";
+    }
 
     // ========== CONSTRUCTOR ==========
 
@@ -54,6 +56,10 @@ contract SynthetixBridgeToOptimism is BaseSynthetixBridge, ISynthetixBridgeToOpt
 
     function hasZeroDebt() internal view {
         require(issuer().debtBalanceOf(msg.sender, "zUSD") == 0, "Cannot deposit or migrate with debt");
+    }
+
+    function counterpart() internal view returns (address) {
+        return synthetixBridgeToBase();
     }
 
     /* ========== VIEWS ========== */
@@ -123,11 +129,7 @@ contract SynthetixBridgeToOptimism is BaseSynthetixBridge, ISynthetixBridgeToOpt
     }
 
     // invoked by Messenger on L1 after L2 waiting period elapses
-    function finalizeWithdrawal(address to, uint256 amount) external {
-        // ensure function only callable from L2 Bridge via messenger (aka relayer)
-        require(msg.sender == address(messenger()), "Only the relayer can call this");
-        require(messenger().xDomainMessageSender() == synthetixBridgeToBase(), "Only the L2 bridge can invoke");
-
+    function finalizeWithdrawal(address to, uint256 amount) external onlyCounterpart {
         // transfer amount back to user
         synthetixERC20().transferFrom(synthetixBridgeEscrow(), to, amount);
 

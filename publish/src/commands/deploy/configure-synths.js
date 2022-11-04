@@ -29,8 +29,6 @@ module.exports = async ({
 		const synth = deployer.deployedContracts[`Zasset${currencyKey}`];
 		const tokenStateForSynth = deployer.deployedContracts[`TokenState${currencyKey}`];
 		const proxyForSynth = deployer.deployedContracts[`Proxy${currencyKey}`];
-		const proxyERC20ForSynth =
-			currencyKey === 'zUSD' ? deployer.deployedContracts[`ProxyERC20zUSD`] : undefined;
 
 		let ExistingSynth;
 		try {
@@ -86,31 +84,15 @@ module.exports = async ({
 				comment: `Ensure the ${currencyKey} synth Proxy is correctly connected to the Synth`,
 			});
 
-			// Migration Phrase 2: if there's a ProxyERC20zUSD then the Synth's proxy must use it
 			await runStep({
 				contract: `Zasset${currencyKey}`,
 				target: synth,
 				read: 'proxy',
-				expected: input => input === addressOf(proxyERC20ForSynth || proxyForSynth),
+				expected: input => input === addressOf(proxyForSynth),
 				write: 'setProxy',
-				writeArg: addressOf(proxyERC20ForSynth || proxyForSynth),
+				writeArg: addressOf(proxyForSynth),
 				comment: `Ensure the ${currencyKey} synth is connected to its Proxy`,
 			});
-
-			if (proxyERC20ForSynth) {
-				// and make sure this new proxy has the target of the synth
-				await runStep({
-					contract: `ProxyERC20zUSD`,
-					target: proxyERC20ForSynth,
-					read: 'target',
-					expected: input => input === addressOf(synth),
-					write: 'setTarget',
-					writeArg: addressOf(synth),
-					comment: 'Ensure the special ERC20 proxy for zUSD has its target set to the Synth',
-					// Skip solidity for this as on mainnet, ProxyERC20sUSD is already done via ProxysUSD above
-					skipSolidity: network === 'mainnet',
-				});
-			}
 		}
 
 		const { feed } = feeds[asset] || {};
