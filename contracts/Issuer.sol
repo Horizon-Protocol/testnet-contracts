@@ -618,6 +618,22 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return rateInvalid;
     }
 
+    /**
+     * Function used to migrate balances from the CollateralShort contract
+     * @param short The address of the CollateralShort contract to be upgraded
+     * @param amount The amount of zUSD collateral to be burnt
+     */
+    function upgradeCollateralShort(address short, uint amount) external onlyOwner {
+        require(short != address(0), "Issuer: invalid address");
+        require(short == resolver.getAddress("CollateralShortLegacy"), "Issuer: wrong short address");
+        require(address(synths[zUSD]) != address(0), "Issuer: synth doesn't exist");
+        require(amount > 0, "Issuer: cannot burn 0 synths");
+
+        exchanger().settle(short, zUSD);
+
+        synths[zUSD].burn(short, amount);
+    }
+
     function issueSynths(address from, uint amount) external onlySynthetix {
         require(amount > 0, "Issuer: cannot issue 0 synths");
 
