@@ -186,7 +186,7 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
         } else {
             // Otherwise, convert source to zUSD value
             (uint amountReceivedInUSD, uint sUsdFee, , , , ) =
-                _getAmountsForAtomicExchangeMinusFees(sourceAmount, sourceCurrencyKey, zUSD);
+                _getAmountsForAtomicExchangeMinusFees(sourceAmountAfterSettlement, sourceCurrencyKey, zUSD);
             sourceSusdValue = amountReceivedInUSD.add(sUsdFee);
         }
 
