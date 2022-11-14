@@ -441,8 +441,9 @@
 			},
 			"CollateralShort": {
 				"address": "0x6c9b0B2914c89f9Ea254425B90D93db3Dc549C34",
-				"status": "current",
-				"keccak256": "0xb71fe785acf9b2e688fdce95dac449e1f38a224afb9ba6f63756ebfca5e7580a"
+				"status": "replaced",
+				"keccak256": "0xb71fe785acf9b2e688fdce95dac449e1f38a224afb9ba6f63756ebfca5e7580a",
+				"replaced_in": "v1.15.0"
 			},
 			"SynthUtil": {
 				"address": "0x4E161b8ABCB2183a3bc94fB181FC1F50F18575F9",
@@ -953,8 +954,9 @@
 			},
 			"Issuer": {
 				"address": "0xfb1BEe717bF0b7dbC0F2Fa54B47BAD64Ffb67Fb0",
-				"status": "current",
-				"keccak256": "0x5a708c80c296c272253df723107c59d9d17a09e715f6ceaee544f2f1b2f3b63f"
+				"status": "replaced",
+				"keccak256": "0x5a708c80c296c272253df723107c59d9d17a09e715f6ceaee544f2f1b2f3b63f",
+				"replaced_in": "v1.15.0"
 			},
 			"SystemSettingsLib": {
 				"address": "0x7e804dFBF23F2d6657bDb716e63BFFdE3b4C1565",
@@ -984,6 +986,25 @@
 				"address": "0x4D15E001c2Ee857e8a101Fd6e9794d22f3fFF48F",
 				"status": "current",
 				"keccak256": "0x7a045683add6c6a3dbfad81f07cc73a401d50b61d13480564ea94fab3a413124"
+			}
+		}
+	},
+	"v1.15.0": {
+		"tag": "v1.15.0",
+		"fulltag": "v1.15.0",
+		"network": "testnet",
+		"date": "2022-11-15T00:12:24+05:30",
+		"commit": "d32185fdcff9a6bef8b44cef92c7d18687a2fb5d",
+		"contracts": {
+			"Issuer": {
+				"address": "0x73EdE2904d962bcA398DFeAc50B0c8bf0306B1A5",
+				"status": "current",
+				"keccak256": "0x316a62cccc85c2794a6b353dc8a93edb1a6a8757cc3cb01f95191b539ab5b444"
+			},
+			"CollateralShort": {
+				"address": "0x6Be60E2746BedC012762c7AfC38d9486Ab8fD04b",
+				"status": "current",
+				"keccak256": "0x47de17a94b0f8e1109243a35b707246acbabaa2bfd56dcf44ff9805ad378cd6a"
 			}
 		}
 	}

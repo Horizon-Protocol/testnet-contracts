@@ -111,7 +111,7 @@ contract CollateralShort is Collateral {
 
         // 3. Get the equivalent payment amount in zUSD, and also distinguish
         // the fee that would be charged for both principal and interest.
-        (uint expectedAmount, uint exchangeFee, ) = _exchanger().getAmountsForExchange(payment, loan.currency, sUSD);
+        (uint expectedAmount, uint exchangeFee, ) = _exchanger().getAmountsForExchange(payment, loan.currency, zUSD);
         uint paymentSUSD = expectedAmount.add(exchangeFee);
 
         // 4. Reduce the collateral by the equivalent (total) payment amount in zUSD,
@@ -123,7 +123,7 @@ contract CollateralShort is Collateral {
         _payFees(exchangeFee, zUSD);
 
         // 6. Burn zUSD held in the contract.
-        _synthsUSD().burn(address(this), collateralToRemove);
+        _synthzUSD().burn(address(this), collateralToRemove);
 
         // 7. Update the last interaction time.
         loan.lastInteraction = block.timestamp;
