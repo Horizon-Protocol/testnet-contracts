@@ -9,5 +9,21 @@
 			"INTERACTION_DELAY": "0",
 			"COLLAPSE_FEE_RATE": "0"
 		}
+	},
+	{
+		"name": "LIQUIDATION_DELAY",
+		"value": "180"
+	},
+	{
+		"name": "LIQUIDATION_RATIO",
+		"value": "500000000000000000"
+	},
+	{
+		"name": "FLAG_REWARD",
+		"value": "1000000000000000000"
+	},
+	{
+		"name": "LIQUIDATE_REWARD",
+		"value": "2000000000000000000"
 	}
 ]

@@ -41,12 +41,6 @@
 	"Issuer": {
 		"deploy": false
 	},
-	"EternalStorageLiquidations": {
-		"deploy": false
-	},
-	"Liquidations": {
-		"deploy": false
-	},
 	"RewardEscrow": {
 		"deploy": false
 	},
@@ -291,6 +285,12 @@
 		"deploy": false
 	},
 	"FuturesMarketADA": {
+		"deploy": false
+	},
+	"Liquidator": {
+		"deploy": false
+	},
+	"LiquidatorRewards": {
 		"deploy": false
 	}
 }
