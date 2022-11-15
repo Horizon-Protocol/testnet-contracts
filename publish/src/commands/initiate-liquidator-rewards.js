@@ -336,6 +336,11 @@ const initiateLiquidatorRewards = async ({
 		.filter(l => l)
 		.map(l => JSON.parse(l.split(',')[0]));
 
+	console.log(
+		'********unFilteredAddresses updating entries for ',
+		unFilteredAddresses,
+		'addresses'
+	);
 	// Check for accounts with debt shares and add them to the `filteredAddresses` list.
 	await readMulticall(
 		unFilteredAddresses,
@@ -350,14 +355,15 @@ const initiateLiquidatorRewards = async ({
 		2000
 	);
 
-	console.log('updating entries for ', filteredAddresses.length, 'addresses');
+	console.log('filteredAddresses updating entries for ', filteredAddresses, 'addresses');
+	console.log('filteredAddresses updating entries for ', filteredAddresses.length, 'addresses');
 
 	// Update liquidator rewards entries for all stakers.
 	await readMulticall(
 		filteredAddresses,
 		a => LiquidatorRewards.populateTransaction.updateEntry(a),
 		(a, r) => {},
-		0, // 0 = READ; 1 = WRITE;
+		1, // 0 = READ; 1 = WRITE;
 		150 // L1 max size = ~200; L2 max size = ~150;
 	);
 
