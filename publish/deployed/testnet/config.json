@@ -222,7 +222,7 @@
 		"deploy": false
 	},
 	"ZassetzMATIC": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStatezXRP": {
 		"deploy": false
@@ -234,7 +234,7 @@
 		"deploy": false
 	},
 	"ZassetzDOGE": {
-		"deploy": false
+		"deploy": true
 	},
 	"SystemSettingsLib": {
 		"deploy": false
