@@ -43,15 +43,7 @@ interface IIssuerInternalDebtCache {
 
     function totalNonSnxBackedDebt() external view returns (uint excludedDebt, bool isInvalid);
 
-    function cacheInfo()
-        external
-        view
-        returns (
-            uint cachedDebt,
-            uint timestamp,
-            bool isInvalid,
-            bool isStale
-        );
+    function cacheInfo() external view returns (uint cachedDebt, uint timestamp, bool isInvalid, bool isStale);
 
     function updateCachedsUSDDebt(int amount) external;
 }
@@ -180,20 +172,14 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return ISystemStatus(requireAndGetAddress(CONTRACT_SYSTEMSTATUS));
     }
 
-    function allNetworksDebtInfo()
-        public
-        view
-        returns (
-            uint256 debt,
-            uint256 sharesSupply,
-            bool isStale
-        )
-    {
-        (, int256 rawIssuedSynths, , uint issuedSynthsUpdatedAt, ) =
-            AggregatorV2V3Interface(requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_ISSUED_SYNTHS)).latestRoundData();
+    function allNetworksDebtInfo() public view returns (uint256 debt, uint256 sharesSupply, bool isStale) {
+        (, int256 rawIssuedSynths, , uint issuedSynthsUpdatedAt, ) = AggregatorV2V3Interface(
+            requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_ISSUED_SYNTHS)
+        ).latestRoundData();
 
-        (, int256 rawRatio, , uint ratioUpdatedAt, ) =
-            AggregatorV2V3Interface(requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_DEBT_RATIO)).latestRoundData();
+        (, int256 rawRatio, , uint ratioUpdatedAt, ) = AggregatorV2V3Interface(
+            requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_DEBT_RATIO)
+        ).latestRoundData();
 
         debt = uint(rawIssuedSynths);
         sharesSupply = rawRatio == 0 ? 0 : debt.divideDecimalRoundPrecise(uint(rawRatio));
@@ -207,15 +193,15 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     }
 
     function _sharesForDebt(uint debtAmount) internal view returns (uint) {
-        (, int256 rawRatio, , , ) =
-            AggregatorV2V3Interface(requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_DEBT_RATIO)).latestRoundData();
+        (, int256 rawRatio, , , ) = AggregatorV2V3Interface(requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_DEBT_RATIO))
+            .latestRoundData();
 
         return rawRatio == 0 ? 0 : debtAmount.divideDecimalRoundPrecise(uint(rawRatio));
     }
 
     function _debtForShares(uint sharesAmount) internal view returns (uint) {
-        (, int256 rawRatio, , , ) =
-            AggregatorV2V3Interface(requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_DEBT_RATIO)).latestRoundData();
+        (, int256 rawRatio, , , ) = AggregatorV2V3Interface(requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_DEBT_RATIO))
+            .latestRoundData();
 
         return sharesAmount.multiplyDecimalRoundPrecise(uint(rawRatio));
     }
@@ -236,11 +222,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     // Returns the total value of the debt pool in currency specified by `currencyKey`.
     // To return only the HZN-backed debt, set `excludeCollateral` to true.
-    function _totalIssuedSynths(bytes32 currencyKey, bool excludeCollateral)
-        internal
-        view
-        returns (uint totalIssued, bool anyRateIsInvalid)
-    {
+    function _totalIssuedSynths(
+        bytes32 currencyKey,
+        bool excludeCollateral
+    ) internal view returns (uint totalIssued, bool anyRateIsInvalid) {
         (uint debt, , bool cacheIsInvalid, bool cacheIsStale) = debtCache().cacheInfo();
         anyRateIsInvalid = cacheIsInvalid || cacheIsStale;
 
@@ -261,15 +246,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return (debt.divideDecimalRound(currencyRate), anyRateIsInvalid || currencyRateInvalid);
     }
 
-    function _debtBalanceOfAndTotalDebt(uint debtShareBalance, bytes32 currencyKey)
-        internal
-        view
-        returns (
-            uint debtBalance,
-            uint totalSystemValue,
-            bool anyRateIsInvalid
-        )
-    {
+    function _debtBalanceOfAndTotalDebt(
+        uint debtShareBalance,
+        bytes32 currencyKey
+    ) internal view returns (uint debtBalance, uint totalSystemValue, bool anyRateIsInvalid) {
         // What's the total value of the system excluding ETH backed synths in their requested currency?
         (uint snxBackedAmount, , bool debtInfoStale) = allNetworksDebtInfo();
 
@@ -295,16 +275,9 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return flexibleStorage().getUIntValue(CONTRACT_NAME, keccak256(abi.encodePacked(LAST_ISSUE_EVENT, account)));
     }
 
-    function _remainingIssuableSynths(address _issuer)
-        internal
-        view
-        returns (
-            uint maxIssuable,
-            uint alreadyIssued,
-            uint totalSystemDebt,
-            bool anyRateIsInvalid
-        )
-    {
+    function _remainingIssuableSynths(
+        address _issuer
+    ) internal view returns (uint maxIssuable, uint alreadyIssued, uint totalSystemDebt, bool anyRateIsInvalid) {
         (alreadyIssued, totalSystemDebt, anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(
             synthetixDebtShare().balanceOf(_issuer),
             zUSD
@@ -340,8 +313,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     function _collateralisationRatio(address _issuer) internal view returns (uint, bool) {
         uint totalOwnedSynthetix = _collateral(_issuer);
 
-        (uint debtBalance, , bool anyRateIsInvalid) =
-            _debtBalanceOfAndTotalDebt(synthetixDebtShare().balanceOf(_issuer), HZN);
+        (uint debtBalance, , bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(
+            synthetixDebtShare().balanceOf(_issuer),
+            HZN
+        );
 
         // it's more gas intensive to put this check here if they have 0 HZN, but it complies with the interface
         if (totalOwnedSynthetix == 0) return (0, anyRateIsInvalid);
@@ -399,11 +374,9 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         (cratio, ) = _collateralisationRatio(_issuer);
     }
 
-    function collateralisationRatioAndAnyRatesInvalid(address _issuer)
-        external
-        view
-        returns (uint cratio, bool anyRateIsInvalid)
-    {
+    function collateralisationRatioAndAnyRatesInvalid(
+        address _issuer
+    ) external view returns (uint cratio, bool anyRateIsInvalid) {
         return _collateralisationRatio(_issuer);
     }
 
@@ -423,15 +396,9 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         (debtBalance, , ) = _debtBalanceOfAndTotalDebt(debtShareBalance, currencyKey);
     }
 
-    function remainingIssuableSynths(address _issuer)
-        external
-        view
-        returns (
-            uint maxIssuable,
-            uint alreadyIssued,
-            uint totalSystemDebt
-        )
-    {
+    function remainingIssuableSynths(
+        address _issuer
+    ) external view returns (uint maxIssuable, uint alreadyIssued, uint totalSystemDebt) {
         (maxIssuable, alreadyIssued, totalSystemDebt, ) = _remainingIssuableSynths(_issuer);
     }
 
@@ -440,11 +407,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return maxIssuable;
     }
 
-    function transferableSynthetixAndAnyRateIsInvalid(address account, uint balance)
-        external
-        view
-        returns (uint transferable, bool anyRateIsInvalid)
-    {
+    function transferableSynthetixAndAnyRateIsInvalid(
+        address account,
+        uint balance
+    ) external view returns (uint transferable, bool anyRateIsInvalid) {
         // How many HZN do they have, excluding escrow?
         // Note: We're excluding escrow here because we're interested in their transferable amount
         // and escrowed HZN are not transferable.
@@ -516,8 +482,11 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint synthSupply = IERC20(synthToRemove).totalSupply();
 
         if (synthSupply > 0) {
-            (uint amountOfzUSD, uint rateToRedeem, ) =
-                exchangeRates().effectiveValueAndRates(currencyKey, synthSupply, "zUSD");
+            (uint amountOfzUSD, uint rateToRedeem, ) = exchangeRates().effectiveValueAndRates(
+                currencyKey,
+                synthSupply,
+                "zUSD"
+            );
             require(rateToRedeem > 0, "Cannot remove synth to redeem without rate");
             ISynthRedeemer _synthRedeemer = synthRedeemer();
             synths[zUSD].issue(address(_synthRedeemer), amountOfzUSD);
@@ -644,11 +613,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         _issueSynths(from, 0, true);
     }
 
-    function issueSynthsOnBehalf(
-        address issueForAddress,
-        address from,
-        uint amount
-    ) external onlySynthetix {
+    function issueSynthsOnBehalf(address issueForAddress, address from, uint amount) external onlySynthetix {
         _requireCanIssueOnBehalf(issueForAddress, from);
         _issueSynths(issueForAddress, amount, false);
     }
@@ -662,11 +627,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         _voluntaryBurnSynths(from, amount, false);
     }
 
-    function burnSynthsOnBehalf(
-        address burnForAddress,
-        address from,
-        uint amount
-    ) external onlySynthetix {
+    function burnSynthsOnBehalf(address burnForAddress, address from, uint amount) external onlySynthetix {
         _requireCanBurnOnBehalf(burnForAddress, from);
         _voluntaryBurnSynths(burnForAddress, amount, false);
     }
@@ -680,11 +641,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         _voluntaryBurnSynths(burnForAddress, 0, true);
     }
 
-    function burnForRedemption(
-        address deprecatedSynthProxy,
-        address account,
-        uint balance
-    ) external onlySynthRedeemer {
+    function burnForRedemption(address deprecatedSynthProxy, address account, uint balance) external onlySynthRedeemer {
         ISynth(IProxy(deprecatedSynthProxy).target()).burn(account, balance);
     }
 
@@ -694,19 +651,20 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     /// @param isSelfLiquidation boolean to determine if this is a forced or self-invoked liquidation
     /// @return uint the total amount of collateral (SNX) to redeem
     /// @return uint the amount of debt (sUSD) to burn in order to fix the account's c-ratio
-    function liquidateAccount(address account, bool isSelfLiquidation)
-        external
-        onlySynthetix
-        returns (uint totalRedeemed, uint amountToLiquidate)
-    {
+    function liquidateAccount(
+        address account,
+        bool isSelfLiquidation
+    ) external onlySynthetix returns (uint totalRedeemed, uint amountToLiquidate) {
         require(liquidator().isLiquidationOpen(account, isSelfLiquidation), "Not open for liquidation");
 
         // Get the penalty for the liquidation type
-        uint penalty = isSelfLiquidation ? getSelfLiquidationPenalty() : getLiquidationPenalty();
+        uint penalty = isSelfLiquidation ? getSelfLiquidationPenalty() : getSnxLiquidationPenalty();
 
         // Get the account's debt balance
-        (uint debtBalance, , bool anyRateIsInvalid) =
-            _debtBalanceOfAndTotalDebt(synthetixDebtShare().balanceOf(account), zUSD);
+        (uint debtBalance, , bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(
+            synthetixDebtShare().balanceOf(account),
+            zUSD
+        );
 
         // Get the SNX rate
         (uint snxRate, bool snxRateInvalid) = exchangeRates().rateAndInvalid(HZN);
@@ -773,11 +731,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         require(delegateApprovals().canBurnFor(burnForAddress, from), "Not approved to act on behalf");
     }
 
-    function _issueSynths(
-        address from,
-        uint amount,
-        bool issueMax
-    ) internal {
+    function _issueSynths(address from, uint amount, bool issueMax) internal {
         // check breaker
         if (!_verifyCircuitBreaker()) {
             return;
@@ -835,11 +789,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     // If burning to target, `amount` is ignored, and the correct quantity of zUSD is burnt to reach the target
     // c-ratio, allowing fees to be claimed. In this case, pending settlements will be skipped as the user
     // will still have debt remaining after reaching their target.
-    function _voluntaryBurnSynths(
-        address from,
-        uint amount,
-        bool burnToTarget
-    ) internal {
+    function _voluntaryBurnSynths(address from, uint amount, bool burnToTarget) internal {
         // check breaker
         if (!_verifyCircuitBreaker()) {
             return;
@@ -855,8 +805,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             }
         }
 
-        (uint existingDebt, , bool anyRateIsInvalid) =
-            _debtBalanceOfAndTotalDebt(synthetixDebtShare().balanceOf(from), zUSD);
+        (uint existingDebt, , bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(
+            synthetixDebtShare().balanceOf(from),
+            zUSD
+        );
         (uint maxIssuableSynthsForAccount, bool snxRateInvalid) = _maxIssuableSynths(from);
         _requireRatesNotInvalid(anyRateIsInvalid || snxRateInvalid);
         require(existingDebt > 0, "No debt to forgive");
@@ -899,11 +851,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
     }
 
-    function _removeFromDebtRegister(
-        address from,
-        uint debtToRemove,
-        uint existingDebt
-    ) internal {
+    function _removeFromDebtRegister(address from, uint debtToRemove, uint existingDebt) internal {
         // important: this has to happen before any updates to user's debt shares
         liquidatorRewards().updateEntry(from);
 
@@ -920,8 +868,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     }
 
     function _verifyCircuitBreaker() internal returns (bool) {
-        (, int256 rawRatio, , , ) =
-            AggregatorV2V3Interface(requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_DEBT_RATIO)).latestRoundData();
+        (, int256 rawRatio, , , ) = AggregatorV2V3Interface(requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_DEBT_RATIO))
+            .latestRoundData();
 
         uint deviation = _calculateDeviation(lastDebtRatio, uint(rawRatio));
 

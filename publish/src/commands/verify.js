@@ -38,7 +38,7 @@ const verify = async ({ buildPath, deploymentPath, network, useOvm }) => {
 	});
 
 	// ensure that every contract in the flag file has a matching deployed address
-	const missingDeployments = Object.keys(config).filter(contractName => {
+	const missingDeployments = Object.keys(config).filter((contractName) => {
 		return !deployment.targets[contractName] || !deployment.targets[contractName].address;
 	});
 
@@ -70,6 +70,8 @@ const verify = async ({ buildPath, deploymentPath, network, useOvm }) => {
 				apikey: etherscanKey,
 			},
 		});
+
+		await new Promise((resolve) => setTimeout(resolve, 5000));
 
 		if (result.data.result === 'Contract source code not verified') {
 			const { source } = deployment.targets[name];
@@ -244,7 +246,7 @@ const verify = async ({ buildPath, deploymentPath, network, useOvm }) => {
 
 				if (status !== 'Pass - Verified') {
 					console.log(gray(' - Sleeping for 15 seconds and re-checking.'));
-					await new Promise(resolve => setTimeout(resolve, 15000));
+					await new Promise((resolve) => setTimeout(resolve, 15000));
 				} else {
 					console.log(green(` - Verified ${name}`));
 					tableData.push([name, address, 'Successfully verified']);
@@ -262,7 +264,7 @@ const verify = async ({ buildPath, deploymentPath, network, useOvm }) => {
 
 module.exports = {
 	verify,
-	cmd: program =>
+	cmd: (program) =>
 		program
 			.command('verify')
 			.description('Verify deployed sources on etherscan')
@@ -275,7 +277,7 @@ module.exports = {
 				'-d, --deployment-path <value>',
 				`Path to a folder that has your input configuration file ${CONFIG_FILENAME} and where your ${DEPLOYMENT_FILENAME} files will go`
 			)
-			.option('-n, --network <value>', 'The network to run off.', x => x.toLowerCase(), 'kovan')
+			.option('-n, --network <value>', 'The network to run off.', (x) => x.toLowerCase(), 'kovan')
 			.option('-z, --use-ovm', 'Target deployment for the OVM (Optimism).')
 			.action(verify),
 };

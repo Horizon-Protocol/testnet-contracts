@@ -72,10 +72,16 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
         return getLiquidationRatio();
     }
 
-    // SIP-15 Liquidations
-    // penalty taken away from target of liquidation (with 18 decimals). E.g. 10% is 0.1e18
+    // SIP-97 Liquidations
+    // penalty taken away from target of Collateral liquidation (with 18 decimals). E.g. 10% is 0.1e18
     function liquidationPenalty() external view returns (uint) {
         return getLiquidationPenalty();
+    }
+
+    // SIP-251 Differentiate Liquidation Penalties
+    // penalty taken away from target of SNX liquidation (with 18 decimals). E.g. 30% is 0.3e18
+    function snxLiquidationPenalty() external view returns (uint) {
+        return getSnxLiquidationPenalty();
     }
 
     /* ========== SIP-148: Upgrade Liquidation Mechanism ========== */
@@ -259,10 +265,10 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
 
     // ========== RESTRICTED ==========
 
-    function setCrossDomainMessageGasLimit(CrossDomainMessageGasLimits _gasLimitType, uint _crossDomainMessageGasLimit)
-        external
-        onlyOwner
-    {
+    function setCrossDomainMessageGasLimit(
+        CrossDomainMessageGasLimits _gasLimitType,
+        uint _crossDomainMessageGasLimit
+    ) external onlyOwner {
         flexibleStorage().setCrossDomainMessageGasLimit(_getGasLimitSetting(_gasLimitType), _crossDomainMessageGasLimit);
         emit CrossDomainMessageGasLimitChanged(_gasLimitType, _crossDomainMessageGasLimit);
     }
@@ -311,7 +317,7 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
         flexibleStorage().setLiquidationRatio(
             SETTING_LIQUIDATION_RATIO,
             _liquidationRatio,
-            getLiquidationPenalty(),
+            getSnxLiquidationPenalty(),
             getIssuanceRatio()
         );
         emit LiquidationRatioUpdated(_liquidationRatio);
@@ -320,6 +326,11 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     function setLiquidationEscrowDuration(uint duration) external onlyOwner {
         flexibleStorage().setUIntValue(SETTING_CONTRACT_NAME, SETTING_LIQUIDATION_ESCROW_DURATION, duration);
         emit LiquidationEscrowDurationUpdated(duration);
+    }
+
+    function setSnxLiquidationPenalty(uint penalty) external onlyOwner {
+        flexibleStorage().setSnxLiquidationPenalty(SETTING_SNX_LIQUIDATION_PENALTY, penalty);
+        emit SnxLiquidationPenaltyUpdated(penalty);
     }
 
     function setLiquidationPenalty(uint penalty) external onlyOwner {
@@ -348,10 +359,10 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     }
 
     /* ========== Exchange Fees Related ========== */
-    function setExchangeFeeRateForSynths(bytes32[] calldata synthKeys, uint256[] calldata exchangeFeeRates)
-        external
-        onlyOwner
-    {
+    function setExchangeFeeRateForSynths(
+        bytes32[] calldata synthKeys,
+        uint256[] calldata exchangeFeeRates
+    ) external onlyOwner {
         flexibleStorage().setExchangeFeeRateForSynths(SETTING_EXCHANGE_FEE_RATE, synthKeys, exchangeFeeRates);
         for (uint i = 0; i < synthKeys.length; i++) {
             emit ExchangeFeeUpdated(synthKeys[i], exchangeFeeRates[i]);
@@ -530,6 +541,7 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     event LiquidationRatioUpdated(uint newRatio);
     event LiquidationEscrowDurationUpdated(uint newDuration);
     event LiquidationPenaltyUpdated(uint newPenalty);
+    event SnxLiquidationPenaltyUpdated(uint newPenalty);
     event SelfLiquidationPenaltyUpdated(uint newPenalty);
     event FlagRewardUpdated(uint newReward);
     event LiquidateRewardUpdated(uint newReward);

@@ -19,6 +19,7 @@ contract MixinSystemSettings is MixinResolver {
     bytes32 internal constant SETTING_LIQUIDATION_RATIO = "liquidationRatio";
     bytes32 internal constant SETTING_LIQUIDATION_ESCROW_DURATION = "liquidationEscrowDuration";
     bytes32 internal constant SETTING_LIQUIDATION_PENALTY = "liquidationPenalty";
+    bytes32 internal constant SETTING_SNX_LIQUIDATION_PENALTY = "snxLiquidationPenalty";
     bytes32 internal constant SETTING_SELF_LIQUIDATION_PENALTY = "selfLiquidationPenalty";
     bytes32 internal constant SETTING_FLAG_REWARD = "flagReward";
     bytes32 internal constant SETTING_LIQUIDATE_REWARD = "liquidateReward";
@@ -59,7 +60,14 @@ contract MixinSystemSettings is MixinResolver {
 
     bytes32 internal constant CONTRACT_FLEXIBLESTORAGE = "FlexibleStorage";
 
-    enum CrossDomainMessageGasLimits {Deposit, Escrow, Reward, Withdrawal, CloseFeePeriod, Relay}
+    enum CrossDomainMessageGasLimits {
+        Deposit,
+        Escrow,
+        Reward,
+        Withdrawal,
+        CloseFeePeriod,
+        Relay
+    }
 
     struct DynamicFeeConfig {
         uint threshold;
@@ -142,6 +150,10 @@ contract MixinSystemSettings is MixinResolver {
 
     function getLiquidationPenalty() internal view returns (uint) {
         return flexibleStorage().getUIntValue(SETTING_CONTRACT_NAME, SETTING_LIQUIDATION_PENALTY);
+    }
+
+    function getSnxLiquidationPenalty() internal view returns (uint) {
+        return flexibleStorage().getUIntValue(SETTING_CONTRACT_NAME, SETTING_SNX_LIQUIDATION_PENALTY);
     }
 
     function getSelfLiquidationPenalty() internal view returns (uint) {

@@ -59,7 +59,7 @@ module.exports = async ({
 
 	const exchangeFeeRates = await getDeployParameter('EXCHANGE_FEE_RATES');
 
-	// update all synths with 0 current rate
+	// update all synths with 0 current rate, except zUSD
 	const synthsRatesToUpdate = synths
 		.map((synth, i) =>
 			Object.assign(
@@ -70,7 +70,8 @@ module.exports = async ({
 				synth
 			)
 		)
-		.filter(({ currentRate }) => currentRate === '0');
+		.filter(({ currentRate }) => currentRate === '0')
+		.filter(({ name }) => name !== 'zUSD'); // SCCP-190: zUSD rate is 0 despite it being in forex category
 
 	console.log(gray(`Found ${synthsRatesToUpdate.length} synths needs exchange rate pricing`));
 
@@ -134,7 +135,7 @@ module.exports = async ({
 		target: SystemSettings,
 		read: 'tradingRewardsEnabled',
 		readTarget: previousSystemSettings,
-		expected: input => input === tradingRewardsEnabled, // only change if non-default
+		expected: (input) => input === tradingRewardsEnabled, // only change if non-default
 		write: 'setTradingRewardsEnabled',
 		writeArg: tradingRewardsEnabled,
 		comment: 'Set the flag for trading rewards (SIP-63)',
@@ -210,7 +211,19 @@ module.exports = async ({
 		expected: allowZeroOrUpdateIfNonZero(liquidationPenalty),
 		write: 'setLiquidationPenalty',
 		writeArg: liquidationPenalty,
-		comment: 'Set the penalty amount a liquidator receives from a liquidated account',
+		comment: 'Set the penalty amount a liquidator receives from a liquidated Collateral loan',
+	});
+
+	const snxLiquidationPenalty = await getDeployParameter('SNX_LIQUIDATION_PENALTY');
+	await runStep({
+		contract: 'SystemSettings',
+		target: SystemSettings,
+		read: 'snxLiquidationPenalty',
+		readTarget: previousSystemSettings,
+		expected: allowZeroOrUpdateIfNonZero(snxLiquidationPenalty),
+		write: 'setSnxLiquidationPenalty',
+		writeArg: snxLiquidationPenalty,
+		comment: 'Set the penalty amount of HZN from a liquidated account',
 	});
 
 	if (SystemSettings.selfLiquidationPenalty) {
@@ -395,7 +408,7 @@ module.exports = async ({
 			target: SystemSettings,
 			read: 'aggregatorWarningFlags',
 			readTarget: previousSystemSettings,
-			expected: input => input !== ZERO_ADDRESS, // only change if zero
+			expected: (input) => input !== ZERO_ADDRESS, // only change if zero
 			write: 'setAggregatorWarningFlags',
 			writeArg: aggregatorWarningFlags,
 			comment: 'Set the aggregator warning address (SIP-76)',
@@ -526,7 +539,7 @@ module.exports = async ({
 				read: 'atomicEquivalentForDexPricing',
 				readArg: toBytes32(currencyKey),
 				readTarget: previousSystemSettings,
-				expected: input => input !== ZERO_ADDRESS, // only change if zero
+				expected: (input) => input !== ZERO_ADDRESS, // only change if zero
 				write: 'setAtomicEquivalentForDexPricing',
 				writeArg: [toBytes32(currencyKey), equivalent],
 				comment:
@@ -544,7 +557,7 @@ module.exports = async ({
 				read: 'atomicExchangeFeeRate',
 				readArg: toBytes32(currencyKey),
 				readTarget: previousSystemSettings,
-				expected: input => input !== 0, // only change if zero
+				expected: (input) => input !== 0, // only change if zero
 				write: 'setAtomicExchangeFeeRate',
 				writeArg: [toBytes32(currencyKey), rate],
 				comment: 'SIP-120 Set the exchange fee rate for swapping atomically into this synth',
@@ -563,7 +576,7 @@ module.exports = async ({
 				read: 'atomicVolatilityConsiderationWindow',
 				readArg: toBytes32(currencyKey),
 				readTarget: previousSystemSettings,
-				expected: input => input !== 0, // only change if zero
+				expected: (input) => input !== 0, // only change if zero
 				write: 'setAtomicVolatilityConsiderationWindow',
 				writeArg: [toBytes32(currencyKey), seconds],
 				comment: 'SIP-120 Set the atomic volatility window for this synth (in seconds)',
@@ -582,7 +595,7 @@ module.exports = async ({
 				read: 'atomicVolatilityUpdateThreshold',
 				readArg: toBytes32(currencyKey),
 				readTarget: previousSystemSettings,
-				expected: input => input !== 0, // only change if zero
+				expected: (input) => input !== 0, // only change if zero
 				write: 'setAtomicVolatilityUpdateThreshold',
 				writeArg: [toBytes32(currencyKey), threshold],
 				comment:
@@ -598,7 +611,7 @@ module.exports = async ({
 			contract: `ExchangeRates`,
 			target: ExchangeRates,
 			read: 'dexPriceAggregator',
-			expected: input => input === dexPriceAggregator,
+			expected: (input) => input === dexPriceAggregator,
 			write: 'setDexPriceAggregator',
 			writeArg: dexPriceAggregator,
 			comment: 'SIP-120 Set the DEX price aggregator (uniswap TWAP oracle reader)',

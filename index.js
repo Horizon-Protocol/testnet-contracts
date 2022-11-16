@@ -97,21 +97,14 @@ const defaults = {
 	WAITING_PERIOD_SECS: (60 * 5).toString(), // 5 mins
 	PRICE_DEVIATION_THRESHOLD_FACTOR: w3utils.toWei('3'),
 	TRADING_REWARDS_ENABLED: false,
-	ISSUANCE_RATIO: w3utils
-		.toBN(1)
-		.mul(w3utils.toBN(1e18))
-		.div(w3utils.toBN(3))
-		.toString(), // 1/3 = 0.3333333333  // 300% ratio
+	ISSUANCE_RATIO: w3utils.toBN(1).mul(w3utils.toBN(1e18)).div(w3utils.toBN(3)).toString(), // 1/3 = 0.3333333333  // 300% ratio
 	FEE_PERIOD_DURATION: (3600 * 24 * 7).toString(), // 1 week
 	TARGET_THRESHOLD: '1', // 1% target threshold (it will be converted to a decimal when set)
 	LIQUIDATION_DELAY: (3600 * 24).toString(), // 24 hours
-	LIQUIDATION_RATIO: w3utils
-		.toBN(1)
-		.mul(w3utils.toBN(2e18))
-		.div(w3utils.toBN(3))
-		.toString(), // 2/3 = 0.6666666667 // 150% ratio
+	LIQUIDATION_RATIO: w3utils.toBN(1).mul(w3utils.toBN(2e18)).div(w3utils.toBN(3)).toString(), // 2/3 = 0.6666666667 // 150% ratio
 	LIQUIDATION_ESCROW_DURATION: (3600 * 24 * 365).toString(), // 1 year
-	LIQUIDATION_PENALTY: w3utils.toWei('0.3'), // 30% penalty
+	LIQUIDATION_PENALTY: w3utils.toWei('0.1'), // 10% penalty (used for Collateral liquidations)
+	SNX_LIQUIDATION_PENALTY: w3utils.toWei('0.3'), // 30% penalty (used for SNX Liquidations)
 	SELF_LIQUIDATION_PENALTY: w3utils.toWei('0.2'), // 20% penalty
 	FLAG_REWARD: w3utils.toWei('10'), // 10 HZN
 	LIQUIDATE_REWARD: w3utils.toWei('20'), // 20 HZN
@@ -195,8 +188,8 @@ const defaults = {
 /**
  * Converts a string into a hex representation of bytes32, with right padding
  */
-const toBytes32 = key => w3utils.rightPad(w3utils.asciiToHex(key), 64);
-const fromBytes32 = key => w3utils.hexToAscii(key);
+const toBytes32 = (key) => w3utils.rightPad(w3utils.asciiToHex(key), 64);
+const fromBytes32 = (key) => w3utils.hexToAscii(key);
 
 const getFolderNameForNetwork = ({ network, useOvm = false }) => {
 	if (network.includes('ovm')) {
@@ -367,7 +360,7 @@ const getSynths = ({
 	const feeds = getFeeds({ network, useOvm, path, fs, deploymentPath });
 
 	// copy all necessary index parameters from the longs to the corresponding shorts
-	return synths.map(synth => {
+	return synths.map((synth) => {
 		// mixin the asset details
 		synth = Object.assign({}, assets[synth.asset], synth);
 
@@ -389,7 +382,7 @@ const getSynths = ({
 		}
 
 		if (synth.index) {
-			synth.index = synth.index.map(indexEntry => {
+			synth.index = synth.index.map((indexEntry) => {
 				return Object.assign({}, assets[indexEntry.asset], indexEntry);
 			});
 		}
@@ -424,7 +417,7 @@ const getFuturesMarkets = ({
 		}
 	}
 
-	return futuresMarkets.map(futuresMarket => {
+	return futuresMarkets.map((futuresMarket) => {
 		/**
 		 * We expect the asset key to not start with an 's'. ie. AVAX rather than sAVAX
 		 * Unfortunately due to some historical reasons 'sBTC', 'sETH' and 'sLINK' does not follow this format
@@ -528,9 +521,9 @@ const getUsers = ({ network = 'mainnet', user, useOvm = false } = {}) => {
 		}),
 	};
 
-	const users = Object.entries(
-		map[getFolderNameForNetwork({ network, useOvm })]
-	).map(([key, value]) => ({ name: key, address: value }));
+	const users = Object.entries(map[getFolderNameForNetwork({ network, useOvm })]).map(
+		([key, value]) => ({ name: key, address: value })
+	);
 
 	return user ? users.find(({ name }) => name === user) : users;
 };
@@ -611,7 +604,7 @@ const getTokens = ({ network = 'mainnet', path, fs, useOvm = false } = {}) => {
 	].concat(
 		synths
 			.filter(({ category }) => category !== 'internal')
-			.map(synth => ({
+			.map((synth) => ({
 				symbol: synth.name,
 				asset: synth.asset,
 				name: synth.description,
