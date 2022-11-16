@@ -66,7 +66,9 @@ const deploy = async ({
 	manageNonces,
 	network = DEFAULTS.network,
 	privateKey,
+	signer,
 	providerUrl,
+	provider,
 	skipFeedChecks = false,
 	specifyContracts,
 	useFork,
@@ -97,17 +99,17 @@ const deploy = async ({
 
 	const getDeployParameter = getDeployParameterFactory({ params, ignoreCustomParameters });
 
-	const addressOf = c => (c ? c.address : '');
-	const sourceOf = c => (c ? c.source : '');
+	const addressOf = (c) => (c ? c.address : '');
+	const sourceOf = (c) => (c ? c.source : '');
 
 	// Mark contracts for deployment specified via an argument
 	if (specifyContracts) {
 		// Ignore config.json
-		Object.keys(config).map(name => {
+		Object.keys(config).map((name) => {
 			config[name].deploy = false;
 		});
 		// Add specified contracts
-		specifyContracts.split(',').map(name => {
+		specifyContracts.split(',').map((name) => {
 			if (!config[name]) {
 				config[name] = {
 					deploy: true,
@@ -134,7 +136,7 @@ const deploy = async ({
 	console.log(
 		gray('Checking all contracts not flagged for deployment have addresses in this network...')
 	);
-	const missingDeployments = Object.keys(config).filter(name => {
+	const missingDeployments = Object.keys(config).filter((name) => {
 		return !config[name].deploy && (!deployment.targets[name] || !deployment.targets[name].address);
 	});
 
@@ -150,23 +152,11 @@ const deploy = async ({
 	console.log(gray('Loading the compiled contracts locally...'));
 	const { earliestCompiledTimestamp, compiled } = loadCompiledFiles({ buildPath });
 
-	const {
-		providerUrl: envProviderUrl,
-		privateKey: envPrivateKey,
-		explorerLinkPrefix,
-	} = loadConnections({
+	const { privateKey: envPrivateKey, explorerLinkPrefix } = loadConnections({
 		network,
 		useFork,
 		useOvm,
 	});
-
-	if (!providerUrl) {
-		if (!envProviderUrl) {
-			throw new Error('Missing .env key of PROVIDER_URL. Please add and retry.');
-		}
-
-		providerUrl = envProviderUrl;
-	}
 
 	// Here we set a default private key for local-ovm deployment, as the
 	// OVM geth node has no notion of local/unlocked accounts.
@@ -187,6 +177,7 @@ const deploy = async ({
 	const nonceManager = new NonceManager({});
 
 	const deployer = new Deployer({
+		account: signer ? await signer.getAddress() : null,
 		compiled,
 		config,
 		configFile,
@@ -196,46 +187,48 @@ const deploy = async ({
 		maxPriorityFeePerGas,
 		network,
 		privateKey,
+		signer,
 		providerUrl,
+		provider,
 		dryRun,
 		useOvm,
 		useFork,
 		nonceManager: manageNonces ? nonceManager : undefined,
 	});
 
-	const { account, signer } = deployer;
+	const { account } = deployer;
+
+	if (!account) {
+		signer = deployer.signer;
+	}
 
 	nonceManager.provider = deployer.provider;
 	nonceManager.account = account;
 
-	const {
-		currentSynthetixSupply,
-		currentLastMintEvent,
-		currentWeekOfInflation,
-		systemSuspended,
-	} = await systemAndParameterCheck({
-		account,
-		buildPath,
-		addNewSynths,
-		concurrency,
-		config,
-		deployer,
-		deploymentPath,
-		dryRun,
-		earliestCompiledTimestamp,
-		freshDeploy,
-		maxFeePerGas,
-		maxPriorityFeePerGas,
-		getDeployParameter,
-		network,
-		providerUrl,
-		skipFeedChecks,
-		feeds,
-		synths,
-		useFork,
-		useOvm,
-		yes,
-	});
+	const { currentSynthetixSupply, currentLastMintEvent, currentWeekOfInflation, systemSuspended } =
+		await systemAndParameterCheck({
+			account,
+			buildPath,
+			addNewSynths,
+			concurrency,
+			config,
+			deployer,
+			deploymentPath,
+			dryRun,
+			earliestCompiledTimestamp,
+			freshDeploy,
+			maxFeePerGas,
+			maxPriorityFeePerGas,
+			getDeployParameter,
+			network,
+			skipFeedChecks,
+			feeds,
+			synths,
+			providerUrl,
+			useFork,
+			useOvm,
+			yes,
+		});
 
 	console.log(
 		gray(`Starting deployment to ${network.toUpperCase()}${useFork ? ' (fork)' : ''}...`)
@@ -244,7 +237,7 @@ const deploy = async ({
 	// track for use with solidity output
 	const runSteps = [];
 
-	const runStep = async opts => {
+	const runStep = async (opts) => {
 		const { noop, ...rest } = await performTransactionalStep({
 			...opts,
 			signer,
@@ -468,7 +461,7 @@ const deploy = async ({
 module.exports = {
 	deploy,
 	DEFAULTS,
-	cmd: program =>
+	cmd: (program) =>
 		program
 			.command('deploy')
 			.description('Deploy compiled solidity files')
@@ -528,7 +521,7 @@ module.exports = {
 			.option(
 				'-n, --network <value>',
 				'The network to run off.',
-				x => x.toLowerCase(),
+				(x) => x.toLowerCase(),
 				DEFAULTS.network
 			)
 			.option(

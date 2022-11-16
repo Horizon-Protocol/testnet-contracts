@@ -250,8 +250,8 @@ const liquidatorRewardsRestitution = async ({
 	const csvObjects = await csvToJSON(csvAsString);
 	const filteredObjects = [];
 	csvObjects
-		.filter(v => v)
-		.forEach(obj => {
+		.filter((v) => v)
+		.forEach((obj) => {
 			if (
 				obj.escrow !== undefined &&
 				ethers.BigNumber.from(obj.escrow).gt(ethers.utils.parseEther(threshold))
@@ -270,7 +270,7 @@ const liquidatorRewardsRestitution = async ({
 		];
 		await readMulticall(
 			txns,
-			v => v,
+			(v) => v,
 			() => {},
 			0,
 			1
@@ -285,7 +285,7 @@ const liquidatorRewardsRestitution = async ({
 		let totalAmountEscrowed = new ethers.BigNumber.from(0);
 		await readMulticall(
 			filteredObjects,
-			a =>
+			(a) =>
 				RewardEscrowV2.populateTransaction.createEscrowEntry(
 					a.address,
 					ethers.BigNumber.from(a.escrow),
@@ -366,13 +366,13 @@ const liquidatorRewardsRestitution = async ({
 
 module.exports = {
 	liquidatorRewardsRestitution,
-	cmd: program =>
+	cmd: (program) =>
 		program
 			.command('liquidator-rewards-restitution')
 			.description('Restore liquidator rewards')
 			.option('-g, --max-fee-per-gas <value>', 'Maximum base gas fee price in GWEI')
 			.option('--max-priority-fee-per-gas <value>', 'Priority gas fee price in GWEI', '2')
-			.option('-n, --network <value>', 'The network to run off.', x => x.toLowerCase(), 'kovan')
+			.option('-n, --network <value>', 'The network to run off.', (x) => x.toLowerCase(), 'testnet')
 			.option(
 				'-k, --use-fork',
 				'Perform the deployment on a forked chain running on localhost (see fork command).',

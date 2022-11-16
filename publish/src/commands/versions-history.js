@@ -47,18 +47,19 @@ const versionsHistory = async ({ network, deploymentPath }) => {
 	const fields = ['tag', 'date', 'commit', 'contract', 'address', 'status', 'replacedIn'];
 
 	let content = fields.join(','); // headers
-	content += '\n' + entries.map(entry => fields.map(field => entry[field]).join(',')).join('\n');
+	content +=
+		'\n' + entries.map((entry) => fields.map((field) => entry[field]).join(',')).join('\n');
 	console.log = oldLogger;
 	console.log(content);
 };
 
 module.exports = {
 	versionsHistory,
-	cmd: program =>
+	cmd: (program) =>
 		program
 			.command('versions-history')
 			.description('Output version history of a network in a CSV format')
-			.option('-n, --network <value>', 'The network to run off.', x => x.toLowerCase(), 'kovan')
+			.option('-n, --network <value>', 'The network to run off.', (x) => x.toLowerCase(), 'testnet')
 			.option(
 				'-d, --deployment-path <value>',
 				`Path to a folder that has your input configuration file ${CONFIG_FILENAME} and where your ${DEPLOYMENT_FILENAME} files will go`

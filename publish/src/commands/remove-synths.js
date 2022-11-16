@@ -24,7 +24,7 @@ const {
 const { performTransactionalStep } = require('../command-utils/transact');
 
 const DEFAULTS = {
-	network: 'kovan',
+	network: 'testnet',
 	gasLimit: 3e5,
 	priorityGasPrice: '1',
 };
@@ -77,7 +77,11 @@ const removeSynths = async ({
 		}
 	}
 
-	const { providerUrl, privateKey: envPrivateKey, explorerLinkPrefix } = loadConnections({
+	const {
+		providerUrl,
+		privateKey: envPrivateKey,
+		explorerLinkPrefix,
+	} = loadConnections({
 		network,
 		useFork,
 	});
@@ -157,9 +161,8 @@ const removeSynths = async ({
 	let updatedSynths = JSON.parse(fs.readFileSync(synthsFile));
 
 	for (const currencyKey of synthsToRemove) {
-		const { address: synthAddress, source: synthSource } = deployment.targets[
-			`Zasset${currencyKey}`
-		];
+		const { address: synthAddress, source: synthSource } =
+			deployment.targets[`Zasset${currencyKey}`];
 		const { abi: synthABI } = deployment.sources[synthSource];
 		const Synth = new ethers.Contract(synthAddress, synthABI, wallet);
 
@@ -223,7 +226,7 @@ const removeSynths = async ({
 			});
 
 			// now update the config and deployment JSON files
-			const contracts = ['Proxy', 'TokenState', 'Synth'].map(name => `${name}${currencyKey}`);
+			const contracts = ['Proxy', 'TokenState', 'Synth'].map((name) => `${name}${currencyKey}`);
 			for (const contract of contracts) {
 				delete updatedConfig[contract];
 				delete updatedDeployment.targets[contract];
@@ -246,7 +249,7 @@ const removeSynths = async ({
 				target: ExchangeRates,
 				read: 'aggregators',
 				readArg: toBytes32(currencyKey),
-				expected: input => input === ZERO_ADDRESS,
+				expected: (input) => input === ZERO_ADDRESS,
 				write: 'removeAggregator',
 				writeArg: toBytes32(currencyKey),
 				gasLimit,
@@ -267,7 +270,7 @@ const removeSynths = async ({
 				target: SystemStatus,
 				read: 'synthSuspension',
 				readArg: toBytes32(currencyKey),
-				expected: input => !input.suspended,
+				expected: (input) => !input.suspended,
 				write: 'resumeSynth',
 				writeArg: toBytes32(currencyKey),
 				gasLimit,
@@ -282,7 +285,7 @@ const removeSynths = async ({
 
 module.exports = {
 	removeSynths,
-	cmd: program =>
+	cmd: (program) =>
 		program
 			.command('remove-synths')
 			.description('Remove a number of synths from the system')
@@ -297,7 +300,7 @@ module.exports = {
 				DEFAULTS.priorityGasPrice
 			)
 			.option('-l, --gas-limit <value>', 'Gas limit', 1e6)
-			.option('-n, --network <value>', 'The network to run off.', x => x.toLowerCase(), 'kovan')
+			.option('-n, --network <value>', 'The network to run off.', (x) => x.toLowerCase(), 'testnet')
 			.option('-r, --dry-run', 'Dry run - no changes transacted')
 			.option(
 				'-k, --use-fork',

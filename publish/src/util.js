@@ -40,16 +40,21 @@ const {
 
 const { networks } = require('../..');
 const JSONreplacer = (key, value) => {
-	if (typeof value === 'object' && value.type && value.type === 'BigNumber') {
+	if (
+		typeof value === 'object' &&
+		value.type &&
+		value.type === 'BigNumber' &&
+		!Array.isArray(value)
+	) {
 		return BigNumber.from(value).toString();
 	}
 	return value;
 };
-const stringify = input => JSON.stringify(input, JSONreplacer, '\t') + '\n';
+const stringify = (input) => JSON.stringify(input, JSONreplacer, '\t') + '\n';
 
-const allowZeroOrUpdateIfNonZero = param => input => param === '0' || input !== '0';
+const allowZeroOrUpdateIfNonZero = (param) => (input) => param === '0' || input !== '0';
 
-const ensureNetwork = network => {
+const ensureNetwork = (network) => {
 	if (!networks.includes(network)) {
 		throw Error(
 			`Invalid network name of "${network}" supplied. Must be one of ${networks.join(', ')}.`
@@ -62,7 +67,7 @@ const getDeploymentPathForNetwork = ({ network, useOvm }) => {
 	return getPathToNetwork({ network, useOvm });
 };
 
-const ensureDeploymentPath = deploymentPath => {
+const ensureDeploymentPath = (deploymentPath) => {
 	if (!fs.existsSync(deploymentPath)) {
 		throw Error(
 			`Invalid deployment path. Please provide a folder with a compatible ${CONFIG_FILENAME}`
@@ -183,35 +188,32 @@ const loadConnections = ({ network, useFork, useOvm }) => {
 	return { providerUrl, privateKey, etherscanUrl, explorerLinkPrefix };
 };
 
-const confirmAction = prompt =>
+const confirmAction = (prompt) =>
 	new Promise((resolve, reject) => {
 		const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
-		rl.question(prompt, answer => {
+		rl.question(prompt, (answer) => {
 			if (/y|Y/.test(answer)) resolve();
 			else reject(Error('Not confirmed'));
 			rl.close();
 		});
 	});
 
-const appendOwnerActionGenerator = ({ ownerActions, ownerActionsFile, explorerLinkPrefix }) => ({
-	key,
-	action,
-	target,
-	data,
-}) => {
-	ownerActions[key] = {
-		target,
-		action,
-		complete: false,
-		link: `${explorerLinkPrefix}/address/${target}#writeContract`,
-		data,
+const appendOwnerActionGenerator =
+	({ ownerActions, ownerActionsFile, explorerLinkPrefix }) =>
+	({ key, action, target, data }) => {
+		ownerActions[key] = {
+			target,
+			action,
+			complete: false,
+			link: `${explorerLinkPrefix}/address/${target}#writeContract`,
+			data,
+		};
+		fs.writeFileSync(ownerActionsFile, stringify(ownerActions));
+		console.log(cyan(`Cannot invoke ${key} as not owner. Appended to actions.`));
 	};
-	fs.writeFileSync(ownerActionsFile, stringify(ownerActions));
-	console.log(cyan(`Cannot invoke ${key} as not owner. Appended to actions.`));
-};
 
-const parameterNotice = props => {
+const parameterNotice = (props) => {
 	console.log(gray('-'.repeat(50)));
 	console.log('Please check the following parameters are correct:');
 	console.log(gray('-'.repeat(50)));

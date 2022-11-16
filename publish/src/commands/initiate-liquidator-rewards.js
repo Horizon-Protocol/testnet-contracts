@@ -68,16 +68,14 @@ const initiateLiquidatorRewards = async ({
 
 	// Instantiate Debt Share contract
 	const { address: debtSharesAddress } = deployment.targets['SynthetixDebtShare'];
-	const { abi: debtSharesABI } = deployment.sources[
-		deployment.targets['SynthetixDebtShare'].source
-	];
+	const { abi: debtSharesABI } =
+		deployment.sources[deployment.targets['SynthetixDebtShare'].source];
 	const SynthetixDebtShare = new ethers.Contract(debtSharesAddress, debtSharesABI, signer);
 
 	// Instantiate Liquidator Rewards contract
 	const { address: liquidatorRewardsAddress } = deployment.targets['LiquidatorRewards'];
-	const { abi: liquidatorRewardsABI } = deployment.sources[
-		deployment.targets['LiquidatorRewards'].source
-	];
+	const { abi: liquidatorRewardsABI } =
+		deployment.sources[deployment.targets['LiquidatorRewards'].source];
 	const LiquidatorRewards = new ethers.Contract(
 		liquidatorRewardsAddress,
 		liquidatorRewardsABI,
@@ -333,8 +331,8 @@ const initiateLiquidatorRewards = async ({
 	// Filter out unwanted text
 	const unFilteredAddresses = lines
 		.slice(1)
-		.filter(l => l)
-		.map(l => JSON.parse(l.split(',')[0]));
+		.filter((l) => l)
+		.map((l) => JSON.parse(l.split(',')[0]));
 
 	console.log(
 		'********unFilteredAddresses updating entries for ',
@@ -344,7 +342,7 @@ const initiateLiquidatorRewards = async ({
 	// Check for accounts with debt shares and add them to the `filteredAddresses` list.
 	await readMulticall(
 		unFilteredAddresses,
-		a => SynthetixDebtShare.populateTransaction.balanceOf(a),
+		(a) => SynthetixDebtShare.populateTransaction.balanceOf(a),
 		(a, r) => {
 			const output = ethers.utils.defaultAbiCoder.decode(['uint256'], r.returnData);
 			if (output[0].gt(0)) {
@@ -361,7 +359,7 @@ const initiateLiquidatorRewards = async ({
 	// Update liquidator rewards entries for all stakers.
 	await readMulticall(
 		filteredAddresses,
-		a => LiquidatorRewards.populateTransaction.updateEntry(a),
+		(a) => LiquidatorRewards.populateTransaction.updateEntry(a),
 		(a, r) => {},
 		1, // 0 = READ; 1 = WRITE;
 		150 // L1 max size = ~200; L2 max size = ~150;
@@ -412,13 +410,13 @@ const initiateLiquidatorRewards = async ({
 
 module.exports = {
 	initiateLiquidatorRewards,
-	cmd: program =>
+	cmd: (program) =>
 		program
 			.command('initiate-liquidator-rewards')
 			.description('Initialize entries for liquidator rewards')
 			.option('-g, --max-fee-per-gas <value>', 'Maximum base gas fee price in GWEI')
 			.option('--max-priority-fee-per-gas <value>', 'Priority gas fee price in GWEI', '2')
-			.option('-n, --network <value>', 'The network to run off.', x => x.toLowerCase(), 'kovan')
+			.option('-n, --network <value>', 'The network to run off.', (x) => x.toLowerCase(), 'testnet')
 			.option(
 				'-k, --use-fork',
 				'Perform the deployment on a forked chain running on localhost (see fork command).',

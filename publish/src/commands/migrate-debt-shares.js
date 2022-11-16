@@ -79,9 +79,8 @@ const migrateDebtShares = async ({
 	console.log(gray(`Using account with public key ${signer.address}`));
 
 	const { address: debtSharesAddress } = deployment.targets['SynthetixDebtShare'];
-	const { abi: debtSharesABI } = deployment.sources[
-		deployment.targets['SynthetixDebtShare'].source
-	];
+	const { abi: debtSharesABI } =
+		deployment.sources[deployment.targets['SynthetixDebtShare'].source];
 	const SynthetixDebtShare = new ethers.Contract(debtSharesAddress, debtSharesABI, signer);
 
 	// get a list of addresses
@@ -138,8 +137,8 @@ const migrateDebtShares = async ({
 	for (let i = 0; i < addressCollateralAmounts.length; i += batchSize) {
 		const batch = addressCollateralAmounts.slice(i, i + batchSize);
 
-		const addrs = batch.map(a => a.address);
-		const amounts = batch.map(a => a.debtBalanceOf);
+		const addrs = batch.map((a) => a.address);
+		const amounts = batch.map((a) => a.debtBalanceOf);
 
 		console.log('write action for import of addresses', i, 'through', i + batchSize);
 
@@ -162,13 +161,13 @@ const migrateDebtShares = async ({
 
 module.exports = {
 	migrateDebtShares,
-	cmd: program =>
+	cmd: (program) =>
 		program
 			.command('migrate-debt-shares')
 			.description('Migrate to Debt Shares from debtLedger')
 			.option('-g, --max-fee-per-gas <value>', 'Maximum base gas fee price in GWEI')
 			.option('--max-priority-fee-per-gas <value>', 'Priority gas fee price in GWEI', '2')
-			.option('-n, --network <value>', 'The network to run off.', x => x.toLowerCase(), 'kovan')
+			.option('-n, --network <value>', 'The network to run off.', (x) => x.toLowerCase(), 'testnet')
 			.option(
 				'-k, --use-fork',
 				'Perform the deployment on a forked chain running on localhost (see fork command).',

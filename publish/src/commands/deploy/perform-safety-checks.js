@@ -13,25 +13,20 @@ module.exports = ({
 	useOvm,
 }) => {
 	if (!ignoreSafetyChecks) {
-		// Using Goerli without manageNonces?
-		if (network.toLowerCase() === 'goerli' && !useOvm && !manageNonces) {
-			throw new Error(`Deploying on Goerli needs to be performed with --manage-nonces.`);
-		}
-
 		// Cannot re-deploy legacy contracts
 		if (!freshDeploy) {
 			// Get list of contracts to be deployed
 			const contractsToDeploy = [];
-			Object.keys(config).map(contractName => {
+			Object.keys(config).map((contractName) => {
 				if (config[contractName].deploy) {
 					contractsToDeploy.push(contractName);
 				}
 			});
 
 			// Check that no non-deployable is marked for deployment.
-			// Note: if nonDeployable = 'TokenState', this will match 'TokenStatezUSD'
-			nonUpgradeable.map(nonUpgradeableContract => {
-				contractsToDeploy.map(contractName => {
+			// Note: if nonDeployable = 'TokenState', this will match 'TokenStatesUSD'
+			nonUpgradeable.map((nonUpgradeableContract) => {
+				contractsToDeploy.map((contractName) => {
 					if (contractName.match(new RegExp(`^${nonUpgradeableContract}`, 'g'))) {
 						throw new Error(
 							`You are attempting to deploy a contract marked as non-upgradeable: ${contractName}. This action could result in loss of state. Please verify and use --ignore-safety-checks if you really know what you're doing.`

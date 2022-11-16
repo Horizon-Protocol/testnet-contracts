@@ -48,16 +48,11 @@ const replaceSynths = async ({
 
 	const { getTarget } = wrap({ network, fs, path });
 
-	const {
-		configFile,
-		synths,
-		synthsFile,
-		deployment,
-		deploymentFile,
-	} = loadAndCheckRequiredSources({
-		deploymentPath,
-		network,
-	});
+	const { configFile, synths, synthsFile, deployment, deploymentFile } =
+		loadAndCheckRequiredSources({
+			deploymentPath,
+			network,
+		});
 
 	if (synthsToReplace.length < 1) {
 		console.log(yellow('No zassets provided. Please use --synths-to-replace option'));
@@ -73,8 +68,8 @@ const replaceSynths = async ({
 	const compiledSourcePath = path.join(buildPath, COMPILED_FOLDER);
 	const foundSourceFileForSubclass = fs
 		.readdirSync(compiledSourcePath)
-		.filter(name => /^.+\.json$/.test(name))
-		.find(entry => new RegExp(`^${subclass}.json$`).test(entry));
+		.filter((name) => /^.+\.json$/.test(name))
+		.find((entry) => new RegExp(`^${subclass}.json$`).test(entry));
 
 	if (!foundSourceFileForSubclass) {
 		console.log(
@@ -96,7 +91,11 @@ const replaceSynths = async ({
 		}
 	}
 
-	const { providerUrl, privateKey: envPrivateKey, explorerLinkPrefix } = loadConnections({
+	const {
+		providerUrl,
+		privateKey: envPrivateKey,
+		explorerLinkPrefix,
+	} = loadConnections({
 		network,
 	});
 
@@ -139,16 +138,13 @@ const replaceSynths = async ({
 	);
 
 	// convert the list of synths into a list of deployed contracts
-	const deployedSynths = synthsToReplace.map(currencyKey => {
-		const { address: synthAddress, source: synthSource } = deployment.targets[
-			`Zasset${currencyKey}`
-		];
-		const { address: proxyAddress, source: proxySource } = deployment.targets[
-			`Proxy${currencyKey}`
-		];
-		const { address: tokenStateAddress, source: tokenStateSource } = deployment.targets[
-			`TokenState${currencyKey}`
-		];
+	const deployedSynths = synthsToReplace.map((currencyKey) => {
+		const { address: synthAddress, source: synthSource } =
+			deployment.targets[`Zasset${currencyKey}`];
+		const { address: proxyAddress, source: proxySource } =
+			deployment.targets[`Proxy${currencyKey}`];
+		const { address: tokenStateAddress, source: tokenStateSource } =
+			deployment.targets[`TokenState${currencyKey}`];
 
 		const { abi: synthABI } = deployment.sources[synthSource];
 		const { abi: tokenStateABI } = deployment.sources[tokenStateSource];
@@ -192,7 +188,7 @@ const replaceSynths = async ({
 						'⚠ WARNING'
 					)}: This action will replace the following synths into ${subclass} on ${network}:\n- ${synthsToReplace
 						.map(
-							synth =>
+							(synth) =>
 								synth + ' (totalSupply of: ' + ethers.utils.formatEther(totalSupplies[synth]) + ')'
 						)
 						.join('\n- ')}`
@@ -211,7 +207,7 @@ const replaceSynths = async ({
 	const resolverAddress = await Issuer.resolver();
 	const updatedSynths = JSON.parse(fs.readFileSync(synthsFile));
 
-	const runStep = async opts =>
+	const runStep = async (opts) =>
 		performTransactionalStep({
 			...opts,
 			deployer,
@@ -229,7 +225,7 @@ const replaceSynths = async ({
 			contract: synthContractName,
 			target: Synth,
 			read: 'totalSupply',
-			expected: input => input === '0',
+			expected: (input) => input === '0',
 			write: 'setTotalSupply',
 			writeArg: '0',
 		});
@@ -240,7 +236,7 @@ const replaceSynths = async ({
 			target: Issuer,
 			read: 'synths',
 			readArg: currencyKeyInBytes,
-			expected: input => input === ZERO_ADDRESS,
+			expected: (input) => input === ZERO_ADDRESS,
 			write: 'removeSynth',
 			writeArg: currencyKeyInBytes,
 		});
@@ -279,7 +275,7 @@ const replaceSynths = async ({
 			target: Issuer,
 			read: 'synths',
 			readArg: currencyKeyInBytes,
-			expected: input => input === replacementSynth.address,
+			expected: (input) => input === replacementSynth.address,
 			write: 'addSynth',
 			writeArg: replacementSynth.address,
 		});
@@ -289,7 +285,7 @@ const replaceSynths = async ({
 			contract: `TokenState${currencyKey}`,
 			target: TokenState,
 			read: 'associatedContract',
-			expected: input => input === replacementSynth.address,
+			expected: (input) => input === replacementSynth.address,
 			write: 'setAssociatedContract',
 			writeArg: replacementSynth.address,
 		});
@@ -299,7 +295,7 @@ const replaceSynths = async ({
 			contract: `Proxy${currencyKey}`,
 			target: Proxy,
 			read: 'target',
-			expected: input => input === replacementSynth.address,
+			expected: (input) => input === replacementSynth.address,
 			write: 'setTarget',
 			writeArg: replacementSynth.address,
 		});
@@ -313,7 +309,7 @@ const replaceSynths = async ({
 
 module.exports = {
 	replaceSynths,
-	cmd: program =>
+	cmd: (program) =>
 		program
 			.command('replace-synths')
 			.description('Replaces a number of existing synths with a subclass')
@@ -332,7 +328,7 @@ module.exports = {
 				'Priority gas fee price in GWEI',
 				DEFAULTS.priorityGasPrice
 			)
-			.option('-n, --network <value>', 'The network to run off.', x => x.toLowerCase(), 'kovan')
+			.option('-n, --network <value>', 'The network to run off.', (x) => x.toLowerCase(), 'testnet')
 			.option(
 				'-s, --synths-to-replace <value>',
 				'The list of synths to replace',

@@ -15,6 +15,7 @@ class Deployer {
 	 * @param {object} deployment An object with full combined contract name keys mapping to existing deployment addresses (if any)
 	 */
 	constructor({
+		account,
 		compiled,
 		config,
 		configFile,
@@ -26,7 +27,9 @@ class Deployer {
 		maxPriorityFeePerGas,
 		network,
 		providerUrl,
+		provider,
 		privateKey,
+		signer,
 		useFork,
 		useOvm,
 		nonceManager,
@@ -44,17 +47,21 @@ class Deployer {
 		this.nonceManager = nonceManager;
 		this.useOvm = useOvm;
 
-		this.provider = new ethers.providers.JsonRpcProvider(providerUrl);
+		this.provider =
+			provider || new ethers.providers.JsonRpcProvider(providerUrl || 'http://127.0.0.1:8545');
 
+		if (signer) {
+			this.signer = signer;
+		}
 		// use the default owner when in a fork or in local mode and no private key supplied
-		if ((useFork || network === 'local') && !privateKey) {
+		else if ((useFork || network === 'local') && !privateKey) {
 			const ownerAddress = getUsers({ network, useOvm, user: 'owner' }).address;
 			this.signer = this.provider.getSigner(ownerAddress);
 			this.signer.address = ownerAddress;
 		} else {
 			this.signer = new ethers.Wallet(privateKey, this.provider);
 		}
-		this.account = this.signer.address;
+		this.account = account || this.signer.address;
 		this.deployedContracts = {};
 		this.replacedContracts = {};
 		this._dryRunCounter = 0;
@@ -94,7 +101,7 @@ class Deployer {
 	}
 
 	getEncodedDeploymentParameters({ abi, params }) {
-		const constructorABI = abi.find(item => item.type === 'constructor');
+		const constructorABI = abi.find((item) => item.type === 'constructor');
 		if (!constructorABI) {
 			return '0x';
 		}
@@ -104,7 +111,7 @@ class Deployer {
 			return '0x';
 		}
 
-		const types = inputs.map(input => input.type);
+		const types = inputs.map((input) => input.type);
 		return ethers.utils.defaultAbiCoder.encode(types, params);
 	}
 
@@ -148,7 +155,9 @@ class Deployer {
 			console.log(yellow(`Skipping ${name} as it is NOT in contract flags file for deployment.`));
 			return;
 		}
-		const missingDeps = deps.filter(d => !this.deployedContracts[d] && !this.deployment.targets[d]);
+		const missingDeps = deps.filter(
+			(d) => !this.deployedContracts[d] && !this.deployment.targets[d]
+		);
 		if (missingDeps.length) {
 			throw Error(`Cannot deploy ${name} as it is missing dependencies: ${missingDeps.join(',')}`);
 		}
@@ -184,7 +193,7 @@ class Deployer {
 			// Any contract after SafeDecimalMath can automatically get linked.
 			// Doing this with bytecode that doesn't require the library is a no-op.
 			let bytecode = compiled.evm.bytecode.object;
-			['SafeDecimalMath', 'Math', 'SystemSettingsLib'].forEach(contractName => {
+			['SafeDecimalMath', 'Math', 'SystemSettingsLib'].forEach((contractName) => {
 				if (this.deployedContracts[contractName]) {
 					bytecode = linker.linkBytecode(bytecode, {
 						[source + '.sol']: {
@@ -209,7 +218,7 @@ class Deployer {
 				const { account } = this;
 				// but stub out all method calls except owner because it is needed to
 				// determine which actions can be performed directly or need to be added to ownerActions
-				Object.keys(deployedContract.functions).forEach(key => {
+				Object.keys(deployedContract.functions).forEach((key) => {
 					deployedContract.functions[key] = () => ({
 						call: () =>
 							key === 'owner'
@@ -244,6 +253,7 @@ class Deployer {
 				});
 				this.replacedContracts[name].source = existingSource;
 			}
+
 			// Deployment in OVM could result in empty bytecode if
 			// the contract's constructor parameters are unsafe.
 			// This check is probably redundant given the previous check, but just in case...
@@ -281,7 +291,7 @@ class Deployer {
 		return deployedContract;
 	}
 
-	async _updateResults({ name, source, deployed, address }) {
+	async _updateResults({ name, source, deployed, address, constructorArgs }) {
 		let timestamp = new Date();
 		let txn = '';
 		if (this.config[name] && !this.config[name].deploy) {
@@ -301,6 +311,7 @@ class Deployer {
 			timestamp,
 			txn,
 			network: this.network,
+			constructorArgs,
 		};
 		if (deployed) {
 			// remove the output from the metadata (don't dupe the ABI)
@@ -378,6 +389,7 @@ class Deployer {
 			source: deployedContract.source,
 			deployed: deployedContract.justDeployed,
 			address: deployedContract.address,
+			constructorArgs: args,
 		});
 
 		return deployedContract;
@@ -403,9 +415,7 @@ class Deployer {
 				useOvm: this.useOvm,
 				byContract: true,
 			})[contract];
-			// console.log('**********contract version**********', contractVersion);
 			const lastEntry = contractVersion.slice(-1)[0];
-			// console.log('**********lastEntry**********', lastEntry);
 			address = lastEntry.address;
 		}
 

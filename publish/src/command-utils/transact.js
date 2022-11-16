@@ -38,8 +38,8 @@ const performTransactionalStep = async ({
 	publiclyCallable,
 	useFork,
 }) => {
-	const argumentsForWriteFunction = [].concat(writeArg).filter(entry => entry !== undefined); // reduce to array of args
-	const action = `${contract}.${write}(${argumentsForWriteFunction.map(arg =>
+	const argumentsForWriteFunction = [].concat(writeArg).filter((entry) => entry !== undefined); // reduce to array of args
+	const action = `${contract}.${write}(${argumentsForWriteFunction.map((arg) =>
 		arg.length === 66 ? ethers.utils.toUtf8String(arg) : arg
 	)})`;
 
@@ -47,7 +47,7 @@ const performTransactionalStep = async ({
 	console.log(yellow(`Attempting action: ${action}`));
 
 	if (read) {
-		const argumentsForReadFunction = [].concat(readArg).filter(entry => entry !== undefined); // reduce to array of args
+		const argumentsForReadFunction = [].concat(readArg).filter((entry) => entry !== undefined); // reduce to array of args
 		let response;
 		try {
 			response = await readTarget[read](...argumentsForReadFunction);
@@ -93,7 +93,7 @@ const performTransactionalStep = async ({
 
 	// otherwise check the owner
 	const owner = await target.owner();
-	if (signer && (owner === signer.address || publiclyCallable)) {
+	if (signer && (owner === (await signer.getAddress()) || publiclyCallable)) {
 		// perform action
 		let hash;
 		let gasUsed = 0;

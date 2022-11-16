@@ -18,7 +18,7 @@ const {
 } = require('../util');
 
 const DEFAULTS = {
-	network: 'kovan',
+	network: 'testnet',
 };
 
 async function extractStakingBalances({
@@ -169,8 +169,9 @@ async function extractStakingBalances({
 		console.log(`    Staking Contract: ${stakingAddress}`);
 		console.log(`    Zasset: ${iSynthAddress}`);
 		console.log(
-			`    Starting Block: ${deploymentBlock} (${currentBlock -
-				deploymentBlock} blocks ago at ${formatDate(deploymentBlockDetails.timestamp * 1000)})\n`
+			`    Starting Block: ${deploymentBlock} (${
+				currentBlock - deploymentBlock
+			} blocks ago at ${formatDate(deploymentBlockDetails.timestamp * 1000)})\n`
 		);
 
 		const transferEvents = await iSynth.queryFilter(
@@ -184,7 +185,7 @@ async function extractStakingBalances({
 			deploymentBlock - 1
 		);
 
-		const candidates = uniq(transferEvents.map(e => e.args.from));
+		const candidates = uniq(transferEvents.map((e) => e.args.from));
 
 		const nonzero = [];
 
@@ -218,7 +219,7 @@ async function extractStakingBalances({
 		);
 
 		const feeMultiplier = ethers.utils.parseEther('1').sub(exchangeFee);
-		const result = balances.map(b => {
+		const result = balances.map((b) => {
 			const owed = multiplyDecimal(multiplyDecimal(b.balance, frozenPrice), feeMultiplier);
 
 			return {
@@ -264,13 +265,13 @@ async function extractStakingBalances({
 
 module.exports = {
 	extractStakingBalances,
-	cmd: program =>
+	cmd: (program) =>
 		program
 			.command('extract-staking-balances')
 			.option(
 				'-n, --network <value>',
 				'The network to run off.',
-				x => x.toLowerCase(),
+				(x) => x.toLowerCase(),
 				DEFAULTS.network
 			)
 			.option(

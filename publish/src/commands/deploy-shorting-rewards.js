@@ -32,12 +32,12 @@ const {
 
 const DEFAULTS = {
 	priorityGasPrice: '1',
-	network: 'kovan',
+	network: 'testnet',
 	buildPath: path.join(__dirname, '..', '..', '..', BUILD_FOLDER),
 	rewardsToDeploy: [],
 };
 
-const addressOf = c => (c ? c.address : '');
+const addressOf = (c) => (c ? c.address : '');
 
 const deployShortingRewards = async ({
 	rewardsToDeploy = DEFAULTS.rewardsToDeploy,
@@ -54,16 +54,11 @@ const deployShortingRewards = async ({
 	deploymentPath = deploymentPath || getDeploymentPathForNetwork({ network });
 	ensureDeploymentPath(deploymentPath);
 
-	const {
-		ownerActions,
-		ownerActionsFile,
-		shortingRewards,
-		deployment,
-		deploymentFile,
-	} = loadAndCheckRequiredSources({
-		deploymentPath,
-		network,
-	});
+	const { ownerActions, ownerActionsFile, shortingRewards, deployment, deploymentFile } =
+		loadAndCheckRequiredSources({
+			deploymentPath,
+			network,
+		});
 
 	console.log(
 		gray('Checking all contracts not flagged for deployment have addresses in this network...')
@@ -75,16 +70,16 @@ const deployShortingRewards = async ({
 	// 2. rewardsToken that is not an address
 	const requiredContractDeployments = ['RewardsDistribution', 'CollateralShort'];
 	const requiredTokenDeployments = shortingRewards
-		.map(x => {
-			return [x.rewardsToken].filter(y => !ethers.utils.isAddress(y));
+		.map((x) => {
+			return [x.rewardsToken].filter((y) => !ethers.utils.isAddress(y));
 		})
 		.reduce((acc, x) => acc.concat(x), [])
-		.filter(x => x !== undefined);
+		.filter((x) => x !== undefined);
 	const uniqueRequiredDeployments = Array.from(
 		new Set([].concat(requiredTokenDeployments, requiredContractDeployments))
 	);
 
-	const missingDeployments = uniqueRequiredDeployments.filter(name => {
+	const missingDeployments = uniqueRequiredDeployments.filter((name) => {
 		return !deployment.targets[name] || !deployment.targets[name].address;
 	});
 
@@ -103,7 +98,11 @@ const deployShortingRewards = async ({
 	// now get the latest time a Solidity file was edited
 	const latestSolTimestamp = getLatestSolTimestamp(CONTRACTS_FOLDER);
 
-	const { providerUrl, privateKey: envPrivateKey, explorerLinkPrefix } = loadConnections({
+	const {
+		providerUrl,
+		privateKey: envPrivateKey,
+		explorerLinkPrefix,
+	} = loadConnections({
 		network,
 	});
 
@@ -191,7 +190,7 @@ const deployShortingRewards = async ({
 		}
 
 		// Try and get addresses for the reward token
-		const [rewardsTokenAddress] = [rewardsToken].map(token => {
+		const [rewardsTokenAddress] = [rewardsToken].map((token) => {
 			// If the token is specified, use that
 			// otherwise will default to ZERO_ADDRESS
 			if (token) {
@@ -233,7 +232,7 @@ const deployShortingRewards = async ({
 		// Deploy contract with deployer as RewardsDistribution.
 		const rewardsContract = await deployer.deployContract({
 			name: shortingRewardNameFixed,
-			deps: [rewardsToken].filter(x => !ethers.utils.isAddress(x)),
+			deps: [rewardsToken].filter((x) => !ethers.utils.isAddress(x)),
 			source: 'ShortingRewards',
 			args: [account, resolverAddress, account, rewardsTokenAddress],
 		});
@@ -241,7 +240,7 @@ const deployShortingRewards = async ({
 		const nonceManager = new NonceManager({});
 		const manageNonces = deployer.manageNonces;
 
-		const runStep = async opts =>
+		const runStep = async (opts) =>
 			performTransactionalStep({
 				...opts,
 				signer,
@@ -295,14 +294,14 @@ const deployShortingRewards = async ({
 module.exports = {
 	deployShortingRewards,
 	DEFAULTS,
-	cmd: program =>
+	cmd: (program) =>
 		program
 			.command('deploy-shorting-rewards')
 			.description('Deploy shorting rewards')
 			.option(
 				'-t, --rewards-to-deploy <items>',
 				`Deploys shorting rewards with matching names in ${SHORTING_REWARDS_FILENAME}`,
-				v => v.split(','),
+				(v) => v.split(','),
 				DEFAULTS.rewardsToDeploy
 			)
 			.option(
@@ -323,7 +322,7 @@ module.exports = {
 			.option(
 				'-n, --network <value>',
 				'The network to run off.',
-				x => x.toLowerCase(),
+				(x) => x.toLowerCase(),
 				DEFAULTS.network
 			)
 			.option(

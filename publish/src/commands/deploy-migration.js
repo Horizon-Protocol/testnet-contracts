@@ -31,7 +31,7 @@ const {
 
 const DEFAULTS = {
 	priorityGasPrice: '1',
-	network: 'kovan',
+	network: 'testnet',
 	buildPath: path.join(__dirname, '..', '..', '..', BUILD_FOLDER),
 	rewardsToDeploy: [],
 };
@@ -207,7 +207,7 @@ const deployMigration = async ({
 			contract: foundContract.name,
 			target: contract,
 			read: 'nominatedOwner',
-			expected: input => input === deployedContract.address,
+			expected: (input) => input === deployedContract.address,
 			write: 'nominateOwner' in contract ? 'nominateOwner' : 'nominateNewOwner',
 			writeArg: [deployedContract.address],
 			signer,
@@ -337,7 +337,7 @@ async function verifyContract({
 module.exports = {
 	deployMigration,
 	DEFAULTS,
-	cmd: program =>
+	cmd: (program) =>
 		program
 			.command('deploy-migration')
 			.description('Deploys a migration script')
@@ -351,7 +351,7 @@ module.exports = {
 			.option(
 				'-n, --network <value>',
 				'The network to run off.',
-				x => x.toLowerCase(),
+				(x) => x.toLowerCase(),
 				DEFAULTS.network
 			)
 			.option('--use-ovm', 'Use OVM')

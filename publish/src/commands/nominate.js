@@ -55,7 +55,7 @@ const nominate = async ({
 		network,
 	});
 
-	contracts.forEach(contract => {
+	contracts.forEach((contract) => {
 		if (!(contract in config)) {
 			throw Error(`Contract ${contract} isn't in the config for this deployment!`);
 		}
@@ -73,7 +73,7 @@ const nominate = async ({
 
 	if (!contracts.length) {
 		// if contracts not supplied, use all contracts except the excluded contracts
-		contracts = Object.keys(config).filter(contract => !excludedContracts.includes(contract));
+		contracts = Object.keys(config).filter((contract) => !excludedContracts.includes(contract));
 	}
 
 	const {
@@ -182,14 +182,14 @@ const nominate = async ({
 	if (warnings.length) {
 		console.log(yellow('\nThere were some issues nominating owner\n'));
 		console.log(yellow('---'));
-		warnings.forEach(warning => console.log(warning));
+		warnings.forEach((warning) => console.log(warning));
 		console.log(yellow('---'));
 	}
 };
 
 module.exports = {
 	nominate,
-	cmd: program =>
+	cmd: (program) =>
 		program
 			.command('nominate')
 			.description('Nominate a new owner for one or more contracts')
@@ -208,7 +208,7 @@ module.exports = {
 				'Perform the deployment on a forked chain running on localhost (see fork command).',
 				false
 			)
-			.option('-n, --network <value>', 'The network to run off.', x => x.toLowerCase(), 'kovan')
+			.option('-n, --network <value>', 'The network to run off.', (x) => x.toLowerCase(), 'testnet')
 			.option(
 				'-o, --new-owner <value>',
 				'The address of the new owner (please include the 0x prefix)'

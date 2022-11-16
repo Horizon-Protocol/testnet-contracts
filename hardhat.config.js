@@ -9,9 +9,12 @@ const path = require('path');
 require('hardhat-interact');
 require('solidity-coverage');
 require('./hardhat');
+require('@nomiclabs/hardhat-etherscan');
 require('@nomiclabs/hardhat-truffle5');
 require('@nomiclabs/hardhat-ethers');
 require('hardhat-gas-reporter');
+
+require('hardhat-cannon');
 
 const {
 	constants: { inflationStartTimestampInSecs, AST_FILENAME, AST_FOLDER, BUILD_FOLDER },
@@ -58,9 +61,15 @@ module.exports = {
 			blockGasLimit: 12e6,
 			url: 'http://localhost:8545',
 		},
+		localhost9545: {
+			gas: 12e6,
+			blockGasLimit: 12e6,
+			url: 'http://localhost:9545',
+		},
 		mainnet: {
-			url: process.env.PROVIDER_URL_MAINNET || 'http://localhost:8545',
+			url: process.env.PROVIDER_URL.replace('network', 'mainnet') || 'http://localhost:8545',
 			chainId: 56,
+			accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
 		},
 		testnet: {
 			url: process.env.PROVIDER_URL || 'http://localhost:8545',
@@ -84,5 +93,23 @@ module.exports = {
 	mocha: {
 		timeout: 120e3, // 120s
 		retries: 1,
+	},
+	etherscan: {
+		apiKey: {
+			testnet: process.env.ETHERSCAN_KEY,
+		},
+	},
+	cannon: {
+		publisherPrivateKey: process.env.PRIVATE_KEY,
+		ipfsConnection: {
+			protocol: 'https',
+			host: 'ipfs.infura.io',
+			port: 5001,
+			headers: {
+				authorization: `Basic ${Buffer.from(
+					process.env.INFURA_IPFS_ID + ':' + process.env.INFURA_IPFS_SECRET
+				).toString('base64')}`,
+			},
+		},
 	},
 };

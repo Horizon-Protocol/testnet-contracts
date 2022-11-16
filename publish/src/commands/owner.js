@@ -169,7 +169,7 @@ const owner = async ({
 		console.log(gray(`Gas: base fee ${maxFeePerGas} GWEI, miner tip ${maxPriorityFeePerGas} GWEI`));
 	}
 
-	const confirmOrEnd = async message => {
+	const confirmOrEnd = async (message) => {
 		try {
 			if (yes) {
 				console.log(message);
@@ -462,14 +462,14 @@ const owner = async ({
 	if (warnings.length) {
 		console.log(yellow('\nThere were some issues during ownership\n'));
 		console.log(yellow('---'));
-		warnings.forEach(warning => console.log(warning));
+		warnings.forEach((warning) => console.log(warning));
 		console.log(yellow('---'));
 	}
 };
 
 module.exports = {
 	owner,
-	cmd: program =>
+	cmd: (program) =>
 		program
 			.command('owner')
 			.description('Owner script - a list of transactions required by the owner.')
@@ -490,7 +490,7 @@ module.exports = {
 			.option('-g, --max-fee-per-gas <value>', 'Maximum base gas fee price in GWEI')
 			.option('--max-priority-fee-per-gas <value>', 'Priority gas fee price in GWEI', '1')
 			.option('-l, --gas-limit <value>', 'Gas limit', parseInt, DEFAULTS.gasLimit)
-			.option('-n, --network <value>', 'The network to run off.', x => x.toLowerCase(), 'kovan')
+			.option('-n, --network <value>', 'The network to run off.', (x) => x.toLowerCase(), 'testnet')
 			.option('-s, --skip-acceptance', 'Skip ownership acceptance checks.')
 			.option('-y, --yes', 'Dont prompt, just reply yes.')
 			.option('-z, --use-ovm', 'Target deployment for the OVM (Optimism).')

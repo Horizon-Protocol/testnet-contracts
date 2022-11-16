@@ -29,7 +29,7 @@ const {
 
 const DEFAULTS = {
 	priorityGasPrice: '1',
-	network: 'kovan',
+	network: 'testnet',
 	buildPath: path.join(__dirname, '..', '..', '..', BUILD_FOLDER),
 	rewardsToDeploy: [],
 };
@@ -50,28 +50,24 @@ const deployStakingRewards = async ({
 	deploymentPath = deploymentPath || getDeploymentPathForNetwork({ network, useOvm });
 	ensureDeploymentPath(deploymentPath);
 
-	const {
-		stakingRewards,
-		stakingRewardsFile,
-		deployment,
-		deploymentFile,
-	} = loadAndCheckRequiredSources({
-		deploymentPath,
-		network,
-	});
+	const { stakingRewards, stakingRewardsFile, deployment, deploymentFile } =
+		loadAndCheckRequiredSources({
+			deploymentPath,
+			network,
+		});
 
 	console.log(
 		gray('Checking all contracts not flagged for deployment have addresses in this network...')
 	);
 
-	const invalidStakingRewardsConfig = stakingRewards.filter(x => {
+	const invalidStakingRewardsConfig = stakingRewards.filter((x) => {
 		return !x.stakingToken || !x.rewardsToken;
 	});
 
 	if (invalidStakingRewardsConfig.length > 0) {
 		throw Error(
 			`${STAKING_REWARDS_FILENAME} has an invalid configurations: ` +
-				invalidStakingRewardsConfig.map(x => x.name).join(', ') +
+				invalidStakingRewardsConfig.map((x) => x.name).join(', ') +
 				'\n' +
 				gray(`Used: ${stakingRewardsFile} as source`)
 		);
@@ -83,16 +79,16 @@ const deployStakingRewards = async ({
 	// 2. rewardsToken/stakingToken that is not an address
 	const requiredContractDeployments = ['RewardsDistribution'];
 	const requiredTokenDeployments = stakingRewards
-		.map(x => {
-			return [x.rewardsToken, x.stakingToken].filter(y => !ethers.utils.isAddress(y));
+		.map((x) => {
+			return [x.rewardsToken, x.stakingToken].filter((y) => !ethers.utils.isAddress(y));
 		})
 		.reduce((acc, x) => acc.concat(x), [])
-		.filter(x => x !== undefined);
+		.filter((x) => x !== undefined);
 	const uniqueRequiredDeployments = Array.from(
 		new Set([].concat(requiredTokenDeployments, requiredContractDeployments))
 	);
 
-	const missingDeployments = uniqueRequiredDeployments.filter(name => {
+	const missingDeployments = uniqueRequiredDeployments.filter((name) => {
 		return !deployment.targets[name] || !deployment.targets[name].address;
 	});
 
@@ -111,7 +107,11 @@ const deployStakingRewards = async ({
 	// now get the latest time a Solidity file was edited
 	const latestSolTimestamp = getLatestSolTimestamp(CONTRACTS_FOLDER);
 
-	const { providerUrl, privateKey: envPrivateKey, explorerLinkPrefix } = loadConnections({
+	const {
+		providerUrl,
+		privateKey: envPrivateKey,
+		explorerLinkPrefix,
+	} = loadConnections({
 		network,
 		useOvm,
 	});
@@ -201,7 +201,7 @@ const deployStakingRewards = async ({
 		}
 
 		// Try and get addresses for the reward/staking token
-		const [stakingTokenAddress, rewardsTokenAddress] = [stakingToken, rewardsToken].map(token => {
+		const [stakingTokenAddress, rewardsTokenAddress] = [stakingToken, rewardsToken].map((token) => {
 			// If the token is specified, use that
 			// otherwise will default to ZERO_ADDRESS
 			if (token) {
@@ -245,7 +245,7 @@ const deployStakingRewards = async ({
 		// Deploy contract
 		await deployer.deployContract({
 			name: stakingRewardNameFixed,
-			deps: [stakingToken, rewardsToken].filter(x => !ethers.utils.isAddress(x)),
+			deps: [stakingToken, rewardsToken].filter((x) => !ethers.utils.isAddress(x)),
 			source: 'StakingRewards',
 			args: [account, rewardsDistributionAddress, rewardsTokenAddress, stakingTokenAddress],
 		});
@@ -272,14 +272,14 @@ const deployStakingRewards = async ({
 module.exports = {
 	deployStakingRewards,
 	DEFAULTS,
-	cmd: program =>
+	cmd: (program) =>
 		program
 			.command('deploy-staking-rewards')
 			.description('Deploy staking rewards')
 			.option(
 				'-t, --rewards-to-deploy <items>',
 				`Deploys staking rewards with matching names in ${STAKING_REWARDS_FILENAME}`,
-				v => v.split(','),
+				(v) => v.split(','),
 				DEFAULTS.rewardsToDeploy
 			)
 			.option(
@@ -300,7 +300,7 @@ module.exports = {
 			.option(
 				'-n, --network <value>',
 				'The network to run off.',
-				x => x.toLowerCase(),
+				(x) => x.toLowerCase(),
 				DEFAULTS.network
 			)
 			.option(
