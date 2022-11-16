@@ -338,13 +338,6 @@
 		"sign": "",
 		"description": "Centralised Exchange Index"
 	},
-	"DEFI": {
-		"asset": "DEFI",
-		"category": "index",
-		"sign": "",
-		"description": "DeFi Index"
-	},
-
 	"AUD": {
 		"asset": "AUD",
 		"category": "forex",
