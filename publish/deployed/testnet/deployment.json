@@ -212,8 +212,8 @@
 			"address": "0x15D5E7a5Cd9d66a8A7Db334382dfDBD1985B0288",
 			"source": "Synthetix",
 			"link": "https://testnet.bscscan.com/address/0x15D5E7a5Cd9d66a8A7Db334382dfDBD1985B0288",
-			"timestamp": "2022-11-15T18:19:24.358Z",
-			"txn": "",
+			"timestamp": "2022-11-15T18:19:23.000Z",
+			"txn": "https://testnet.bscscan.com/tx/0x3a265a137fef306d74e2b6db88a24d1d2512858c80e0557da13c1675a5377df6",
 			"network": "testnet"
 		},
 		"ProxySynthetix": {
@@ -266,8 +266,8 @@
 			"address": "0x81a00fB45bb3B623eC2cC4cDcd9D1e45c6339CE6",
 			"source": "Issuer",
 			"link": "https://testnet.bscscan.com/address/0x81a00fB45bb3B623eC2cC4cDcd9D1e45c6339CE6",
-			"timestamp": "2022-11-15T18:19:54.276Z",
-			"txn": "",
+			"timestamp": "2022-11-15T18:19:50.000Z",
+			"txn": "https://testnet.bscscan.com/tx/0x6777f993e8a4fb66359dff6466135ef4d51520a93f349ea580b1eb1ea011ebee",
 			"network": "testnet"
 		},
 		"TradingRewards": {
@@ -356,8 +356,8 @@
 			"address": "0xBbBce80C0F8bd17F0D574fE259550d6B0773Aca5",
 			"source": "MultiCollateralSynth",
 			"link": "https://testnet.bscscan.com/address/0xBbBce80C0F8bd17F0D574fE259550d6B0773Aca5",
-			"timestamp": "2022-11-15T18:20:25.516Z",
-			"txn": "",
+			"timestamp": "2022-11-15T18:20:17.000Z",
+			"txn": "https://testnet.bscscan.com/tx/0x6760bbe1e4cf037fcb0b3110c350d89a8a7d8ad364c7f001a6f324a93f66a738",
 			"network": "testnet"
 		},
 		"TokenStatezBNB": {
