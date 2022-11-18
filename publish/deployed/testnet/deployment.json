@@ -7,7 +7,8 @@
 			"link": "https://testnet.bscscan.com/address/0xC2E88C3d03A5f74F53D5c0404bc2b34c2760d6D3",
 			"timestamp": "2022-04-21T06:50:09.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x3d0cce4525d3df2e12f84e8745af845e20ae936f2c190ad7dc418f5d0f7be7b9",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": []
 		},
 		"Math": {
 			"name": "Math",
@@ -16,7 +17,8 @@
 			"link": "https://testnet.bscscan.com/address/0x5140f419a2a9822d24f1d4b1e5AA55eC71Cfa387",
 			"timestamp": "2022-04-21T06:50:18.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0xac10302e7115b8fe335d5f5b6a26a87734bcd9663ba928c27fc6591f86742114",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": []
 		},
 		"AddressResolver": {
 			"name": "AddressResolver",
@@ -25,7 +27,8 @@
 			"link": "https://testnet.bscscan.com/address/0x26A1655f9164E99C5a0C7FAB6b38462dEd93d4ba",
 			"timestamp": "2022-04-21T06:50:27.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0xd1fc8c317d922678eb731d349d2471a8e7dc9760709574a0eef61d8e4febf538",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": ["0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7"]
 		},
 		"ReadProxyAddressResolver": {
 			"name": "ReadProxyAddressResolver",
@@ -34,7 +37,8 @@
 			"link": "https://testnet.bscscan.com/address/0xdaA625cf7a927f61d14bf363335A544134147e41",
 			"timestamp": "2022-04-21T06:50:39.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0xd21f805296ad1cd7338317e7cbc55ab7e90f65aa916bb73ae2953cb8b1f3a84e",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": ["0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7"]
 		},
 		"FlexibleStorage": {
 			"name": "FlexibleStorage",
@@ -43,7 +47,8 @@
 			"link": "https://testnet.bscscan.com/address/0x09e4ad6B20f0d0F426AB00523999Cebae73F011B",
 			"timestamp": "2022-04-21T06:50:51.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x264caee41b44fb06049fd2f6e19def385fac66538c834fbc8faeda6aaca728cc",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": ["0xdaA625cf7a927f61d14bf363335A544134147e41"]
 		},
 		"SystemSettings": {
 			"name": "SystemSettings",
@@ -52,7 +57,11 @@
 			"link": "https://testnet.bscscan.com/address/0x2223605d9aa4149137298fbEf6748ab5d033E46e",
 			"timestamp": "2022-11-16T19:02:12.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0xe4308138c614ab949639fe1293d71beca0b8d6bcd525960f321a5e4a7d00e354",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		},
 		"SystemStatus": {
 			"name": "SystemStatus",
@@ -61,7 +70,8 @@
 			"link": "https://testnet.bscscan.com/address/0xDb45abC0Bf5D5bE5d8561242eEA1D81b028B0fAf",
 			"timestamp": "2022-10-28T17:43:06.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x8d085eb790d3820bd44b4551e062c5cfbf49198ff5b4e6c438b3b3804b59dc04",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": ["0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7"]
 		},
 		"ExchangeRates": {
 			"name": "ExchangeRates",
@@ -70,7 +80,11 @@
 			"link": "https://testnet.bscscan.com/address/0x84EfF8482F3ee95d538Cca8EA20a736d1BD7Ff5d",
 			"timestamp": "2022-11-04T19:11:26.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x9d01f2c5cf9b6d7d8e0f33da00da9294c163f881572652767302f9baeefa596d",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		},
 		"RewardEscrow": {
 			"name": "RewardEscrow",
@@ -79,7 +93,12 @@
 			"link": "https://testnet.bscscan.com/address/0xE4c2B8FDBD8D829FAce1C0B2FA0CE6F0d3B6279E",
 			"timestamp": "2022-04-21T06:51:36.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x085c8e22c702d9cf16361cf118e7aeafe0972da0c5af8bf9396a8f6e08d37c0d",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x0000000000000000000000000000000000000000",
+				"0x0000000000000000000000000000000000000000"
+			]
 		},
 		"RewardEscrowV2": {
 			"name": "RewardEscrowV2",
@@ -88,7 +107,11 @@
 			"link": "https://testnet.bscscan.com/address/0x6D410Ca59489701819c8745C8be7a657DdA7d8Bb",
 			"timestamp": "2022-04-21T06:51:45.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x3d86c15e20840d622d4a00fdb0a39962faf9e4ef79d7e05a51ea7174be2d7170",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		},
 		"SynthetixEscrow": {
 			"name": "SynthetixEscrow",
@@ -97,7 +120,11 @@
 			"link": "https://testnet.bscscan.com/address/0x7C61913A778e0920693625fBDd2c1B645bc8d607",
 			"timestamp": "2022-04-21T06:52:00.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x2ede4f055a07ecdc02943d73c7f52f315114a4741ca3803b630a2fb0183183cd",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x0000000000000000000000000000000000000000"
+			]
 		},
 		"SynthetixState": {
 			"name": "SynthetixState",
@@ -106,7 +133,11 @@
 			"link": "https://testnet.bscscan.com/address/0x49408983B4215B319EEE2d172Bf7B859d47C5246",
 			"timestamp": "2022-04-21T06:52:09.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x08f96db700062b0150f371b83c327c30771d58c5557b0409006f2d3f9226e3f5",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7"
+			]
 		},
 		"ProxyFeePool": {
 			"name": "ProxyFeePool",
@@ -115,7 +146,8 @@
 			"link": "https://testnet.bscscan.com/address/0xDa8eddeeD46f32aF7a4c82602D24F561E6F31cDA",
 			"timestamp": "2022-04-21T06:52:21.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x495a842ce6ba9402b8eb500149b99aabab9358afbd751bbe09ce338f299001aa",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": ["0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7"]
 		},
 		"DelegateApprovalsEternalStorage": {
 			"name": "DelegateApprovalsEternalStorage",
@@ -124,7 +156,11 @@
 			"link": "https://testnet.bscscan.com/address/0x96dF8d038e5fA5a5a340a180668dBFC61355A664",
 			"timestamp": "2022-04-21T06:52:30.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x17648eaa07cdb2e3fc80cccedd3c86f657262fc254d01f069e95f4e6904e3171",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x0000000000000000000000000000000000000000"
+			]
 		},
 		"DelegateApprovals": {
 			"name": "DelegateApprovals",
@@ -133,7 +169,11 @@
 			"link": "https://testnet.bscscan.com/address/0x33da318E0D034f65Dc11F095E58EFd987b71428d",
 			"timestamp": "2022-04-21T06:52:42.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0xb39d69d61581f1fdf47d218023b4f576f8982e9a6b77958cb29e9233553ef5cb",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x96dF8d038e5fA5a5a340a180668dBFC61355A664"
+			]
 		},
 		"Liquidations": {
 			"name": "Liquidations",
@@ -160,7 +200,11 @@
 			"link": "https://testnet.bscscan.com/address/0x3FA0b2Cfb293eb61F42146e0C699F767B103998C",
 			"timestamp": "2022-04-21T06:53:12.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x0a2101027c31b34c05cc8963a971bf8f3c87f2602bf82a3fcd9c0eaca88f8760",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x0000000000000000000000000000000000000000"
+			]
 		},
 		"FeePool": {
 			"name": "FeePool",
@@ -169,7 +213,12 @@
 			"link": "https://testnet.bscscan.com/address/0xF59148754393fACa09C0F3e5666d3B258Bd05846",
 			"timestamp": "2022-10-28T17:44:06.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x9094080b863926fc7b901df5aaa0a78ab0d9faace0ae9ad170d26321cce27669",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xDa8eddeeD46f32aF7a4c82602D24F561E6F31cDA",
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		},
 		"FeePoolState": {
 			"name": "FeePoolState",
@@ -178,7 +227,11 @@
 			"link": "https://testnet.bscscan.com/address/0x046F8e3D1AF5B67659164Fd6beD688580d936FCE",
 			"timestamp": "2022-04-21T06:53:45.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x11a6652f3681e2841a151245a4b9ffdaed0f8300660f79d2d16016a5e471d2d8",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0xF59148754393fACa09C0F3e5666d3B258Bd05846"
+			]
 		},
 		"RewardsDistribution": {
 			"name": "RewardsDistribution",
@@ -187,7 +240,14 @@
 			"link": "https://testnet.bscscan.com/address/0x07664B910D67bA543Aa3aC1E3e166E1FC444eEfD",
 			"timestamp": "2022-04-21T06:54:03.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x628f8e4fa2321a0a8e09be42116b5b5c17db9b47a67ce0ebe2aa6d0dc507a1c1",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x0000000000000000000000000000000000000000",
+				"0x0000000000000000000000000000000000000000",
+				"0x6D410Ca59489701819c8745C8be7a657DdA7d8Bb",
+				"0xDa8eddeeD46f32aF7a4c82602D24F561E6F31cDA"
+			]
 		},
 		"ProxyERC20": {
 			"name": "ProxyERC20",
@@ -205,7 +265,11 @@
 			"link": "https://testnet.bscscan.com/address/0x50F667B964e9574C7112bE68eD3B189ef05f764f",
 			"timestamp": "2022-04-21T06:54:27.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x2bb2ebc2686ca5dc4bc30a58bb5a382d08018185395269c97d59bf382d668a54",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7"
+			]
 		},
 		"Synthetix": {
 			"name": "Synthetix",
@@ -214,7 +278,14 @@
 			"link": "https://testnet.bscscan.com/address/0x15D5E7a5Cd9d66a8A7Db334382dfDBD1985B0288",
 			"timestamp": "2022-11-15T18:19:23.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x3a265a137fef306d74e2b6db88a24d1d2512858c80e0557da13c1675a5377df6",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0x426F971981353f71414aa0ED1D72073d00308Ad4",
+				"0x50F667B964e9574C7112bE68eD3B189ef05f764f",
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"378365384615384615384615251",
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		},
 		"ProxySynthetix": {
 			"name": "ProxySynthetix",
@@ -223,7 +294,8 @@
 			"link": "https://testnet.bscscan.com/address/0x426F971981353f71414aa0ED1D72073d00308Ad4",
 			"timestamp": "2022-04-21T06:55:04.380Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": ["0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7"]
 		},
 		"DebtCache": {
 			"name": "DebtCache",
@@ -232,7 +304,11 @@
 			"link": "https://testnet.bscscan.com/address/0xfB7B4e258d21f9425ED97c908264C8E5c958D5BB",
 			"timestamp": "2022-10-28T17:44:33.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x35d604bf2b6c074c38a1549e827f29d57616d03cc34741d513a8353eac7b4514",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		},
 		"Exchanger": {
 			"name": "Exchanger",
@@ -241,7 +317,11 @@
 			"link": "https://testnet.bscscan.com/address/0x6A03d1635bC773923B0071D9FD8Dc2aCafDED22A",
 			"timestamp": "2022-11-09T17:46:54.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0xd8272bb0e0d4c7dccf95099d3814aa6624b9bb483ab2e6891f1ee5d2ac516fda",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		},
 		"VirtualSynthMastercopy": {
 			"name": "VirtualSynthMastercopy",
@@ -250,7 +330,8 @@
 			"link": "https://testnet.bscscan.com/address/0x1cF00856a318540e3C395c7a410f5E75159E37aE",
 			"timestamp": "2022-04-21T06:55:48.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0xd8eb15d738c2c557acffc18d2bb6f06476ef8f8a4e500348dfb08dcd8842ca0d",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": []
 		},
 		"ExchangeState": {
 			"name": "ExchangeState",
@@ -259,7 +340,11 @@
 			"link": "https://testnet.bscscan.com/address/0x914D8e3a8Fc0e0D13C54cF5456799C8f3ACE49C5",
 			"timestamp": "2022-04-21T06:56:12.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x1a25313ac8401fd33f8fe27c6e0d1a4f1badbc2bfb4ed5fe5fdc4e4ca75a1e16",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x6A03d1635bC773923B0071D9FD8Dc2aCafDED22A"
+			]
 		},
 		"Issuer": {
 			"name": "Issuer",
@@ -268,7 +353,11 @@
 			"link": "https://testnet.bscscan.com/address/0x50e24328514EB818d169B9e90aF708A04cCe6DDC",
 			"timestamp": "2022-11-16T19:02:33.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0xf69032cab3fcbb6ae2a7d9f21c0f1df21e51b654a89703b12aeb1b55782f59e2",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		},
 		"TradingRewards": {
 			"name": "TradingRewards",
@@ -277,7 +366,12 @@
 			"link": "https://testnet.bscscan.com/address/0x5C894b248a89865429aa907785A564beaaD6a871",
 			"timestamp": "2022-04-21T06:57:03.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0xd8f20085230139e0c626ef136a459ec2803bcd00792647fec25f2f5d418da283",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		},
 		"SupplySchedule": {
 			"name": "SupplySchedule",
@@ -286,7 +380,12 @@
 			"link": "https://testnet.bscscan.com/address/0xeC2856dE8EcC1e16066f448FC560439571EE7300",
 			"timestamp": "2022-10-17T15:51:48.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0xd9f201362eb9497a94377eb8ed862228e0d0a6e3593163242b72ec07d9255ff9",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"1668643200",
+				"193"
+			]
 		},
 		"EscrowChecker": {
 			"name": "EscrowChecker",
@@ -295,7 +394,8 @@
 			"link": "https://testnet.bscscan.com/address/0x5D3b36E73aFb1B23c42b8e5Cd94aCA2dA7a6F471",
 			"timestamp": "2022-04-21T06:57:51.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0xff45b4be6a293c383040293f48edba7e10ab11fd623f6d758c9d683f10de6e5c",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": ["0x7C61913A778e0920693625fBDd2c1B645bc8d607"]
 		},
 		"SynthetixBridgeToOptimism": {
 			"name": "SynthetixBridgeToOptimism",
@@ -304,7 +404,11 @@
 			"link": "https://testnet.bscscan.com/address/0x6e61Ef19f0e74cBfe21ae848d1367BF445732f59",
 			"timestamp": "2022-04-21T06:58:12.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x85683f74221188758420b362468ba44a1dc12f541f50fa4832fad900c9bcbdf1",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		},
 		"SynthetixBridgeEscrow": {
 			"name": "SynthetixBridgeEscrow",
@@ -313,7 +417,8 @@
 			"link": "https://testnet.bscscan.com/address/0x2297C9ebf1D2eDa418fBF87FBC7854B8E1fFa62F",
 			"timestamp": "2022-04-21T06:58:30.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0xf1f7e57842c9b27d4fcddc8f2a507b1c27c3c1995b6fd652622ec14b74ee9449",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": ["0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7"]
 		},
 		"SynthRedeemer": {
 			"name": "SynthRedeemer",
@@ -322,7 +427,8 @@
 			"link": "https://testnet.bscscan.com/address/0x2E745EA43699d0e8adE169eE3cE0A869E8123E32",
 			"timestamp": "2022-04-21T06:58:39.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x608063fe884937b6cc53b4e99cca2a7ae4b9ad206f84d6f2d3f57e9d92374522",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": ["0xdaA625cf7a927f61d14bf363335A544134147e41"]
 		},
 		"TokenStatezUSD": {
 			"name": "TokenStatezUSD",
@@ -331,7 +437,11 @@
 			"link": "https://testnet.bscscan.com/address/0xA418Cd0801aB6608325e3130D383dc611f08a171",
 			"timestamp": "2022-04-21T06:58:54.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0xca0b452b61e9ea8f679c5d1cf255759464188d8f7cbca4a31a7c5ed13f9c1f7b",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x0000000000000000000000000000000000000000"
+			]
 		},
 		"ProxyzUSD": {
 			"name": "ProxyzUSD",
@@ -340,7 +450,8 @@
 			"link": "https://testnet.bscscan.com/address/0x4E95838791B9C77f6548541beC290db9450d38F7",
 			"timestamp": "2022-04-21T06:59:06.732Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": ["0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7"]
 		},
 		"ProxyERC20zUSD": {
 			"name": "ProxyERC20zUSD",
@@ -358,7 +469,17 @@
 			"link": "https://testnet.bscscan.com/address/0xBbBce80C0F8bd17F0D574fE259550d6B0773Aca5",
 			"timestamp": "2022-11-15T18:20:17.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x6760bbe1e4cf037fcb0b3110c350d89a8a7d8ad364c7f001a6f324a93f66a738",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0x4E95838791B9C77f6548541beC290db9450d38F7",
+				"0xA418Cd0801aB6608325e3130D383dc611f08a171",
+				"Zasset zUSD",
+				"zUSD",
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x7a55534400000000000000000000000000000000000000000000000000000000",
+				0,
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		},
 		"TokenStatezBNB": {
 			"name": "TokenStatezBNB",
@@ -367,7 +488,11 @@
 			"link": "https://testnet.bscscan.com/address/0xfAc220A1CDA2F7369155c7Be08F844cf42cF7b59",
 			"timestamp": "2022-04-21T06:59:39.317Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x0000000000000000000000000000000000000000"
+			]
 		},
 		"ProxyzBNB": {
 			"name": "ProxyzBNB",
@@ -376,7 +501,8 @@
 			"link": "https://testnet.bscscan.com/address/0x2816E61b2EE4197961FB96cC4a0A29eFF491B559",
 			"timestamp": "2022-04-21T06:59:50.392Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": ["0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7"]
 		},
 		"ZassetzBNB": {
 			"name": "ZassetzBNB",
@@ -385,7 +511,17 @@
 			"link": "https://testnet.bscscan.com/address/0x7b88996638C895D385C27D644D010C59F162b8c2",
 			"timestamp": "2022-11-15T18:20:51.536Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0x2816E61b2EE4197961FB96cC4a0A29eFF491B559",
+				"0xfAc220A1CDA2F7369155c7Be08F844cf42cF7b59",
+				"Zasset zBNB",
+				"zBNB",
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x7a424e4200000000000000000000000000000000000000000000000000000000",
+				0,
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		},
 		"TokenStatezBTC": {
 			"name": "TokenStatezBTC",
@@ -394,7 +530,11 @@
 			"link": "https://testnet.bscscan.com/address/0x3E4168f218a9aAc5B50078575Fa6372c069DdB7F",
 			"timestamp": "2022-04-21T07:00:12.229Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x0000000000000000000000000000000000000000"
+			]
 		},
 		"ProxyzBTC": {
 			"name": "ProxyzBTC",
@@ -403,7 +543,8 @@
 			"link": "https://testnet.bscscan.com/address/0x3F79f8452ff9143DB8AD3bA5e6DA69dFBb8916Be",
 			"timestamp": "2022-04-21T07:00:22.255Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": ["0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7"]
 		},
 		"ZassetzBTC": {
 			"name": "ZassetzBTC",
@@ -412,7 +553,17 @@
 			"link": "https://testnet.bscscan.com/address/0xde40470eA1AC70c75FF7a1479654719d1A38a350",
 			"timestamp": "2022-11-15T18:21:19.996Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0x3F79f8452ff9143DB8AD3bA5e6DA69dFBb8916Be",
+				"0x3E4168f218a9aAc5B50078575Fa6372c069DdB7F",
+				"Zasset zBTC",
+				"zBTC",
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x7a42544300000000000000000000000000000000000000000000000000000000",
+				0,
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		},
 		"TokenStatezETH": {
 			"name": "TokenStatezETH",
@@ -421,7 +572,11 @@
 			"link": "https://testnet.bscscan.com/address/0xF39b83db7d2DB55101091Aa2c80423aC9CE0582d",
 			"timestamp": "2022-04-21T07:00:43.444Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x0000000000000000000000000000000000000000"
+			]
 		},
 		"ProxyzETH": {
 			"name": "ProxyzETH",
@@ -430,7 +585,8 @@
 			"link": "https://testnet.bscscan.com/address/0x0E4B50e9cc21798AD5594949f33Ff38126a2602A",
 			"timestamp": "2022-04-21T07:00:53.548Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": ["0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7"]
 		},
 		"ZassetzETH": {
 			"name": "ZassetzETH",
@@ -439,7 +595,17 @@
 			"link": "https://testnet.bscscan.com/address/0x560D53f46B635c5E9520201664578f6c3ba78CDC",
 			"timestamp": "2022-11-15T18:21:44.524Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0x0E4B50e9cc21798AD5594949f33Ff38126a2602A",
+				"0xF39b83db7d2DB55101091Aa2c80423aC9CE0582d",
+				"Zasset zETH",
+				"zETH",
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x7a45544800000000000000000000000000000000000000000000000000000000",
+				0,
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		},
 		"TokenStatezADA": {
 			"name": "TokenStatezADA",
@@ -448,7 +614,11 @@
 			"link": "https://testnet.bscscan.com/address/0x74E22F9B23111a23d5405819031ff297E1b68040",
 			"timestamp": "2022-04-21T07:01:14.352Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x0000000000000000000000000000000000000000"
+			]
 		},
 		"ProxyzADA": {
 			"name": "ProxyzADA",
@@ -457,7 +627,8 @@
 			"link": "https://testnet.bscscan.com/address/0x1086AfbcaEcDCBF4C1f0788A3bca67D135550cda",
 			"timestamp": "2022-04-21T07:01:24.812Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": ["0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7"]
 		},
 		"ZassetzADA": {
 			"name": "ZassetzADA",
@@ -466,7 +637,17 @@
 			"link": "https://testnet.bscscan.com/address/0xAF76a6e4E40E9A363F4D840EdF8A1bD45Ff97772",
 			"timestamp": "2022-11-15T18:22:12.676Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0x1086AfbcaEcDCBF4C1f0788A3bca67D135550cda",
+				"0x74E22F9B23111a23d5405819031ff297E1b68040",
+				"Zasset zADA",
+				"zADA",
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x7a41444100000000000000000000000000000000000000000000000000000000",
+				0,
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		},
 		"TokenStatezCAKE": {
 			"name": "TokenStatezCAKE",
@@ -475,7 +656,11 @@
 			"link": "https://testnet.bscscan.com/address/0x0b42D9DA6b6c4cf0d17f1228168Ab883e7705E0c",
 			"timestamp": "2022-04-21T07:01:47.295Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x0000000000000000000000000000000000000000"
+			]
 		},
 		"ProxyzCAKE": {
 			"name": "ProxyzCAKE",
@@ -484,7 +669,8 @@
 			"link": "https://testnet.bscscan.com/address/0xD48B8717bb97ed45e381aC4D88A71c9CF1E49917",
 			"timestamp": "2022-04-21T07:01:57.442Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": ["0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7"]
 		},
 		"ZassetzCAKE": {
 			"name": "ZassetzCAKE",
@@ -493,7 +679,17 @@
 			"link": "https://testnet.bscscan.com/address/0x046169381405d0daF702C9c9Ae99121105E162f2",
 			"timestamp": "2022-11-15T18:29:51.770Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD48B8717bb97ed45e381aC4D88A71c9CF1E49917",
+				"0x0b42D9DA6b6c4cf0d17f1228168Ab883e7705E0c",
+				"Zasset zCAKE",
+				"zCAKE",
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x7a43414b45000000000000000000000000000000000000000000000000000000",
+				0,
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		},
 		"TokenStatezDOT": {
 			"name": "TokenStatezDOT",
@@ -502,7 +698,11 @@
 			"link": "https://testnet.bscscan.com/address/0x45F22A4d26300d84e2B5c71298d6CcE064F0326f",
 			"timestamp": "2022-04-21T07:02:20.342Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x0000000000000000000000000000000000000000"
+			]
 		},
 		"ProxyzDOT": {
 			"name": "ProxyzDOT",
@@ -511,7 +711,8 @@
 			"link": "https://testnet.bscscan.com/address/0x4f78BF88c7104DC60cA893E6a423cCe2d0117edE",
 			"timestamp": "2022-04-21T07:02:30.588Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": ["0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7"]
 		},
 		"ZassetzDOT": {
 			"name": "ZassetzDOT",
@@ -520,7 +721,17 @@
 			"link": "https://testnet.bscscan.com/address/0xa20555576365C2ED2Bf5852c00A042f28B1DD5F3",
 			"timestamp": "2022-11-15T18:30:26.263Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0x4f78BF88c7104DC60cA893E6a423cCe2d0117edE",
+				"0x45F22A4d26300d84e2B5c71298d6CcE064F0326f",
+				"Zasset zDOT",
+				"zDOT",
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x7a444f5400000000000000000000000000000000000000000000000000000000",
+				0,
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		},
 		"TokenStatezLINK": {
 			"name": "TokenStatezLINK",
@@ -529,7 +740,11 @@
 			"link": "https://testnet.bscscan.com/address/0x6A151bAd4d81b07FA0060C9EA2f0fBb48D1F1c34",
 			"timestamp": "2022-04-21T07:02:51.887Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x0000000000000000000000000000000000000000"
+			]
 		},
 		"ProxyzLINK": {
 			"name": "ProxyzLINK",
@@ -538,7 +753,8 @@
 			"link": "https://testnet.bscscan.com/address/0x999D75864342E2873A1e7650bFB4995024e95a18",
 			"timestamp": "2022-04-21T07:03:02.341Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": ["0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7"]
 		},
 		"ZassetzLINK": {
 			"name": "ZassetzLINK",
@@ -547,7 +763,17 @@
 			"link": "https://testnet.bscscan.com/address/0x0CBd1B7a8D5B8CC1bBb40508d1a630936937f00a",
 			"timestamp": "2022-11-15T18:30:52.212Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0x999D75864342E2873A1e7650bFB4995024e95a18",
+				"0x6A151bAd4d81b07FA0060C9EA2f0fBb48D1F1c34",
+				"Zasset zLINK",
+				"zLINK",
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x7a4c494e4b000000000000000000000000000000000000000000000000000000",
+				0,
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		},
 		"ZassetzMATIC": {
 			"name": "ZassetzMATIC",
@@ -565,7 +791,11 @@
 			"link": "https://testnet.bscscan.com/address/0x0473dddA2B98AAA36C0337D3F39447c7700bfF0C",
 			"timestamp": "2022-04-21T07:03:55.071Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x0000000000000000000000000000000000000000"
+			]
 		},
 		"ProxyzXRP": {
 			"name": "ProxyzXRP",
@@ -574,7 +804,8 @@
 			"link": "https://testnet.bscscan.com/address/0x745E1B942AffF529D7dE4360eEd52E14C2C39a23",
 			"timestamp": "2022-04-21T07:04:05.966Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": ["0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7"]
 		},
 		"ZassetzXRP": {
 			"name": "ZassetzXRP",
@@ -583,7 +814,17 @@
 			"link": "https://testnet.bscscan.com/address/0xD1cc3454412240154037953077CF67e09A1fb720",
 			"timestamp": "2022-11-15T18:31:26.379Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0x745E1B942AffF529D7dE4360eEd52E14C2C39a23",
+				"0x0473dddA2B98AAA36C0337D3F39447c7700bfF0C",
+				"Zasset zXRP",
+				"zXRP",
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x7a58525000000000000000000000000000000000000000000000000000000000",
+				0,
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		},
 		"ZassetzDOGE": {
 			"name": "ZassetzDOGE",
@@ -655,7 +896,12 @@
 			"link": "https://testnet.bscscan.com/address/0x823eabCaEdAcbB5F0e18A32e20760C5c4e42daae",
 			"timestamp": "2022-04-21T07:05:51.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x57ed245bd56ffe7e38acbfb9657e249f777a494b405dd5065e4e2748f6381236",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		},
 		"EtherWrapper": {
 			"name": "EtherWrapper",
@@ -664,7 +910,12 @@
 			"link": "https://testnet.bscscan.com/address/0xFC454901FB1068d79f6323E7f3E60526DA859eb3",
 			"timestamp": "2022-04-21T07:06:03.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x095ba749789bf9b4e33daca6ac4ad9b7b8b0b498d6a059407eb2913a04223b58",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0xdaA625cf7a927f61d14bf363335A544134147e41",
+				"0x094616f0bdfb0b526bd735bf66eca0ad254ca81f"
+			]
 		},
 		"NativeEtherWrapper": {
 			"name": "NativeEtherWrapper",
@@ -673,7 +924,11 @@
 			"link": "https://testnet.bscscan.com/address/0x855fE84Ba9E55dA80e9787dd54DC3D9673AC2E5d",
 			"timestamp": "2022-04-21T07:06:12.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x50c7a6d97a3115f9bd6189051d1be424bb928fb9cfb2672f7a595703ddf42716",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		},
 		"CollateralUtil": {
 			"name": "CollateralUtil",
@@ -682,7 +937,8 @@
 			"link": "https://testnet.bscscan.com/address/0x92C91241498a797851c5c992BB62AF782A7BD365",
 			"timestamp": "2022-04-21T07:06:24.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x31fb68a75b43a155bf0655b9e15e35832a12d441dbd300c1ee88302915af065c",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": ["0xdaA625cf7a927f61d14bf363335A544134147e41"]
 		},
 		"CollateralManagerState": {
 			"name": "CollateralManagerState",
@@ -691,7 +947,11 @@
 			"link": "https://testnet.bscscan.com/address/0xbb250bf3f5EFd23bbF86Cb74B0179ce356C876cD",
 			"timestamp": "2022-07-08T14:07:12.576Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7"
+			]
 		},
 		"CollateralManager": {
 			"name": "CollateralManager",
@@ -700,7 +960,16 @@
 			"link": "https://testnet.bscscan.com/address/0x5708ACfE8325c635D7aa1Dfe920d656a6cBB83C0",
 			"timestamp": "2022-07-08T14:07:50.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0xbef3fb72158fd5a805b37a72ee7430b6fc0b15f81937835e1e6db9183bf4be3a",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xbb250bf3f5EFd23bbF86Cb74B0179ce356C876cD",
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0xdaA625cf7a927f61d14bf363335A544134147e41",
+				"75000000000000000000000000",
+				"200000000000000000",
+				"158443823",
+				"158443823"
+			]
 		},
 		"CollateralStateEth": {
 			"name": "CollateralStateEth",
@@ -718,7 +987,15 @@
 			"link": "https://testnet.bscscan.com/address/0x9EDfA1De9B4c3a686503B01479C12384C30c8021",
 			"timestamp": "2022-07-08T14:08:11.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x3cf463cd6712488ae744098c3967b77ddbcc339dddd1cfc11411e2d95c0d27c2",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x5708ACfE8325c635D7aa1Dfe920d656a6cBB83C0",
+				"0xdaA625cf7a927f61d14bf363335A544134147e41",
+				"0x7a424e4200000000000000000000000000000000000000000000000000000000",
+				"1300000000000000000",
+				"2000000000000000000"
+			]
 		},
 		"CollateralStateErc20": {
 			"name": "CollateralStateErc20",
@@ -736,7 +1013,17 @@
 			"link": "https://testnet.bscscan.com/address/0x52F75C79B8b9E89373aCf0A417feB274EB9b3a80",
 			"timestamp": "2022-07-08T14:08:32.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0xcc1b308b8d1c6fb1d65022db7e93541471a3abe51ee1ca797f47bf6820bae906",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x5708ACfE8325c635D7aa1Dfe920d656a6cBB83C0",
+				"0xdaA625cf7a927f61d14bf363335A544134147e41",
+				"0x7a42544300000000000000000000000000000000000000000000000000000000",
+				"1300000000000000000",
+				"50000000000000000",
+				"0x765b1e342734fA9001C7497190BAbd8f706f47db",
+				8
+			]
 		},
 		"CollateralStateShort": {
 			"name": "CollateralStateShort",
@@ -754,7 +1041,15 @@
 			"link": "https://testnet.bscscan.com/address/0x6Be60E2746BedC012762c7AfC38d9486Ab8fD04b",
 			"timestamp": "2022-11-14T19:56:27.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x01073fdb1a4f9b6994f5312cae75bde205e1870bb622b6f68b4b0b7b7c08ce57",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x5708ACfE8325c635D7aa1Dfe920d656a6cBB83C0",
+				"0xdaA625cf7a927f61d14bf363335A544134147e41",
+				"0x7a55534400000000000000000000000000000000000000000000000000000000",
+				"1200000000000000000",
+				"100000000000000000000"
+			]
 		},
 		"SynthUtil": {
 			"name": "SynthUtil",
@@ -763,7 +1058,8 @@
 			"link": "https://testnet.bscscan.com/address/0x4E161b8ABCB2183a3bc94fB181FC1F50F18575F9",
 			"timestamp": "2022-04-21T07:08:03.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x22e01d693b77914f4c70aca08c517baa1b409e4c7061f6c08bae98e0fbe52075",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": ["0xdaA625cf7a927f61d14bf363335A544134147e41"]
 		},
 		"DappMaintenance": {
 			"name": "DappMaintenance",
@@ -772,7 +1068,8 @@
 			"link": "https://testnet.bscscan.com/address/0xD10836aE0F23a42AC1C9A9D497f879451318F38b",
 			"timestamp": "2022-04-21T07:08:12.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0xa831e76a680ed22ea257ca6d5165601ef5342ec566fa47cd09dad510b8971f92",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": ["0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7"]
 		},
 		"ZassetzTRX": {
 			"name": "ZassetzTRX",
@@ -790,7 +1087,11 @@
 			"link": "https://testnet.bscscan.com/address/0x5Bb00d61Ff6CbaB3e64CA5e44DE7f484E8de6406",
 			"timestamp": "2022-08-23T14:33:31.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x237f3e046514251213a5c6197487310c4fef717bcb70a8712b47bc3857e7293f",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		},
 		"SystemSettingsLib": {
 			"name": "SystemSettingsLib",
@@ -799,7 +1100,8 @@
 			"link": "https://testnet.bscscan.com/address/0x1ebA76db654F5544415308F1987E61b15AA9bC3d",
 			"timestamp": "2022-11-16T19:01:51.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x6716a3e7cd4b7b35f574e6c981932e35c1275beddab3ac8165825e4519303bf5",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": []
 		},
 		"SynthetixDebtShare": {
 			"name": "SynthetixDebtShare",
@@ -808,7 +1110,11 @@
 			"link": "https://testnet.bscscan.com/address/0x354621394B2ba379E5Ac1d95101e0D6992dB71a8",
 			"timestamp": "2022-10-04T17:31:55.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x0822294937c4610afc5305a8e25f86b7289d541db87cf32910f011066a44a59a",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		},
 		"TokenStatezDAI": {
 			"name": "TokenStatezDAI",
@@ -817,7 +1123,11 @@
 			"link": "https://testnet.bscscan.com/address/0x6602b201Fd8544bC4D2e38Cc2306e55Adf8f2720",
 			"timestamp": "2022-10-17T05:36:15.738Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x0000000000000000000000000000000000000000"
+			]
 		},
 		"ProxyzDAI": {
 			"name": "ProxyzDAI",
@@ -826,7 +1136,8 @@
 			"link": "https://testnet.bscscan.com/address/0xeb61C7b3eCC07089a5EfeBb7B1F228d7b3ba5174",
 			"timestamp": "2022-10-17T05:41:00.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0xf695cdb2ed9c91ee2494d99473dd21111b8af92ef157e5145a44b7d444785383",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": ["0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7"]
 		},
 		"ZassetzDAI": {
 			"name": "ZassetzDAI",
@@ -835,7 +1146,17 @@
 			"link": "https://testnet.bscscan.com/address/0x0bB0364f665A48E1ebcae579E7B0d7e5948e88df",
 			"timestamp": "2022-11-15T18:31:55.104Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xeb61C7b3eCC07089a5EfeBb7B1F228d7b3ba5174",
+				"0x6602b201Fd8544bC4D2e38Cc2306e55Adf8f2720",
+				"Zasset zDAI",
+				"zDAI",
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0x7a44414900000000000000000000000000000000000000000000000000000000",
+				0,
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		},
 		"SignedSafeDecimalMath": {
 			"name": "SignedSafeDecimalMath",
@@ -844,7 +1165,8 @@
 			"link": "https://testnet.bscscan.com/address/0xD1D9C8d7dE85d6D0D8cd718806032F8Ac9f27a3b",
 			"timestamp": "2022-10-28T17:41:42.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x887624bc79bf135d70451e16c724aa3250de3d3bf10fa5cd9e068e4d00b0d3ea",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": []
 		},
 		"OneNetAggregatorIssuedSynths": {
 			"name": "OneNetAggregatorIssuedSynths",
@@ -853,7 +1175,8 @@
 			"link": "https://testnet.bscscan.com/address/0x4A4cCB331a97C58914Ce27c0873995cA37dBC471",
 			"timestamp": "2022-10-28T17:42:09.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x9f871fa35dda3d70ccb1c0ce64920fa7efb0808b3751ae4dba1204e7904e21b8",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": ["0xdaA625cf7a927f61d14bf363335A544134147e41"]
 		},
 		"OneNetAggregatorDebtRatio": {
 			"name": "OneNetAggregatorDebtRatio",
@@ -862,7 +1185,8 @@
 			"link": "https://testnet.bscscan.com/address/0xc53Bc59D9a3D82F88EF7fae055e2544C9b472214",
 			"timestamp": "2022-10-28T17:42:36.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0xbaf956aae6d5eb0083c0046053815fd713b1659dd4eeaeeb9a0e3cd0de817390",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": ["0xdaA625cf7a927f61d14bf363335A544134147e41"]
 		},
 		"ExchangeCircuitBreaker": {
 			"name": "ExchangeCircuitBreaker",
@@ -871,7 +1195,11 @@
 			"link": "https://testnet.bscscan.com/address/0x7eB38aeadB1Da5d5d481dedB027650Eec77dAAc7",
 			"timestamp": "2022-10-28T17:45:45.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x3348fb444ae1e3e641498a0f0a4ed58c187b3067f3c0ae0b71c66f81bea0797c",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		},
 		"FuturesMarketManager": {
 			"name": "FuturesMarketManager",
@@ -880,7 +1208,11 @@
 			"link": "https://testnet.bscscan.com/address/0x0BFC458023Fb8222057e24Ee0024f325CdbC6884",
 			"timestamp": "2022-10-28T17:51:21.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0xf02a5e589f46a810af76a4c72db76abdc5dfe827339a5f5514e86bed62763603",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		},
 		"FuturesMarketData": {
 			"name": "FuturesMarketData",
@@ -889,7 +1221,8 @@
 			"link": "https://testnet.bscscan.com/address/0x57A78e746892b6fbfF3D17f90dA1A4C34394696c",
 			"timestamp": "2022-10-28T17:51:42.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x4b26a1fa5cb882e2d48db1b96f18014d86d8d25a3d1e805068083f96179423c0",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": ["0xdaA625cf7a927f61d14bf363335A544134147e41"]
 		},
 		"FuturesMarketSettings": {
 			"name": "FuturesMarketSettings",
@@ -898,7 +1231,11 @@
 			"link": "https://testnet.bscscan.com/address/0x957dA4fd92B35319b8ed412C5bf4C4dC192eD5C5",
 			"timestamp": "2022-10-28T17:52:09.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0xd2631a93c90889e02820e384bf732717eb0df5cd3596ab3ed53d2a1cdfa430ad",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		},
 		"FuturesMarketBTC": {
 			"name": "FuturesMarketBTC",
@@ -907,7 +1244,12 @@
 			"link": "https://testnet.bscscan.com/address/0xE689Ab1C61A6d860fE84e5F55D02a3AFAeda18b6",
 			"timestamp": "2022-10-28T19:46:15.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0xea67ff9a909fb5d003c31c5e5ba6ed435b0dc289f95f89ef6611254c1a70ea36",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xdaA625cf7a927f61d14bf363335A544134147e41",
+				"0x7a42544300000000000000000000000000000000000000000000000000000000",
+				"0x7a42544300000000000000000000000000000000000000000000000000000000"
+			]
 		},
 		"FuturesMarketBNB": {
 			"name": "FuturesMarketBNB",
@@ -916,7 +1258,12 @@
 			"link": "https://testnet.bscscan.com/address/0x802a7e4457AB479Daeaff6Ca8EC2C58AC2376e81",
 			"timestamp": "2022-10-28T19:59:14.304Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xdaA625cf7a927f61d14bf363335A544134147e41",
+				"0x7a424e4200000000000000000000000000000000000000000000000000000000",
+				"0x7a424e4200000000000000000000000000000000000000000000000000000000"
+			]
 		},
 		"FuturesMarketLINK": {
 			"name": "FuturesMarketLINK",
@@ -925,7 +1272,12 @@
 			"link": "https://testnet.bscscan.com/address/0x961A568775882F18Ec8273e9b6337e5A89B8e737",
 			"timestamp": "2022-10-28T19:59:39.532Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xdaA625cf7a927f61d14bf363335A544134147e41",
+				"0x7a4c494e4b000000000000000000000000000000000000000000000000000000",
+				"0x7a4c494e4b000000000000000000000000000000000000000000000000000000"
+			]
 		},
 		"FuturesMarketADA": {
 			"name": "FuturesMarketADA",
@@ -934,7 +1286,12 @@
 			"link": "https://testnet.bscscan.com/address/0x0c86e869EB7DD952827EE7Ce3dF57528dB96A151",
 			"timestamp": "2022-11-02T19:56:15.558Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xdaA625cf7a927f61d14bf363335A544134147e41",
+				"0x4144410000000000000000000000000000000000000000000000000000000000",
+				"0x7a41444100000000000000000000000000000000000000000000000000000000"
+			]
 		},
 		"FuturesMarketCAKE": {
 			"name": "FuturesMarketCAKE",
@@ -943,7 +1300,12 @@
 			"link": "https://testnet.bscscan.com/address/0xe04A435f8d545D5701D7eB6645F72743F4a85773",
 			"timestamp": "2022-11-02T19:57:10.023Z",
 			"txn": "",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xdaA625cf7a927f61d14bf363335A544134147e41",
+				"0x43414b4500000000000000000000000000000000000000000000000000000000",
+				"0x7a43414b45000000000000000000000000000000000000000000000000000000"
+			]
 		},
 		"Liquidator": {
 			"name": "Liquidator",
@@ -952,7 +1314,11 @@
 			"link": "https://testnet.bscscan.com/address/0x03e6ee4AFD5F5F9CD0cFd1e228B125Bd2684d687",
 			"timestamp": "2022-11-09T17:45:45.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x58236ffd80c97841d078f888a3fbeaa968e1eb3865c889d8ebc7679ff3829567",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		},
 		"LiquidatorRewards": {
 			"name": "LiquidatorRewards",
@@ -961,7 +1327,11 @@
 			"link": "https://testnet.bscscan.com/address/0x9bBdedd465796ef1dDa8378d283796437758e04e",
 			"timestamp": "2022-11-09T17:46:03.000Z",
 			"txn": "https://testnet.bscscan.com/tx/0x7b20ea949037519d52c9d4fb90dcf0901c4b3c12d6a0b0bcbf26642ecaef13a2",
-			"network": "testnet"
+			"network": "testnet",
+			"constructorArgs": [
+				"0xD9e11e52D2fAF7E735613CcB54478461611Fd4b7",
+				"0xdaA625cf7a927f61d14bf363335A544134147e41"
+			]
 		}
 	},
 	"sources": {

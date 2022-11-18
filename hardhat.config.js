@@ -67,7 +67,8 @@ module.exports = {
 			url: 'http://localhost:9545',
 		},
 		mainnet: {
-			url: process.env.PROVIDER_URL.replace('network', 'mainnet') || 'http://localhost:8545',
+			// url: process.env.PROVIDER_URL.replace('network', 'mainnet') || 'http://localhost:8545',
+			url: process.env.PROVIDER_URL_MAINNET || 'http://localhost:8545',
 			chainId: 56,
 			accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
 		},
