@@ -14,7 +14,7 @@ import "./interfaces/ISystemStatus.sol";
 import "./interfaces/IERC20.sol";
 import "./interfaces/IExchangeState.sol";
 import "./interfaces/IExchangeRates.sol";
-import "./interfaces/IExchangeCircuitBreaker.sol";
+import "./interfaces/ICircuitBreaker.sol";
 import "./interfaces/ISynthetix.sol";
 import "./interfaces/IFeePool.sol";
 import "./interfaces/IDelegateApprovals.sol";
@@ -25,12 +25,7 @@ import "./Proxyable.sol";
 
 // Used to have strongly-typed access to internal mutative functions in Synthetix
 interface ISynthetixInternal {
-    function emitExchangeTracking(
-        bytes32 trackingCode,
-        bytes32 toCurrencyKey,
-        uint256 toAmount,
-        uint256 fee
-    ) external;
+    function emitExchangeTracking(bytes32 trackingCode, bytes32 toCurrencyKey, uint256 toAmount, uint256 fee) external;
 
     function emitSynthExchange(
         address account,
@@ -50,17 +45,9 @@ interface ISynthetixInternal {
         address toAddress
     ) external;
 
-    function emitExchangeReclaim(
-        address account,
-        bytes32 currencyKey,
-        uint amount
-    ) external;
+    function emitExchangeReclaim(address account, bytes32 currencyKey, uint amount) external;
 
-    function emitExchangeRebate(
-        address account,
-        bytes32 currencyKey,
-        uint amount
-    ) external;
+    function emitExchangeRebate(address account, bytes32 currencyKey, uint amount) external;
 }
 
 interface IExchangerInternalDebtCache {
@@ -89,7 +76,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     bytes32 private constant CONTRACT_DELEGATEAPPROVALS = "DelegateApprovals";
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_DEBTCACHE = "DebtCache";
-    bytes32 private constant CONTRACT_CIRCUIT_BREAKER = "ExchangeCircuitBreaker";
+    bytes32 private constant CONTRACT_CIRCUIT_BREAKER = "CircuitBreaker";
 
     constructor(address _owner, address _resolver) public Owned(_owner) MixinSystemSettings(_resolver) {}
 
@@ -123,8 +110,8 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         return IExchangeRates(requireAndGetAddress(CONTRACT_EXRATES));
     }
 
-    function exchangeCircuitBreaker() internal view returns (IExchangeCircuitBreaker) {
-        return IExchangeCircuitBreaker(requireAndGetAddress(CONTRACT_CIRCUIT_BREAKER));
+    function circuitBreaker() internal view returns (ICircuitBreaker) {
+        return ICircuitBreaker(requireAndGetAddress(CONTRACT_CIRCUIT_BREAKER));
     }
 
     function synthetix() internal view returns (ISynthetix) {
@@ -168,31 +155,24 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     }
 
     function lastExchangeRate(bytes32 currencyKey) external view returns (uint) {
-        return exchangeCircuitBreaker().lastExchangeRate(currencyKey);
+        return circuitBreaker().lastValue(address(exchangeRates().aggregators(currencyKey)));
     }
 
-    function settlementOwing(address account, bytes32 currencyKey)
-        public
-        view
-        returns (
-            uint reclaimAmount,
-            uint rebateAmount,
-            uint numEntries
-        )
-    {
+    function settlementOwing(
+        address account,
+        bytes32 currencyKey
+    ) public view returns (uint reclaimAmount, uint rebateAmount, uint numEntries) {
         (reclaimAmount, rebateAmount, numEntries, ) = _settlementOwing(account, currencyKey);
     }
 
     // Internal function to aggregate each individual rebate and reclaim entry for a synth
-    function _settlementOwing(address account, bytes32 currencyKey)
+    function _settlementOwing(
+        address account,
+        bytes32 currencyKey
+    )
         internal
         view
-        returns (
-            uint reclaimAmount,
-            uint rebateAmount,
-            uint numEntries,
-            IExchanger.ExchangeEntrySettlement[] memory
-        )
+        returns (uint reclaimAmount, uint rebateAmount, uint numEntries, IExchanger.ExchangeEntrySettlement[] memory)
     {
         // Need to sum up all reclaim and rebate amounts for the user and the currency key
         numEntries = exchangeState().getLengthOfEntries(account, currencyKey);
@@ -209,22 +189,23 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
             (uint srcRoundIdAtPeriodEnd, uint destRoundIdAtPeriodEnd) = getRoundIdsAtPeriodEnd(exchangeEntry);
 
             // given these round ids, determine what effective value they should have received
-            (uint destinationAmount, , ) =
-                exchangeRates().effectiveValueAndRatesAtRound(
-                    exchangeEntry.src,
-                    exchangeEntry.amount,
-                    exchangeEntry.dest,
-                    srcRoundIdAtPeriodEnd,
-                    destRoundIdAtPeriodEnd
-                );
+            (uint destinationAmount, , ) = exchangeRates().effectiveValueAndRatesAtRound(
+                exchangeEntry.src,
+                exchangeEntry.amount,
+                exchangeEntry.dest,
+                srcRoundIdAtPeriodEnd,
+                destRoundIdAtPeriodEnd
+            );
 
             // and deduct the fee from this amount using the exchangeFeeRate from storage
             uint amountShouldHaveReceived = _deductFeesFromAmount(destinationAmount, exchangeEntry.exchangeFeeRate);
 
             // SIP-65 settlements where the amount at end of waiting period is beyond the threshold, then
             // settle with no reclaim or rebate
-            bool sip65condition =
-                exchangeCircuitBreaker().isDeviationAboveThreshold(exchangeEntry.amountReceived, amountShouldHaveReceived);
+            bool sip65condition = circuitBreaker().isDeviationAboveThreshold(
+                exchangeEntry.amountReceived,
+                amountShouldHaveReceived
+            );
             if (!sip65condition) {
                 if (exchangeEntry.amountReceived > amountShouldHaveReceived) {
                     // if they received more than they should have, add to the reclaim tally
@@ -316,7 +297,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     }
 
     function isSynthRateInvalid(bytes32 currencyKey) external view returns (bool) {
-        (, bool invalid) = exchangeCircuitBreaker().rateWithInvalid(currencyKey);
+        (, bool invalid) = exchangeRates().rateAndInvalid(currencyKey);
         return invalid;
     }
 
@@ -353,24 +334,11 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         }
     }
 
-    function exchangeAtomically(
-        address,
-        bytes32,
-        uint,
-        bytes32,
-        address,
-        bytes32,
-        uint
-    ) external returns (uint) {
+    function exchangeAtomically(address, bytes32, uint, bytes32, address, bytes32, uint) external returns (uint) {
         _notImplemented();
     }
 
-    function _emitTrackingEvent(
-        bytes32 trackingCode,
-        bytes32 toCurrencyKey,
-        uint256 toAmount,
-        uint256 fee
-    ) internal {
+    function _emitTrackingEvent(bytes32 trackingCode, bytes32 toCurrencyKey, uint256 toAmount, uint256 fee) internal {
         ISynthetixInternal(address(synthetix())).emitExchangeTracking(trackingCode, toCurrencyKey, toAmount, fee);
     }
 
@@ -425,15 +393,10 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         bytes32 destinationCurrencyKey,
         address destinationAddress,
         bool virtualSynth
-    )
-        internal
-        returns (
-            uint amountReceived,
-            uint fee,
-            IVirtualSynth vSynth
-        )
-    {
-        require(sourceAmount > 0, "Zero amount");
+    ) internal returns (uint amountReceived, uint fee, IVirtualSynth vSynth) {
+        if (!_ensureCanExchange(sourceCurrencyKey, destinationCurrencyKey, sourceAmount)) {
+            return (0, 0, IVirtualSynth(0));
+        }
 
         // Using struct to resolve stack too deep error
         IExchanger.ExchangeEntry memory entry;
@@ -457,13 +420,8 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
             entry.roundIdForDest
         );
 
+        // rates must also be good for the round we are doing
         _ensureCanExchangeAtRound(sourceCurrencyKey, destinationCurrencyKey, entry.roundIdForSrc, entry.roundIdForDest);
-
-        // SIP-65: Decentralized Circuit Breaker
-        // mutative call to suspend system if the rate is invalid
-        if (_exchangeRatesCircuitBroken(sourceCurrencyKey, destinationCurrencyKey)) {
-            return (0, 0, IVirtualSynth(0));
-        }
 
         bool tooVolatile;
         (entry.exchangeFeeRate, tooVolatile) = _feeRateForExchangeAtRounds(
@@ -547,26 +505,6 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         }
     }
 
-    // SIP-65: Decentralized Circuit Breaker
-    function _exchangeRatesCircuitBroken(bytes32 sourceCurrencyKey, bytes32 destinationCurrencyKey)
-        internal
-        returns (bool circuitBroken)
-    {
-        // check both currencies unless they're zUSD, since its rate is never invalid (gas savings)
-        if (sourceCurrencyKey != zUSD) {
-            (, circuitBroken) = exchangeCircuitBreaker().rateWithBreakCircuit(sourceCurrencyKey);
-        }
-
-        if (destinationCurrencyKey != zUSD) {
-            // we're not skipping the suspension check if the circuit was broken already
-            // this is not terribly important, but is more consistent (so that results don't
-            // depend on which synth is source and which is destination)
-            bool destCircuitBroken;
-            (, destCircuitBroken) = exchangeCircuitBreaker().rateWithBreakCircuit(destinationCurrencyKey);
-            circuitBroken = circuitBroken || destCircuitBroken;
-        }
-    }
-
     function _convert(
         bytes32 sourceCurrencyKey,
         address from,
@@ -591,24 +529,15 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         }
     }
 
-    function _createVirtualSynth(
-        IERC20,
-        address,
-        uint,
-        bytes32
-    ) internal returns (IVirtualSynth) {
+    function _createVirtualSynth(IERC20, address, uint, bytes32) internal returns (IVirtualSynth) {
         _notImplemented();
     }
 
     // Note: this function can intentionally be called by anyone on behalf of anyone else (the caller just pays the gas)
-    function settle(address from, bytes32 currencyKey)
-        external
-        returns (
-            uint reclaimed,
-            uint refunded,
-            uint numEntriesSettled
-        )
-    {
+    function settle(
+        address from,
+        bytes32 currencyKey
+    ) external returns (uint reclaimed, uint refunded, uint numEntriesSettled) {
         systemStatus().requireSynthActive(currencyKey);
         return _internalSettle(from, currencyKey, true);
     }
@@ -616,26 +545,36 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     function suspendSynthWithInvalidRate(bytes32 currencyKey) external {
         systemStatus().requireSystemActive();
         // SIP-65: Decentralized Circuit Breaker
-        (, bool circuitBroken) = exchangeCircuitBreaker().rateWithBreakCircuit(currencyKey);
+        (, bool circuitBroken, ) = exchangeRates().rateWithSafetyChecks(currencyKey);
         require(circuitBroken, "Synth price is valid");
     }
 
     /* ========== INTERNAL FUNCTIONS ========== */
 
+    // runs basic checks and calls `rateWithSafetyChecks` (which can trigger circuit breakers)
+    // returns if there are any problems found with the rate of the given currencyKey but not reverted
     function _ensureCanExchange(
         bytes32 sourceCurrencyKey,
-        uint sourceAmount,
-        bytes32 destinationCurrencyKey
-    ) internal view {
+        bytes32 destinationCurrencyKey,
+        uint sourceAmount
+    ) internal returns (bool) {
         require(sourceCurrencyKey != destinationCurrencyKey, "Can't be same synth");
         require(sourceAmount > 0, "Zero amount");
 
-        bytes32[] memory synthKeys = new bytes32[](2);
-        synthKeys[0] = sourceCurrencyKey;
-        synthKeys[1] = destinationCurrencyKey;
-        require(!exchangeRates().anyRateIsInvalid(synthKeys), "src/dest rate stale or flagged");
+        (, bool srcBroken, bool srcStaleOrInvalid) = sourceCurrencyKey != zUSD
+            ? exchangeRates().rateWithSafetyChecks(sourceCurrencyKey)
+            : (0, false, false);
+        (, bool dstBroken, bool dstStaleOrInvalid) = destinationCurrencyKey != zUSD
+            ? exchangeRates().rateWithSafetyChecks(destinationCurrencyKey)
+            : (0, false, false);
+
+        require(!srcStaleOrInvalid, "src rate stale or flagged");
+        require(!dstStaleOrInvalid, "dest rate stale or flagged");
+
+        return !srcBroken && !dstBroken;
     }
 
+    // runs additional checks to verify a rate is valid at a specific round`
     function _ensureCanExchangeAtRound(
         bytes32 sourceCurrencyKey,
         bytes32 destinationCurrencyKey,
@@ -658,18 +597,15 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         address from,
         bytes32 currencyKey,
         bool updateCache
-    )
-        internal
-        returns (
-            uint reclaimed,
-            uint refunded,
-            uint numEntriesSettled
-        )
-    {
+    ) internal returns (uint reclaimed, uint refunded, uint numEntriesSettled) {
         require(maxSecsLeftInWaitingPeriod(from, currencyKey) == 0, "Cannot settle during waiting period");
 
-        (uint reclaimAmount, uint rebateAmount, uint entries, IExchanger.ExchangeEntrySettlement[] memory settlements) =
-            _settlementOwing(from, currencyKey);
+        (
+            uint reclaimAmount,
+            uint rebateAmount,
+            uint entries,
+            IExchanger.ExchangeEntrySettlement[] memory settlements
+        ) = _settlementOwing(from, currencyKey);
 
         if (reclaimAmount > rebateAmount) {
             reclaimed = reclaimAmount.sub(rebateAmount);
@@ -708,21 +644,13 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         exchangeState().removeEntries(from, currencyKey);
     }
 
-    function reclaim(
-        address from,
-        bytes32 currencyKey,
-        uint amount
-    ) internal {
+    function reclaim(address from, bytes32 currencyKey, uint amount) internal {
         // burn amount from user
         issuer().synths(currencyKey).burn(from, amount);
         ISynthetixInternal(address(synthetix())).emitExchangeReclaim(from, currencyKey, amount);
     }
 
-    function refund(
-        address from,
-        bytes32 currencyKey,
-        uint amount
-    ) internal {
+    function refund(address from, bytes32 currencyKey, uint amount) internal {
         // issue amount to user
         issuer().synths(currencyKey).issue(from, amount);
         ISynthetixInternal(address(synthetix())).emitExchangeRebate(from, currencyKey, amount);
@@ -752,11 +680,10 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     /// @param sourceCurrencyKey The source currency key
     /// @param destinationCurrencyKey The destination currency key
     /// @return The exchange dynamic fee rate and if rates are too volatile
-    function dynamicFeeRateForExchange(bytes32 sourceCurrencyKey, bytes32 destinationCurrencyKey)
-        external
-        view
-        returns (uint feeRate, bool tooVolatile)
-    {
+    function dynamicFeeRateForExchange(
+        bytes32 sourceCurrencyKey,
+        bytes32 destinationCurrencyKey
+    ) external view returns (uint feeRate, bool tooVolatile) {
         return _dynamicFeeRateForExchange(sourceCurrencyKey, destinationCurrencyKey);
     }
 
@@ -765,11 +692,10 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     /// @param destinationCurrencyKey The destination currency key
     /// @return The exchange fee rate
     /// @return The exchange dynamic fee rate and if rates are too volatile
-    function _feeRateForExchange(bytes32 sourceCurrencyKey, bytes32 destinationCurrencyKey)
-        internal
-        view
-        returns (uint feeRate, bool tooVolatile)
-    {
+    function _feeRateForExchange(
+        bytes32 sourceCurrencyKey,
+        bytes32 destinationCurrencyKey
+    ) internal view returns (uint feeRate, bool tooVolatile) {
         // Get the exchange fee rate as per the source currencyKey and destination currencyKey
         uint baseRate = getExchangeFeeRate(sourceCurrencyKey).add(getExchangeFeeRate(destinationCurrencyKey));
         uint dynamicFee;
@@ -790,8 +716,8 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         uint roundIdForSrc,
         uint roundIdForDest
     ) internal view returns (uint feeRate, bool tooVolatile) {
-        // Get the exchange fee rate as per destination currencyKey
-        uint baseRate = getExchangeFeeRate(destinationCurrencyKey);
+        // Get the exchange fee rate as per the source currencyKey and destination currencyKey
+        uint baseRate = getExchangeFeeRate(sourceCurrencyKey).add(getExchangeFeeRate(destinationCurrencyKey));
         uint dynamicFee;
         (dynamicFee, tooVolatile) = _dynamicFeeRateForExchangeAtRounds(
             sourceCurrencyKey,
@@ -802,11 +728,10 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         return (baseRate.add(dynamicFee), tooVolatile);
     }
 
-    function _dynamicFeeRateForExchange(bytes32 sourceCurrencyKey, bytes32 destinationCurrencyKey)
-        internal
-        view
-        returns (uint dynamicFee, bool tooVolatile)
-    {
+    function _dynamicFeeRateForExchange(
+        bytes32 sourceCurrencyKey,
+        bytes32 destinationCurrencyKey
+    ) internal view returns (uint dynamicFee, bool tooVolatile) {
         DynamicFeeConfig memory config = getExchangeDynamicFeeConfig();
         (uint dynamicFeeDst, bool dstVolatile) = _dynamicFeeRateForCurrency(destinationCurrencyKey, config);
         (uint dynamicFeeSrc, bool srcVolatile) = _dynamicFeeRateForCurrency(sourceCurrencyKey, config);
@@ -824,8 +749,11 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         uint roundIdForDest
     ) internal view returns (uint dynamicFee, bool tooVolatile) {
         DynamicFeeConfig memory config = getExchangeDynamicFeeConfig();
-        (uint dynamicFeeDst, bool dstVolatile) =
-            _dynamicFeeRateForCurrencyRound(destinationCurrencyKey, roundIdForDest, config);
+        (uint dynamicFeeDst, bool dstVolatile) = _dynamicFeeRateForCurrencyRound(
+            destinationCurrencyKey,
+            roundIdForDest,
+            config
+        );
         (uint dynamicFeeSrc, bool srcVolatile) = _dynamicFeeRateForCurrencyRound(sourceCurrencyKey, roundIdForSrc, config);
         dynamicFee = dynamicFeeDst.add(dynamicFeeSrc);
         // cap to maxFee
@@ -838,11 +766,10 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     /// @param currencyKey The given currency key
     /// @param config dynamic fee calculation configuration params
     /// @return The dynamic fee and if it exceeds max dynamic fee set in config
-    function _dynamicFeeRateForCurrency(bytes32 currencyKey, DynamicFeeConfig memory config)
-        internal
-        view
-        returns (uint dynamicFee, bool tooVolatile)
-    {
+    function _dynamicFeeRateForCurrency(
+        bytes32 currencyKey,
+        DynamicFeeConfig memory config
+    ) internal view returns (uint dynamicFee, bool tooVolatile) {
         // no dynamic dynamicFee for zUSD or too few rounds
         if (currencyKey == zUSD || config.rounds <= 1) {
             return (0, false);
@@ -879,11 +806,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     /// @param threshold A threshold to clip the price deviation ratop
     /// @param weightDecay A weight decay constant
     /// @return uint dynamic fee rate as decimal
-    function _dynamicFeeCalculation(
-        uint[] memory prices,
-        uint threshold,
-        uint weightDecay
-    ) internal pure returns (uint) {
+    function _dynamicFeeCalculation(uint[] memory prices, uint threshold, uint weightDecay) internal pure returns (uint) {
         // don't underflow
         if (prices.length == 0) {
             return 0;
@@ -905,11 +828,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     /// absolute price deviation ratio used by dynamic fee calculation
     /// deviationRatio = (abs(current - previous) / previous) - threshold
     /// if negative, zero is returned
-    function _thresholdedAbsDeviationRatio(
-        uint price,
-        uint previousPrice,
-        uint threshold
-    ) internal pure returns (uint) {
+    function _thresholdedAbsDeviationRatio(uint price, uint previousPrice, uint threshold) internal pure returns (uint) {
         if (previousPrice == 0) {
             return 0; // don't divide by zero
         }
@@ -925,15 +844,14 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         uint sourceAmount,
         bytes32 sourceCurrencyKey,
         bytes32 destinationCurrencyKey
-    )
-        external
-        view
-        returns (
-            uint amountReceived,
-            uint fee,
-            uint exchangeFeeRate
-        )
-    {
+    ) external view returns (uint amountReceived, uint fee, uint exchangeFeeRate) {
+        require(sourceCurrencyKey == zUSD || !exchangeRates().rateIsInvalid(sourceCurrencyKey), "src synth rate invalid");
+
+        require(
+            destinationCurrencyKey == zUSD || !exchangeRates().rateIsInvalid(destinationCurrencyKey),
+            "dest synth rate invalid"
+        );
+
         // The checks are added for consistency with the checks performed in _exchange()
         // The reverts (instead of no-op returns) are used order to prevent incorrect usage in calling contracts
         // (The no-op in _exchange() is in order to trigger system suspension if needed)
@@ -942,33 +860,26 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         systemStatus().requireSynthActive(sourceCurrencyKey);
         systemStatus().requireSynthActive(destinationCurrencyKey);
 
-        // check rates don't deviate above ciruit breaker allowed deviation
-        (, bool srcInvalid) = exchangeCircuitBreaker().rateWithInvalid(sourceCurrencyKey);
-        (, bool dstInvalid) = exchangeCircuitBreaker().rateWithInvalid(destinationCurrencyKey);
-        require(!srcInvalid, "source synth rate invalid");
-        require(!dstInvalid, "destination synth rate invalid");
-
-        // check rates not stale or flagged
-        _ensureCanExchange(sourceCurrencyKey, sourceAmount, destinationCurrencyKey);
-
         bool tooVolatile;
         (exchangeFeeRate, tooVolatile) = _feeRateForExchange(sourceCurrencyKey, destinationCurrencyKey);
 
         // check rates volatility result
         require(!tooVolatile, "exchange rates too volatile");
 
-        (uint destinationAmount, , ) =
-            exchangeRates().effectiveValueAndRates(sourceCurrencyKey, sourceAmount, destinationCurrencyKey);
+        (uint destinationAmount, , ) = exchangeRates().effectiveValueAndRates(
+            sourceCurrencyKey,
+            sourceAmount,
+            destinationCurrencyKey
+        );
 
         amountReceived = _deductFeesFromAmount(destinationAmount, exchangeFeeRate);
         fee = destinationAmount.sub(amountReceived);
     }
 
-    function _deductFeesFromAmount(uint destinationAmount, uint exchangeFeeRate)
-        internal
-        pure
-        returns (uint amountReceived)
-    {
+    function _deductFeesFromAmount(
+        uint destinationAmount,
+        uint exchangeFeeRate
+    ) internal pure returns (uint amountReceived) {
         amountReceived = destinationAmount.multiplyDecimal(SafeDecimalMath.unit().sub(exchangeFeeRate));
     }
 
@@ -1007,11 +918,9 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         );
     }
 
-    function getRoundIdsAtPeriodEnd(IExchangeState.ExchangeEntry memory exchangeEntry)
-        internal
-        view
-        returns (uint srcRoundIdAtPeriodEnd, uint destRoundIdAtPeriodEnd)
-    {
+    function getRoundIdsAtPeriodEnd(
+        IExchangeState.ExchangeEntry memory exchangeEntry
+    ) internal view returns (uint srcRoundIdAtPeriodEnd, uint destRoundIdAtPeriodEnd) {
         IExchangeRates exRates = exchangeRates();
         uint _waitingPeriodSecs = getWaitingPeriodSecs();
 

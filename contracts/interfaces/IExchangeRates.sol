@@ -29,14 +29,7 @@ interface IExchangeRates {
         bytes32 sourceCurrencyKey,
         uint sourceAmount,
         bytes32 destinationCurrencyKey
-    )
-        external
-        view
-        returns (
-            uint value,
-            uint sourceRate,
-            uint destinationRate
-        );
+    ) external view returns (uint value, uint sourceRate, uint destinationRate);
 
     function effectiveValueAndRatesAtRound(
         bytes32 sourceCurrencyKey,
@@ -44,28 +37,13 @@ interface IExchangeRates {
         bytes32 destinationCurrencyKey,
         uint roundIdForSrc,
         uint roundIdForDest
-    )
-        external
-        view
-        returns (
-            uint value,
-            uint sourceRate,
-            uint destinationRate
-        );
+    ) external view returns (uint value, uint sourceRate, uint destinationRate);
 
     function effectiveAtomicValueAndRates(
         bytes32 sourceCurrencyKey,
         uint sourceAmount,
         bytes32 destinationCurrencyKey
-    )
-        external
-        view
-        returns (
-            uint value,
-            uint systemValue,
-            uint systemSourceRate,
-            uint systemDestinationRate
-        );
+    ) external view returns (uint value, uint systemValue, uint systemSourceRate, uint systemDestinationRate);
 
     function getCurrentRoundId(bytes32 currencyKey) external view returns (uint);
 
@@ -100,13 +78,14 @@ interface IExchangeRates {
         uint roundId
     ) external view returns (uint[] memory rates, uint[] memory times);
 
-    function ratesAndInvalidForCurrencies(bytes32[] calldata currencyKeys)
-        external
-        view
-        returns (uint[] memory rates, bool anyRateInvalid);
+    function ratesAndInvalidForCurrencies(
+        bytes32[] calldata currencyKeys
+    ) external view returns (uint[] memory rates, bool anyRateInvalid);
 
     function ratesForCurrencies(bytes32[] calldata currencyKeys) external view returns (uint[] memory);
 
     // Mutative functions
     function synthTooVolatileForAtomicExchange(bytes32 currencyKey) external view returns (bool);
+
+    function rateWithSafetyChecks(bytes32 currencyKey) external returns (uint rate, bool broken, bool invalid);
 }

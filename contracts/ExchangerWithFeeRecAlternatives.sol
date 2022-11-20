@@ -50,11 +50,10 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
         return getAtomicMaxVolumePerBlock();
     }
 
-    function feeRateForAtomicExchange(bytes32 sourceCurrencyKey, bytes32 destinationCurrencyKey)
-        external
-        view
-        returns (uint exchangeFeeRate)
-    {
+    function feeRateForAtomicExchange(
+        bytes32 sourceCurrencyKey,
+        bytes32 destinationCurrencyKey
+    ) external view returns (uint exchangeFeeRate) {
         exchangeFeeRate = _feeRateForAtomicExchange(sourceCurrencyKey, destinationCurrencyKey);
     }
 
@@ -62,15 +61,7 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
         uint sourceAmount,
         bytes32 sourceCurrencyKey,
         bytes32 destinationCurrencyKey
-    )
-        external
-        view
-        returns (
-            uint amountReceived,
-            uint fee,
-            uint exchangeFeeRate
-        )
-    {
+    ) external view returns (uint amountReceived, uint fee, uint exchangeFeeRate) {
         (amountReceived, fee, exchangeFeeRate, , , ) = _getAmountsForAtomicExchangeMinusFees(
             sourceAmount,
             sourceCurrencyKey,
@@ -122,8 +113,9 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
         // prevent inverse synths from being allowed due to purgeability
         require(currencyKey[0] != 0x69, "Cannot virtualize this synth");
 
-        IVirtualSynthInternal vSynth =
-            IVirtualSynthInternal(_cloneAsMinimalProxy(_virtualSynthMastercopy(), "Could not create new vSynth"));
+        IVirtualSynthInternal vSynth = IVirtualSynthInternal(
+            _cloneAsMinimalProxy(_virtualSynthMastercopy(), "Could not create new vSynth")
+        );
         vSynth.initialize(synth, resolver, recipient, amount, currencyKey);
         emit VirtualSynthCreated(address(synth), recipient, address(vSynth), currencyKey, amount);
 
@@ -137,7 +129,9 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
         bytes32 destinationCurrencyKey,
         address destinationAddress
     ) internal returns (uint amountReceived, uint fee) {
-        _ensureCanExchange(sourceCurrencyKey, sourceAmount, destinationCurrencyKey);
+        if (!_ensureCanExchange(sourceCurrencyKey, destinationCurrencyKey, sourceAmount)) {
+            return (0, 0);
+        }
         require(!exchangeRates().synthTooVolatileForAtomicExchange(sourceCurrencyKey), "Src synth too volatile");
         require(!exchangeRates().synthTooVolatileForAtomicExchange(destinationCurrencyKey), "Dest synth too volatile");
 
@@ -164,14 +158,9 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
             systemDestinationRate // current system rate for dest currency
         ) = _getAmountsForAtomicExchangeMinusFees(sourceAmountAfterSettlement, sourceCurrencyKey, destinationCurrencyKey);
 
-        // SIP-65: Decentralized Circuit Breaker (checking current system rates)
-        if (_exchangeRatesCircuitBroken(sourceCurrencyKey, destinationCurrencyKey)) {
-            return (0, 0);
-        }
-
         // Sanity check atomic output's value against current system value (checking atomic rates)
         require(
-            !exchangeCircuitBreaker().isDeviationAboveThreshold(systemConvertedAmount, amountReceived.add(fee)),
+            !circuitBreaker().isDeviationAboveThreshold(systemConvertedAmount, amountReceived.add(fee)),
             "Atomic rate deviates too much"
         );
 
@@ -185,8 +174,11 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
             sourceSusdValue = systemConvertedAmount;
         } else {
             // Otherwise, convert source to zUSD value
-            (uint amountReceivedInUSD, uint sUsdFee, , , , ) =
-                _getAmountsForAtomicExchangeMinusFees(sourceAmountAfterSettlement, sourceCurrencyKey, zUSD);
+            (uint amountReceivedInUSD, uint sUsdFee, , , , ) = _getAmountsForAtomicExchangeMinusFees(
+                sourceAmountAfterSettlement,
+                sourceCurrencyKey,
+                zUSD
+            );
             sourceSusdValue = amountReceivedInUSD.add(sUsdFee);
         }
 
@@ -256,20 +248,18 @@ contract ExchangerWithFeeRecAlternatives is MinimalProxyFactory, Exchanger {
     }
 
     function _checkAndUpdateAtomicVolume(uint sourceSusdValue) internal {
-        uint currentVolume =
-            uint(lastAtomicVolume.time) == block.timestamp
-                ? uint(lastAtomicVolume.volume).add(sourceSusdValue)
-                : sourceSusdValue;
+        uint currentVolume = uint(lastAtomicVolume.time) == block.timestamp
+            ? uint(lastAtomicVolume.volume).add(sourceSusdValue)
+            : sourceSusdValue;
         require(currentVolume <= getAtomicMaxVolumePerBlock(), "Surpassed volume limit");
         lastAtomicVolume.time = uint64(block.timestamp);
         lastAtomicVolume.volume = uint192(currentVolume); // Protected by volume limit check above
     }
 
-    function _feeRateForAtomicExchange(bytes32 sourceCurrencyKey, bytes32 destinationCurrencyKey)
-        internal
-        view
-        returns (uint)
-    {
+    function _feeRateForAtomicExchange(
+        bytes32 sourceCurrencyKey,
+        bytes32 destinationCurrencyKey
+    ) internal view returns (uint) {
         // Get the exchange fee rate as per source and destination currencyKey
         uint baseRate = getAtomicExchangeFeeRate(sourceCurrencyKey).add(getAtomicExchangeFeeRate(destinationCurrencyKey));
         if (baseRate == 0) {
