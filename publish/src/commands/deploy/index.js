@@ -210,7 +210,7 @@ const deploy = async ({
 
 	const { account } = deployer;
 
-	if (!account) {
+	if (account) {
 		signer = deployer.signer;
 	}
 
