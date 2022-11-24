@@ -292,11 +292,5 @@
 	},
 	"LiquidatorRewards": {
 		"deploy": false
-	},
-	"CircuitBreaker": {
-		"deploy": false
-	},
-	"FuturesMarketDebtRatio": {
-		"deploy": false
 	}
 }

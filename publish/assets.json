@@ -479,11 +479,5 @@
 		"category": "crypto",
 		"sign": "",
 		"description": "Maker Dao Dai"
-	},
-	"DebtRatio": {
-		"asset": "DebtRatio",
-		"category": "crypto",
-		"sign": "",
-		"description": "Synthetix Aggregator Debt Ratio"
 	}
 }
