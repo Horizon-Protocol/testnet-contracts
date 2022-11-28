@@ -8,8 +8,8 @@ module.exports = {
 		'test-helpers',
 		'migrations',
 		'legacy',
+		'RewardEscrowV2Frozen',
 		'EscrowChecker.sol',
-		'ExchangeRatesWithoutInvPricing.sol',
 		'EmptyEtherWrapper.sol',
 	],
 	providerOptions: {
