@@ -54,9 +54,5 @@
 	"CREAM": {
 		"asset": "CREAM",
 		"feed": "0xB8eADfD8B78aDA4F85680eD96e0f50e1B5762b0a"
-	},
-	"DebtRatio": {
-		"asset": "DebtRatio",
-		"feed": "0x7309310b8a2013b5d34E438E8747876B17d6a801"
 	}
 }
