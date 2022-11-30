@@ -73,6 +73,7 @@ contract MyContract {
     horizon.issueMaxSynthsOnBehalf(user);
   }
 }
+
 ```
 
 ### Node.js API
