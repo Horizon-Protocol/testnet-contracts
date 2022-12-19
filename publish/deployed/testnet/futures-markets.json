@@ -4,7 +4,7 @@
 		"asset": "zBTC",
 		"takerFee": "0.003",
 		"makerFee": "0.002",
-		"takerFeeNextPrice": "0.001",
+		"takerFeeNextPrice": "0.003",
 		"makerFeeNextPrice": "0.0",
 		"nextPriceConfirmWindow": "2",
 		"maxLeverage": "25",
@@ -64,20 +64,6 @@
 		"maxMarketValueUSD": "2000000",
 		"maxFundingRate": "0.1",
 		"skewScaleUSD": "10000000",
-		"paused": true
-	},
-	{
-		"marketKey": "zDebtRatio",
-		"asset": "DebtRatio",
-		"takerFee": "0.0060",
-		"makerFee": "0.0060",
-		"takerFeeNextPrice": "0.0015",
-		"makerFeeNextPrice": "0.0015",
-		"nextPriceConfirmWindow": "2",
-		"maxLeverage": "10",
-		"maxMarketValueUSD": "1000000",
-		"maxFundingRate": "0.1",
-		"skewScaleUSD": "5000000",
 		"paused": true
 	}
 ]
