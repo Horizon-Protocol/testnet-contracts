@@ -3,54 +3,64 @@
 const { contract } = require('hardhat');
 const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 const { toBytes32 } = require('../..');
-const { toUnit, currentTime } = require('../utils')();
-const { setExchangeFeeRateForSynths } = require('./helpers');
+const { toUnit } = require('../utils')();
+const {
+	setExchangeFeeRateForSynths,
+	setupPriceAggregators,
+	updateAggregatorRates,
+} = require('./helpers');
 
 const { setupAllContracts } = require('./setup');
 
 contract('SynthUtil', accounts => {
-	const [, ownerAccount, oracle, account2] = accounts;
-	let synthUtil, zUSDContract, synthetix, exchangeRates, timestamp, systemSettings, debtCache;
+	const [, ownerAccount, , account2] = accounts;
+	let synthUtil, sUSDContract, synthetix, exchangeRates, systemSettings, debtCache, circuitBreaker;
 
-	const [zUSD, zBTC, iBTC] = ['zUSD', 'zBTC', 'iBTC'].map(toBytes32);
-	const synthKeys = [zUSD, zBTC, iBTC];
+	const [sUSD, sBTC, iBTC, SNX] = ['sUSD', 'sBTC', 'iBTC', 'SNX'].map(toBytes32);
+	const synthKeys = [sUSD, sBTC, iBTC];
 	const synthPrices = [toUnit('1'), toUnit('5000'), toUnit('5000')];
 
 	before(async () => {
 		({
 			SynthUtil: synthUtil,
-			ZassetzUSD: zUSDContract,
+			SynthsUSD: sUSDContract,
 			Synthetix: synthetix,
 			ExchangeRates: exchangeRates,
 			SystemSettings: systemSettings,
+			CircuitBreaker: circuitBreaker,
 			DebtCache: debtCache,
 		} = await setupAllContracts({
 			accounts,
-			synths: ['zUSD', 'zBTC', 'iBTC'],
+			synths: ['sUSD', 'sBTC', 'iBTC'],
 			contracts: [
 				'SynthUtil',
 				'Synthetix',
 				'Exchanger',
 				'ExchangeRates',
 				'ExchangeState',
-				'FeePoolState',
 				'FeePoolEternalStorage',
 				'SystemSettings',
 				'DebtCache',
 				'Issuer',
+				'LiquidatorRewards',
 				'CollateralManager',
+				'CircuitBreaker',
 				'RewardEscrowV2', // required for issuer._collateral to read collateral
 			],
 		}));
+
+		await setupPriceAggregators(exchangeRates, ownerAccount, [sBTC, iBTC]);
 	});
 
 	addSnapshotBeforeRestoreAfterEach();
 
 	beforeEach(async () => {
-		timestamp = await currentTime();
-		await exchangeRates.updateRates([zBTC, iBTC], ['5000', '5000'].map(toUnit), timestamp, {
-			from: oracle,
-		});
+		await updateAggregatorRates(
+			exchangeRates,
+			circuitBreaker,
+			[sBTC, iBTC, SNX],
+			['5000', '5000', '0.2'].map(toUnit)
+		);
 		await debtCache.takeDebtSnapshot();
 
 		// set a 0% default exchange fee rate for test purpose
@@ -64,26 +74,26 @@ contract('SynthUtil', accounts => {
 	});
 
 	describe('given an instance', () => {
-		const zUSDMinted = toUnit('10000');
+		const sUSDMinted = toUnit('10000');
 		const amountToExchange = toUnit('50');
-		const zUSDAmount = toUnit('100');
+		const sUSDAmount = toUnit('100');
 		beforeEach(async () => {
-			await synthetix.issueSynths(zUSDMinted, {
+			await synthetix.issueSynths(sUSDMinted, {
 				from: ownerAccount,
 			});
-			await zUSDContract.transfer(account2, zUSDAmount, { from: ownerAccount });
-			await synthetix.exchange(zUSD, amountToExchange, zBTC, { from: account2 });
+			await sUSDContract.transfer(account2, sUSDAmount, { from: ownerAccount });
+			await synthetix.exchange(sUSD, amountToExchange, sBTC, { from: account2 });
 		});
 		describe('totalSynthsInKey', () => {
 			it('should return the total balance of synths into the specified currency key', async () => {
-				assert.bnEqual(await synthUtil.totalSynthsInKey(account2, zUSD), zUSDAmount);
+				assert.bnEqual(await synthUtil.totalSynthsInKey(account2, sUSD), sUSDAmount);
 			});
 		});
 		describe('synthsBalances', () => {
-			it('should return the balance and its value in zUSD for every synth in the wallet', async () => {
-				const effectiveValue = await exchangeRates.effectiveValue(zUSD, amountToExchange, zBTC);
+			it('should return the balance and its value in sUSD for every synth in the wallet', async () => {
+				const effectiveValue = await exchangeRates.effectiveValue(sUSD, amountToExchange, sBTC);
 				assert.deepEqual(await synthUtil.synthsBalances(account2), [
-					[zUSD, zBTC, iBTC],
+					[sUSD, sBTC, iBTC],
 					[toUnit('50'), effectiveValue, 0],
 					[toUnit('50'), toUnit('50'), 0],
 				]);
@@ -96,11 +106,11 @@ contract('SynthUtil', accounts => {
 		});
 		describe('synthsTotalSupplies', () => {
 			it('should return the correct synth total supplies', async () => {
-				const effectiveValue = await exchangeRates.effectiveValue(zUSD, amountToExchange, zBTC);
+				const effectiveValue = await exchangeRates.effectiveValue(sUSD, amountToExchange, sBTC);
 				assert.deepEqual(await synthUtil.synthsTotalSupplies(), [
 					synthKeys,
-					[zUSDMinted.sub(amountToExchange), effectiveValue, 0],
-					[zUSDMinted.sub(amountToExchange), amountToExchange, 0],
+					[sUSDMinted.sub(amountToExchange), effectiveValue, 0],
+					[sUSDMinted.sub(amountToExchange), amountToExchange, 0],
 				]);
 			});
 		});

@@ -38,7 +38,7 @@ contract('SynthRedeemer (unit tests)', async accounts => {
 		let synth, otherSynth;
 		beforeEach(async () => {
 			({ mocks: this.mocks, resolver: this.resolver } = await prepareSmocks({
-				contracts: ['Issuer', 'Synth:ZassetzUSD'],
+				contracts: ['Issuer', 'Synth:SynthsUSD'],
 				accounts: accounts.slice(10), // mock using accounts after the first few
 			}));
 		});
@@ -72,7 +72,7 @@ contract('SynthRedeemer (unit tests)', async accounts => {
 				describe('when there is sufficient sUSD for the synth to be deprecated', () => {
 					beforeEach(async () => {
 						// smock sUSD balance to prevent the deprecation failing
-						this.mocks['ZassetzUSD'].smocked.balanceOf.will.return.with(parseEther('10000'));
+						this.mocks['SynthsUSD'].smocked.balanceOf.will.return.with(parseEther('10000'));
 					});
 
 					describe('when successfully executed', () => {
@@ -125,7 +125,7 @@ contract('SynthRedeemer (unit tests)', async accounts => {
 				describe('when there is sufficient sUSD for the synth to be deprecated', () => {
 					beforeEach(async () => {
 						// smock sUSD balance to prevent the deprecation failing
-						this.mocks['ZassetzUSD'].smocked.balanceOf.will.return.with(parseEther('2000'));
+						this.mocks['SynthsUSD'].smocked.balanceOf.will.return.with(parseEther('2000'));
 					});
 					it('then deprecation succeeds', async () => {
 						await instance.deprecate(synth.address, parseEther('2'), {
@@ -177,7 +177,7 @@ contract('SynthRedeemer (unit tests)', async accounts => {
 				describe('when a synth is deprecated', () => {
 					beforeEach(async () => {
 						// smock sUSD balance to prevent the deprecation failing
-						this.mocks['ZassetzUSD'].smocked.balanceOf.will.return.with(parseEther('2000'));
+						this.mocks['SynthsUSD'].smocked.balanceOf.will.return.with(parseEther('2000'));
 						await instance.deprecate(synth.address, parseEther('2'), {
 							from: this.mocks['Issuer'].address,
 						});
@@ -214,7 +214,7 @@ contract('SynthRedeemer (unit tests)', async accounts => {
 				describe('when a synth is deprecated', () => {
 					beforeEach(async () => {
 						// smock sUSD balance to prevent the deprecation failing
-						this.mocks['ZassetzUSD'].smocked.balanceOf.will.return.with(parseEther('2000'));
+						this.mocks['SynthsUSD'].smocked.balanceOf.will.return.with(parseEther('2000'));
 						await instance.deprecate(synth.address, parseEther('2'), {
 							from: this.mocks['Issuer'].address,
 						});
@@ -239,7 +239,7 @@ contract('SynthRedeemer (unit tests)', async accounts => {
 				describe('when synth marked for redemption', () => {
 					beforeEach(async () => {
 						// smock sUSD balance to prevent the deprecation failing
-						this.mocks['ZassetzUSD'].smocked.balanceOf.will.return.with(parseEther('2000'));
+						this.mocks['SynthsUSD'].smocked.balanceOf.will.return.with(parseEther('2000'));
 						await instance.deprecate(synth.address, parseEther('2'), {
 							from: this.mocks['Issuer'].address,
 						});
@@ -276,10 +276,10 @@ contract('SynthRedeemer (unit tests)', async accounts => {
 								);
 							});
 							it('transfers the correct amount of sUSD to the user', async () => {
-								assert.equal(this.mocks['ZassetzUSD'].smocked.transfer.calls.length, 1);
-								assert.equal(this.mocks['ZassetzUSD'].smocked.transfer.calls[0][0], account1);
+								assert.equal(this.mocks['SynthsUSD'].smocked.transfer.calls.length, 1);
+								assert.equal(this.mocks['SynthsUSD'].smocked.transfer.calls[0][0], account1);
 								assert.bnEqual(
-									this.mocks['ZassetzUSD'].smocked.transfer.calls[0][1],
+									this.mocks['SynthsUSD'].smocked.transfer.calls[0][1],
 									parseEther('10') // 5 units deprecated at price 2 is 10
 								);
 							});
@@ -308,7 +308,7 @@ contract('SynthRedeemer (unit tests)', async accounts => {
 				describe('when a synth marked for redemption', () => {
 					beforeEach(async () => {
 						// smock sUSD balance to prevent the deprecation failing
-						this.mocks['ZassetzUSD'].smocked.balanceOf.will.return.with(parseEther('2000'));
+						this.mocks['SynthsUSD'].smocked.balanceOf.will.return.with(parseEther('2000'));
 					});
 					beforeEach(async () => {
 						await instance.deprecate(synth.address, parseEther('2'), {
@@ -366,13 +366,13 @@ contract('SynthRedeemer (unit tests)', async accounts => {
 												);
 											});
 											it('transfers the correct amount of sUSD to the user', async () => {
-												assert.equal(this.mocks['ZassetzUSD'].smocked.transfer.calls.length, 2);
+												assert.equal(this.mocks['SynthsUSD'].smocked.transfer.calls.length, 2);
 												assert.equal(
-													this.mocks['ZassetzUSD'].smocked.transfer.calls[i][0],
+													this.mocks['SynthsUSD'].smocked.transfer.calls[i][0],
 													account1
 												);
 												assert.bnEqual(
-													this.mocks['ZassetzUSD'].smocked.transfer.calls[i][1],
+													this.mocks['SynthsUSD'].smocked.transfer.calls[i][1],
 													parseEther('10') // 5 units deprecated at price 2 is 10
 												);
 											});
@@ -402,7 +402,7 @@ contract('SynthRedeemer (unit tests)', async accounts => {
 				describe('when synth marked for redemption', () => {
 					beforeEach(async () => {
 						// smock sUSD balance to prevent the deprecation failing
-						this.mocks['ZassetzUSD'].smocked.balanceOf.will.return.with(parseEther('2000'));
+						this.mocks['SynthsUSD'].smocked.balanceOf.will.return.with(parseEther('2000'));
 						await instance.deprecate(synth.address, parseEther('2'), {
 							from: this.mocks['Issuer'].address,
 						});
@@ -441,10 +441,10 @@ contract('SynthRedeemer (unit tests)', async accounts => {
 								);
 							});
 							it('transfers the correct amount of sUSD to the user', async () => {
-								assert.equal(this.mocks['ZassetzUSD'].smocked.transfer.calls.length, 1);
-								assert.equal(this.mocks['ZassetzUSD'].smocked.transfer.calls[0][0], account1);
+								assert.equal(this.mocks['SynthsUSD'].smocked.transfer.calls.length, 1);
+								assert.equal(this.mocks['SynthsUSD'].smocked.transfer.calls[0][0], account1);
 								assert.bnEqual(
-									this.mocks['ZassetzUSD'].smocked.transfer.calls[0][1],
+									this.mocks['SynthsUSD'].smocked.transfer.calls[0][1],
 									parseEther('2') // 1 units deprecated at price 2 is 2
 								);
 							});

@@ -4,12 +4,14 @@ const { contract, artifacts, web3 } = require('hardhat');
 
 const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 
-const { currentTime, toUnit } = require('../utils')();
+const { toUnit } = require('../utils')();
 
 const {
 	ensureOnlyExpectedMutativeFunctions,
 	getDecodedLogs,
 	decodedEventEqual,
+	setupPriceAggregators,
+	updateAggregatorRates,
 } = require('./helpers');
 
 const { setupAllContracts } = require('./setup');
@@ -23,7 +25,7 @@ contract('Wrapper', async accounts => {
 
 	const ONE = toBN('1');
 
-	const [, owner, oracle, , account1] = accounts;
+	const [, owner, , , account1] = accounts;
 
 	let systemSettings,
 		feePool,
@@ -35,8 +37,7 @@ contract('Wrapper', async accounts => {
 		sETHSynth,
 		wrapperFactory,
 		etherWrapper,
-		weth,
-		timestamp;
+		weth;
 
 	const calculateETHToUSD = async feesInETH => {
 		// Ask the Depot how many sUSD I will get for this ETH
@@ -65,8 +66,8 @@ contract('Wrapper', async accounts => {
 			Depot: depot,
 			ExchangeRates: exchangeRates,
 			WrapperFactory: wrapperFactory,
-			SynthsUSD: sUSDSynth,
-			SynthsETH: sETHSynth,
+			ZassetzUSD: sUSDSynth,
+			ZassetzBNB: sETHSynth,
 			WETH: weth,
 		} = await setupAllContracts({
 			accounts,
@@ -88,11 +89,12 @@ contract('Wrapper', async accounts => {
 			],
 		}));
 
+		console.log("**************** sETHSynth ******************", sETHSynth);
 		// deploy an eth wrapper
 		const etherWrapperCreateTx = await wrapperFactory.createWrapper(
 			weth.address,
 			sETH,
-			toBytes32('ZassetzBNB'),
+			toBytes32('ZassetzUSD'),
 			{ from: owner }
 		);
 
@@ -112,12 +114,8 @@ contract('Wrapper', async accounts => {
 			from: owner,
 		});
 
-		timestamp = await currentTime();
-
-		// Depot requires ETH rates
-		await exchangeRates.updateRates([sETH, ETH], ['1500', '1500'].map(toUnit), timestamp, {
-			from: oracle,
-		});
+		await setupPriceAggregators(exchangeRates, owner, [sETH, ETH]);
+		await updateAggregatorRates(exchangeRates, null, [sETH, ETH], ['1500', '1500'].map(toUnit));
 	});
 
 	addSnapshotBeforeRestoreAfterEach();

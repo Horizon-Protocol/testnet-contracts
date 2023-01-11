@@ -18,7 +18,7 @@
 		"fork": "node --max-old-space-size=4096 ./node_modules/.bin/hardhat node",
 		"fork:mainnet": "node --max-old-space-size=4096 ./node_modules/.bin/hardhat node --target-network mainnet --port 9545",
 		"fork:ovm": "node --max-old-space-size=4096 ./node_modules/.bin/hardhat node --target-network mainnet --use-ovm",
-		"test": "node --max-old-space-size=4096 ./node_modules/.bin/hardhat test",
+		"test": "node --max-old-space-size=4096 --openssl-legacy-provider ./node_modules/.bin/hardhat test",
 		"describe": "hardhat describe",
 		"test:deployments": "mocha test/deployments -- --timeout 100000",
 		"test:etherscan": "node test/etherscan",

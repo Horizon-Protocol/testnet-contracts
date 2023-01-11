@@ -15,6 +15,8 @@ const {
 	onlyGivenAddressCanInvoke,
 	ensureOnlyExpectedMutativeFunctions,
 	setStatus,
+	setupPriceAggregators,
+	updateAggregatorRates,
 } = require('./helpers');
 
 const {
@@ -25,51 +27,50 @@ const {
 
 contract('DebtCache', async accounts => {
 	const [sUSD, sAUD, sEUR, SNX, sETH, ETH, iETH] = [
-		'zUSD',
-		'zAUD',
-		'zEUR',
-		'HZN',
-		'zBNB',
-		'BNB',
-		'iBNB',
+		'sUSD',
+		'sAUD',
+		'sEUR',
+		'SNX',
+		'sETH',
+		'ETH',
+		'iETH',
 	].map(toBytes32);
 	const synthKeys = [sUSD, sAUD, sEUR, sETH, SNX];
 
-	const [deployerAccount, owner, oracle, account1, account2] = accounts;
+	const [deployerAccount, owner, , account1] = accounts;
 
 	const oneETH = toUnit('1.0');
 	const twoETH = toUnit('2.0');
 
 	let synthetix,
+		synthetixProxy,
 		systemStatus,
 		systemSettings,
 		exchangeRates,
+		circuitBreaker,
 		feePool,
 		sUSDContract,
 		sETHContract,
 		sEURContract,
 		sAUDContract,
-		timestamp,
 		debtCache,
 		issuer,
 		synths,
 		addressResolver,
 		exchanger,
+		// Futures market
+		futuresMarketManager,
 		wrapperFactory,
 		weth,
 		// MultiCollateral tests.
 		ceth,
 		// Short tests.
-		short;
+		short,
+		// aggregators
+		aggregatorDebtRatio,
+		aggregatorIssuedSynths;
 
-	const deployCollateral = async ({
-		owner,
-		manager,
-		resolver,
-		collatKey,
-		minColat,
-		minSize,
-	}) => {
+	const deployCollateral = async ({ owner, manager, resolver, collatKey, minColat, minSize }) => {
 		return setupContract({
 			accounts,
 			contract: 'CollateralEth',
@@ -79,10 +80,9 @@ contract('DebtCache', async accounts => {
 
 	const setupMultiCollateral = async () => {
 		const CollateralManager = artifacts.require(`CollateralManager`);
-		const CollateralState = artifacts.require(`CollateralState`);
 		const CollateralManagerState = artifacts.require('CollateralManagerState');
 
-		synths = ['zUSD', 'zBNB', 'zAUD'];
+		synths = ['sUSD', 'sETH', 'sAUD'];
 
 		// Deploy CollateralManagerState.
 		const managerState = await CollateralManagerState.new(owner, ZERO_ADDRESS, {
@@ -135,14 +135,14 @@ contract('DebtCache', async accounts => {
 		await manager.addCollaterals([ceth.address], { from: owner });
 
 		await ceth.addSynths(
-			['ZassetzUSD', 'ZassetzBNB'].map(toBytes32),
-			['zUSD', 'zBNB'].map(toBytes32),
+			['SynthsUSD', 'SynthsETH'].map(toBytes32),
+			['sUSD', 'sETH'].map(toBytes32),
 			{ from: owner }
 		);
 
 		await manager.addSynths(
-			['ZassetzUSD', 'ZassetzBNB'].map(toBytes32),
-			['zUSD', 'zBNB'].map(toBytes32),
+			['SynthsUSD', 'SynthsETH'].map(toBytes32),
+			['sUSD', 'sETH'].map(toBytes32),
 			{ from: owner }
 		);
 		// rebuild the cache to add the synths we need.
@@ -215,9 +215,9 @@ contract('DebtCache', async accounts => {
 
 		await manager.addCollaterals([short.address], { from: owner });
 
-		await short.addSynths(['ZassetzBNB'].map(toBytes32), ['zBNB'].map(toBytes32), { from: owner });
+		await short.addSynths(['SynthsETH'].map(toBytes32), ['sETH'].map(toBytes32), { from: owner });
 
-		await manager.addShortableSynths(['ZassetzBNB'].map(toBytes32), [sETH], {
+		await manager.addShortableSynths(['SynthsETH'].map(toBytes32), [sETH], {
 			from: owner,
 		});
 
@@ -228,7 +228,7 @@ contract('DebtCache', async accounts => {
 		const etherWrapperCreateTx = await wrapperFactory.createWrapper(
 			weth.address,
 			sETH,
-			toBytes32('ZassetzBNB'),
+			toBytes32('SynthsETH'),
 			{ from: owner }
 		);
 
@@ -246,29 +246,35 @@ contract('DebtCache', async accounts => {
 	// run this once before all tests to prepare our environment, snapshots on beforeEach will take
 	// care of resetting to this state
 	before(async () => {
-		synths = ['zUSD', 'zAUD', 'zEUR', 'zBNB', 'iBNB'];
+		synths = ['sUSD', 'sAUD', 'sEUR', 'sETH', 'iETH'];
 		({
 			Synthetix: synthetix,
+			ProxyERC20Synthetix: synthetixProxy,
 			SystemStatus: systemStatus,
 			SystemSettings: systemSettings,
 			ExchangeRates: exchangeRates,
-			ZassetzUSD: sUSDContract,
-			ZassetzBNB: sETHContract,
-			ZassetzAUD: sAUDContract,
-			ZassetzEUR: sEURContract,
+			CircuitBreaker: circuitBreaker,
+			SynthsUSD: sUSDContract,
+			SynthsETH: sETHContract,
+			SynthsAUD: sAUDContract,
+			SynthsEUR: sEURContract,
 			FeePool: feePool,
 			DebtCache: debtCache,
 			Issuer: issuer,
 			AddressResolver: addressResolver,
 			Exchanger: exchanger,
+			FuturesMarketManager: futuresMarketManager,
 			WrapperFactory: wrapperFactory,
 			WETH: weth,
+			'ext:AggregatorDebtRatio': aggregatorDebtRatio,
+			'ext:AggregatorIssuedSynths': aggregatorIssuedSynths,
 		} = await setupAllContracts({
 			accounts,
 			synths,
 			contracts: [
 				'Synthetix',
 				'ExchangeRates',
+				'CircuitBreaker',
 				'FeePool',
 				'FeePoolEternalStorage',
 				'AddressResolver',
@@ -276,6 +282,7 @@ contract('DebtCache', async accounts => {
 				'SynthetixEscrow',
 				'SystemSettings',
 				'Issuer',
+				'LiquidatorRewards',
 				'DebtCache',
 				'Exchanger', // necessary for burnSynths to check settlement of sUSD
 				'DelegateApprovals', // necessary for *OnBehalf functions
@@ -283,25 +290,28 @@ contract('DebtCache', async accounts => {
 				'CollateralManager',
 				'RewardEscrowV2', // necessary for issuer._collateral()
 				'CollateralUtil',
+				'FuturesMarketManager',
 				'WrapperFactory',
 				'WETH',
 			],
 		}));
+
+		// use implementation ABI on the proxy address to simplify calling
+		synthetix = await artifacts.require('Synthetix').at(synthetixProxy.address);
+
+		await setupPriceAggregators(exchangeRates, owner, [sAUD, sEUR, sETH, ETH, iETH]);
 	});
 
 	addSnapshotBeforeRestoreAfterEach();
 
 	beforeEach(async () => {
-		timestamp = await currentTime();
-
-		await exchangeRates.updateRates(
+		await updateAggregatorRates(
+			exchangeRates,
+			circuitBreaker,
 			[sAUD, sEUR, SNX, sETH, ETH, iETH],
-			['0.5', '1.25', '10', '200', '200', '200'].map(toUnit),
-			timestamp,
-			{ from: oracle }
+			['0.5', '1.25', '10', '200', '200', '200'].map(toUnit)
 		);
 
-		// set a 0.3% default exchange fee rate
 		const exchangeFeeRate = toUnit('0.003');
 		await setExchangeFeeRateForSynths({
 			owner,
@@ -325,6 +335,7 @@ contract('DebtCache', async accounts => {
 				'updateCachedSynthDebtsWithRates',
 				'updateDebtCacheValidity',
 				'updateCachedsUSDDebt',
+				'importExcludedIssuedDebts',
 			],
 		});
 	});
@@ -375,6 +386,17 @@ contract('DebtCache', async accounts => {
 			});
 		});
 
+		it('importExcludedIssuedDebts() can only be invoked by the owner', async () => {
+			await onlyGivenAddressCanInvoke({
+				fnc: debtCache.importExcludedIssuedDebts,
+				accounts,
+				args: [ZERO_ADDRESS, ZERO_ADDRESS],
+				address: owner,
+				skipPassCheck: true,
+				reason: 'Only the contract owner may perform this action',
+			});
+		});
+
 		it('recordExcludedDebtChange() can only be invoked by the owner', async () => {
 			await onlyGivenAddressCanInvoke({
 				fnc: debtCache.recordExcludedDebtChange,
@@ -403,11 +425,11 @@ contract('DebtCache', async accounts => {
 			// set default issuance ratio of 0.2
 			await systemSettings.setIssuanceRatio(toUnit('0.2'), { from: owner });
 			// set up initial prices
-			await exchangeRates.updateRates(
+			await updateAggregatorRates(
+				exchangeRates,
+				circuitBreaker,
 				[sAUD, sEUR, sETH],
-				['0.5', '2', '100'].map(toUnit),
-				await currentTime(),
-				{ from: oracle }
+				['0.5', '2', '100'].map(toUnit)
 			);
 			await debtCache.takeDebtSnapshot();
 
@@ -437,7 +459,7 @@ contract('DebtCache', async accounts => {
 				assert.bnEqual(debts[2], toUnit(50));
 				assert.bnEqual(debts[3], toUnit(200));
 
-				assert.isFalse(result[2]);
+				assert.isFalse(result[3]);
 			});
 		});
 
@@ -459,9 +481,12 @@ contract('DebtCache', async accounts => {
 				assert.bnEqual(result[0], toUnit(550));
 				assert.isFalse(result[1]);
 
-				await exchangeRates.updateRates([sAUD, sEUR], ['1', '3'].map(toUnit), await currentTime(), {
-					from: oracle,
-				});
+				await updateAggregatorRates(
+					exchangeRates,
+					circuitBreaker,
+					[sAUD, sEUR],
+					['1', '3'].map(toUnit)
+				);
 				await debtCache.takeDebtSnapshot();
 				assert.bnEqual((await debtCache.cacheInfo()).debt, toUnit(700));
 				result = await debtCache.currentDebt();
@@ -483,13 +508,11 @@ contract('DebtCache', async accounts => {
 			});
 
 			it('updates the cached values for all individual synths', async () => {
-				await exchangeRates.updateRates(
+				await updateAggregatorRates(
+					exchangeRates,
+					circuitBreaker,
 					[sAUD, sEUR, sETH],
-					['1', '3', '200'].map(toUnit),
-					await currentTime(),
-					{
-						from: oracle,
-					}
+					['1', '3', '200'].map(toUnit)
 				);
 				await debtCache.takeDebtSnapshot();
 				let debts = await debtCache.currentSynthDebts([sUSD, sEUR, sAUD, sETH]);
@@ -517,122 +540,17 @@ contract('DebtCache', async accounts => {
 				assert.isTrue((await debtCache.cacheInfo()).isInvalid);
 
 				// Revalidate the cache once rates are no longer stale
-				await exchangeRates.updateRates(
+				await updateAggregatorRates(
+					exchangeRates,
+					circuitBreaker,
 					[sAUD, sEUR, SNX, sETH, ETH, iETH],
-					['0.5', '2', '100', '200', '200', '200'].map(toUnit),
-					await currentTime(),
-					{ from: oracle }
+					['0.5', '2', '100', '200', '200', '200'].map(toUnit)
 				);
 				const tx2 = await debtCache.takeDebtSnapshot();
 				assert.isFalse((await debtCache.cacheInfo()).isInvalid);
 
 				assert.eventEqual(tx1.logs[2], 'DebtCacheValidityChanged', [true]);
 				assert.eventEqual(tx2.logs[2], 'DebtCacheValidityChanged', [false]);
-			});
-
-			it('Rates are reported as invalid when snapshot is stale.', async () => {
-				assert.isFalse((await debtCache.cacheInfo()).isStale);
-				assert.isFalse(await debtCache.cacheStale());
-				assert.isFalse((await issuer.collateralisationRatioAndAnyRatesInvalid(account1))[1]);
-				const snapshotStaleTime = await systemSettings.debtSnapshotStaleTime();
-				await fastForward(snapshotStaleTime + 10);
-
-				// ensure no actual rates are stale.
-				await exchangeRates.updateRates(
-					[sAUD, sEUR, sETH, SNX],
-					['0.5', '2', '100', '1'].map(toUnit),
-					await currentTime(),
-					{ from: oracle }
-				);
-
-				const info = await debtCache.cacheInfo();
-				assert.isFalse(info.isInvalid);
-				assert.isTrue(info.isStale);
-				assert.isTrue(await debtCache.cacheStale());
-				assert.isTrue((await issuer.collateralisationRatioAndAnyRatesInvalid(account1))[1]);
-
-				await systemSettings.setDebtSnapshotStaleTime(snapshotStaleTime + 10000, {
-					from: owner,
-				});
-
-				assert.isFalse(await debtCache.cacheStale());
-				assert.isFalse((await debtCache.cacheInfo()).isStale);
-				assert.isFalse((await issuer.collateralisationRatioAndAnyRatesInvalid(account1))[1]);
-			});
-
-			it('Rates are reported as invalid when the debt snapshot is uninitisalised', async () => {
-				const debtCacheName = toBytes32('DebtCache');
-
-				// Set the stale time to a huge value so that the snapshot will not be stale.
-				await systemSettings.setDebtSnapshotStaleTime(toUnit('100'), {
-					from: owner,
-				});
-
-				const newDebtCache = await setupContract({
-					contract: 'DebtCache',
-					accounts,
-					skipPostDeploy: true,
-					args: [owner, addressResolver.address],
-				});
-
-				await addressResolver.importAddresses([debtCacheName], [newDebtCache.address], {
-					from: owner,
-				});
-				await newDebtCache.rebuildCache();
-
-				assert.bnEqual(await newDebtCache.cachedDebt(), toUnit('0'));
-				assert.bnEqual(await newDebtCache.cachedSynthDebt(sUSD), toUnit('0'));
-				assert.bnEqual(await newDebtCache.cacheTimestamp(), toUnit('0'));
-				assert.isTrue(await newDebtCache.cacheInvalid());
-
-				const info = await newDebtCache.cacheInfo();
-				assert.bnEqual(info.debt, toUnit('0'));
-				assert.bnEqual(info.timestamp, toUnit('0'));
-				assert.isTrue(info.isInvalid);
-				assert.isTrue(info.isStale);
-				assert.isTrue(await newDebtCache.cacheStale());
-
-				await issuer.rebuildCache();
-				assert.isTrue((await issuer.collateralisationRatioAndAnyRatesInvalid(account1))[1]);
-			});
-
-			it('When the debt snapshot is invalid, cannot issue, burn, exchange, claim, or transfer when holding debt.', async () => {
-				// Ensure the account has some synths to attempt to burn later.
-				await synthetix.transfer(account1, toUnit('1000'), { from: owner });
-				await synthetix.transfer(account2, toUnit('1000'), { from: owner });
-				await synthetix.issueSynths(toUnit('10'), { from: account1 });
-
-				// Stale the debt snapshot
-				const snapshotStaleTime = await systemSettings.debtSnapshotStaleTime();
-				await fastForward(snapshotStaleTime + 10);
-				// ensure no actual rates are stale.
-				await exchangeRates.updateRates(
-					[sAUD, sEUR, sETH, SNX],
-					['0.5', '2', '100', '1'].map(toUnit),
-					await currentTime(),
-					{ from: oracle }
-				);
-
-				await assert.revert(
-					synthetix.issueSynths(toUnit('10'), { from: account1 }),
-					'A zasset or HZN rate is invalid'
-				);
-
-				await assert.revert(
-					synthetix.burnSynths(toUnit('1'), { from: account1 }),
-					'A zasset or HZN rate is invalid'
-				);
-
-				await assert.revert(feePool.claimFees(), 'A zasset or HZN rate is invalid');
-
-				// Can't transfer SNX if issued debt
-				await assert.revert(
-					synthetix.transfer(owner, toUnit('1'), { from: account1 }),
-					'A zasset or HZN rate is invalid'
-				);
-
-				// But can transfer if not
-				await synthetix.transfer(owner, toUnit('1'), { from: account2 });
 			});
 
 			it('will not operate if the system is paused except by the owner', async () => {
@@ -643,36 +561,112 @@ contract('DebtCache', async accounts => {
 				);
 				await debtCache.takeDebtSnapshot({ from: owner });
 			});
-		});
 
-		describe('when debts are excluded', async () => {
-			let beforeExcludedDebts;
+			describe('properly incorporates futures market debt', () => {
+				it('when no market exist', async () => {
+					await debtCache.takeDebtSnapshot();
+					const initialDebt = (await debtCache.cacheInfo()).debt;
 
-			beforeEach(async () => {
-				beforeExcludedDebts = await debtCache.currentDebt();
+					// issue some debt to sanity check it's being updated
+					sUSDContract.issue(account1, toUnit(100), { from: owner });
+					await debtCache.takeDebtSnapshot();
 
-				// cause debt CollateralManager
-				await setupMultiCollateral();
-				await ceth.open(oneETH, sETH, {
-					value: toUnit('10'),
-					from: account1,
+					// debt calc works
+					assert.bnEqual((await debtCache.currentDebt())[0], initialDebt.add(toUnit(100)));
+					assert.bnEqual((await debtCache.cacheInfo()).debt, initialDebt.add(toUnit(100)));
+
+					// no debt from futures
+					assert.bnEqual((await debtCache.currentSynthDebts([])).futuresDebt, toUnit(0));
 				});
 
-				// cause debt from WrapperFactory
-				const etherWrapper = await setupDebtIssuer();
-				const wrapperAmount = toUnit('1');
+				it('when a market exists', async () => {
+					const market = await setupContract({
+						accounts,
+						contract: 'MockFuturesMarket',
+						args: [
+							futuresMarketManager.address,
+							toBytes32('sLINK'),
+							toBytes32('sLINK'),
+							toUnit('1000'),
+							false,
+						],
+						skipPostDeploy: true,
+					});
+					await futuresMarketManager.addMarkets([market.address], { from: owner });
 
-				await weth.deposit({ from: account1, value: wrapperAmount });
-				await weth.approve(etherWrapper.address, wrapperAmount, { from: account1 });
-				await etherWrapper.mint(wrapperAmount, { from: account1 });
+					await debtCache.takeDebtSnapshot();
+					const initialDebt = (await debtCache.cacheInfo()).debt;
+					await market.setMarketDebt(toUnit('2000'));
+					await debtCache.takeDebtSnapshot();
 
-				// test function
-				await debtCache.takeDebtSnapshot({ from: owner });
+					assert.bnEqual((await debtCache.cacheInfo()).debt, initialDebt.add(toUnit('1000')));
+					assert.bnEqual((await debtCache.currentSynthDebts([])).futuresDebt, toUnit('2000'));
+				});
 			});
 
-			it('current debt is correct', async () => {
-				// debt shouldn't have changed since SNX holders have not issued any more debt
-				assert.bnEqual(await debtCache.currentDebt(), beforeExcludedDebts);
+			describe('when debts are excluded', async () => {
+				let beforeExcludedDebts;
+
+				beforeEach(async () => {
+					beforeExcludedDebts = await debtCache.currentDebt();
+
+					// cause debt CollateralManager
+					await setupMultiCollateral();
+					await ceth.open(oneETH, sETH, {
+						value: toUnit('10'),
+						from: account1,
+					});
+
+					// cause debt from WrapperFactory
+					const etherWrapper = await setupDebtIssuer();
+					const wrapperAmount = toUnit('1');
+
+					await weth.deposit({ from: account1, value: wrapperAmount });
+					await weth.approve(etherWrapper.address, wrapperAmount, { from: account1 });
+					await etherWrapper.mint(wrapperAmount, { from: account1 });
+
+					// test function
+					await debtCache.takeDebtSnapshot({ from: owner });
+				});
+
+				it('current debt is correct', async () => {
+					// debt shouldn't have changed since SNX holders have not issued any more debt
+					assert.bnEqual(await debtCache.currentDebt(), beforeExcludedDebts);
+				});
+			});
+		});
+
+		describe('cache functions', () => {
+			let originalTimestamp;
+
+			it('values are correct', async () => {
+				originalTimestamp = await debtCache.cacheTimestamp();
+				assert.bnNotEqual(originalTimestamp, 0);
+				assert.equal(await debtCache.cacheInvalid(), false);
+				assert.equal(await debtCache.cacheStale(), false);
+			});
+
+			describe('after going forward in time', () => {
+				beforeEach(async () => {
+					await fastForward(1000000);
+				});
+
+				it('is now stale', async () => {
+					assert.equal(await debtCache.cacheInvalid(), false);
+					assert.equal(await debtCache.cacheStale(), true);
+				});
+
+				describe('debt snapshot is taken', () => {
+					beforeEach(async () => {
+						await debtCache.takeDebtSnapshot();
+					});
+
+					it('is now invalid (upstream rates are ood)', async () => {
+						assert.bnNotEqual(await debtCache.cacheTimestamp(), originalTimestamp);
+						assert.equal(await debtCache.cacheInvalid(), true);
+						assert.equal(await debtCache.cacheStale(), false);
+					});
+				});
 			});
 		});
 
@@ -680,13 +674,11 @@ contract('DebtCache', async accounts => {
 			it('allows resynchronisation of subsets of synths', async () => {
 				await debtCache.takeDebtSnapshot();
 
-				await exchangeRates.updateRates(
+				await updateAggregatorRates(
+					exchangeRates,
+					circuitBreaker,
 					[sAUD, sEUR, sETH],
-					['1', '3', '200'].map(toUnit),
-					await currentTime(),
-					{
-						from: oracle,
-					}
+					['1', '3', '200'].map(toUnit)
 				);
 
 				// First try a single currency, ensuring that the others have not been altered.
@@ -720,11 +712,11 @@ contract('DebtCache', async accounts => {
 				assert.isTrue((await debtCache.cacheInfo()).isInvalid);
 
 				// But even if we update all rates, we can't revalidate the cache using the partial update function
-				await exchangeRates.updateRates(
+				await updateAggregatorRates(
+					exchangeRates,
+					circuitBreaker,
 					[sAUD, sEUR, sETH],
-					['0.5', '2', '100'].map(toUnit),
-					await currentTime(),
-					{ from: oracle }
+					['0.5', '2', '100'].map(toUnit)
 				);
 				const tx2 = await debtCache.updateCachedSynthDebts([sAUD, sEUR, sETH]);
 				assert.isTrue((await debtCache.cacheInfo()).isInvalid);
@@ -735,13 +727,11 @@ contract('DebtCache', async accounts => {
 			it('properly emits events', async () => {
 				await debtCache.takeDebtSnapshot();
 
-				await exchangeRates.updateRates(
+				await updateAggregatorRates(
+					exchangeRates,
+					circuitBreaker,
 					[sAUD, sEUR, sETH],
-					['1', '3', '200'].map(toUnit),
-					await currentTime(),
-					{
-						from: oracle,
-					}
+					['1', '3', '200'].map(toUnit)
 				);
 
 				const tx = await debtCache.updateCachedSynthDebts([sAUD]);
@@ -772,14 +762,104 @@ contract('DebtCache', async accounts => {
 					'Excluded debt cannot become negative'
 				);
 			});
+
 			it('executed successfully', async () => {
 				await debtCache.recordExcludedDebtChange(sETH, toUnit('1'), { from: owner });
 				assert.bnEqual(await debtCache.excludedIssuedDebts([sETH]), toUnit('1'));
+
 				await debtCache.recordExcludedDebtChange(sETH, toUnit('-0.2'), { from: owner });
 				assert.bnEqual(await debtCache.excludedIssuedDebts([sETH]), toUnit('0.8'));
 			});
 		});
-		
+
+		describe('importExcludedIssuedDebts()', () => {
+			beforeEach(async () => {
+				await debtCache.recordExcludedDebtChange(sETH, toUnit('1'), { from: owner });
+				await debtCache.recordExcludedDebtChange(sAUD, toUnit('2'), { from: owner });
+			});
+
+			it('reverts for non debt cache address', async () => {
+				await assert.revert(
+					debtCache.importExcludedIssuedDebts(issuer.address, issuer.address, { from: owner })
+				);
+			});
+
+			it('reverts for non issuer address', async () => {
+				await assert.revert(
+					debtCache.importExcludedIssuedDebts(debtCache.address, debtCache.address, { from: owner })
+				);
+			});
+
+			it('reverts for empty issuer', async () => {
+				const newIssuer = await setupContract({
+					contract: 'Issuer',
+					accounts,
+					skipPostDeploy: true,
+					args: [owner, addressResolver.address],
+				});
+
+				await assert.revert(
+					debtCache.importExcludedIssuedDebts(debtCache.address, newIssuer.address, {
+						from: owner,
+					}),
+					'previous Issuer has no synths'
+				);
+			});
+
+			it('imports previous entries and can run only once', async () => {
+				const newIssuer = await setupContract({
+					contract: 'Issuer',
+					accounts,
+					skipPostDeploy: true,
+					args: [owner, addressResolver.address],
+				});
+				const newDebtCache = await setupContract({
+					contract: 'DebtCache',
+					accounts,
+					skipPostDeploy: true,
+					args: [owner, addressResolver.address],
+				});
+
+				// update the address resolver and the contract address caches
+				await addressResolver.importAddresses(
+					[toBytes32('Issuer'), toBytes32('DebtCache')],
+					[newIssuer.address, newDebtCache.address],
+					{ from: owner }
+				);
+				await newIssuer.rebuildCache();
+				await newDebtCache.rebuildCache();
+
+				// add only one of the synths
+				await newIssuer.addSynth(sETHContract.address, { from: owner });
+
+				// check uninitialised
+				assert.equal(await newDebtCache.isInitialized(), false);
+
+				// import entries
+				await newDebtCache.importExcludedIssuedDebts(debtCache.address, issuer.address, {
+					from: owner,
+				});
+
+				// check initialised
+				assert.equal(await newDebtCache.isInitialized(), true);
+
+				// check both entries are updated
+				// sAUD is not in new Issuer, but should be imported
+				assert.bnEqual(await debtCache.excludedIssuedDebts([sETH, sAUD]), [
+					toUnit('1'),
+					toUnit('2'),
+				]);
+
+				// check can't run twice
+				await assert.revert(
+					newDebtCache.importExcludedIssuedDebts(debtCache.address, issuer.address, {
+						from: owner,
+					}),
+					'already initialized'
+				);
+			});
+		});
+
 		describe('updateCachedsUSDDebt()', () => {
 			beforeEach(async () => {
 				await addressResolver.importAddresses([toBytes32('Issuer')], [owner], {
@@ -838,6 +918,7 @@ contract('DebtCache', async accounts => {
 				});
 			});
 		});
+
 		describe('Issuance, burning, exchange, settlement', () => {
 			it('issuing sUSD updates the debt total', async () => {
 				await debtCache.takeDebtSnapshot();
@@ -866,6 +947,16 @@ contract('DebtCache', async accounts => {
 				const synthsToIssue = toUnit('10');
 				await synthetix.transfer(account1, toUnit('1000'), { from: owner });
 				await synthetix.issueSynths(synthsToIssue, { from: account1 });
+
+				await circuitBreaker.resetLastValue(
+					[aggregatorIssuedSynths.address, aggregatorDebtRatio.address],
+					[
+						(await aggregatorIssuedSynths.latestRoundData())[1],
+						(await aggregatorDebtRatio.latestRoundData())[1],
+					],
+					{ from: owner }
+				);
+
 				const issued = (await debtCache.cacheInfo())[0];
 
 				const synthsToBurn = toUnit('5');
@@ -885,6 +976,7 @@ contract('DebtCache', async accounts => {
 					log: logs.find(({ name } = {}) => name === 'DebtCacheUpdated'),
 				});
 			});
+
 			it('issuing sUSD updates the total debt cached and sUSD cache', async () => {
 				await debtCache.takeDebtSnapshot();
 				const issued = (await debtCache.cacheInfo())[0];
@@ -970,9 +1062,12 @@ contract('DebtCache', async accounts => {
 			});
 
 			it('exchanging between synths updates sUSD debt total due to fees', async () => {
+				// Disable Dynamic fee so that we can neglect it.
+				await systemSettings.setExchangeDynamicFeeRounds('0', { from: owner });
+
 				await systemSettings.setExchangeFeeRateForSynths(
 					[sAUD, sUSD, sEUR],
-					[toUnit(0.1), toUnit(0.1), toUnit(0.1)],
+					[toUnit(0.05), toUnit(0.05), toUnit(0.05)],
 					{ from: owner }
 				);
 
@@ -992,9 +1087,16 @@ contract('DebtCache', async accounts => {
 			});
 
 			it('exchanging between synths updates debt properly when prices have changed', async () => {
-				await systemSettings.setExchangeFeeRateForSynths([sAUD, sUSD], [toUnit(0), toUnit(0)], {
-					from: owner,
-				});
+				// Zero exchange fees so that we can neglect them.
+				await systemSettings.setExchangeFeeRateForSynths(
+					[sAUD, sUSD, sEUR],
+					[toUnit(0), toUnit(0), toUnit(0)],
+					{
+						from: owner,
+					}
+				);
+				// Disable Dynamic fee so that we can neglect it.
+				await systemSettings.setExchangeDynamicFeeRounds('0', { from: owner });
 
 				await sEURContract.issue(account1, toUnit(20));
 				await debtCache.takeDebtSnapshot();
@@ -1002,9 +1104,12 @@ contract('DebtCache', async accounts => {
 
 				const debts = await debtCache.cachedSynthDebts([sAUD, sEUR]);
 
-				await exchangeRates.updateRates([sAUD, sEUR], ['1', '1'].map(toUnit), await currentTime(), {
-					from: oracle,
-				});
+				await updateAggregatorRates(
+					exchangeRates,
+					circuitBreaker,
+					[sAUD, sEUR],
+					['1', '1'].map(toUnit)
+				);
 
 				await synthetix.exchange(sEUR, toUnit(10), sAUD, { from: account1 });
 				const postDebts = await debtCache.cachedSynthDebts([sAUD, sEUR]);
@@ -1018,9 +1123,13 @@ contract('DebtCache', async accounts => {
 			});
 
 			it('settlement updates debt totals', async () => {
+				// Zero exchange fees so that we can neglect them.
 				await systemSettings.setExchangeFeeRateForSynths([sAUD, sEUR], [toUnit(0), toUnit(0)], {
 					from: owner,
 				});
+				// Disable Dynamic fee so that we can neglect it.
+				await systemSettings.setExchangeDynamicFeeRounds('0', { from: owner });
+
 				await sAUDContract.issue(account1, toUnit(100));
 
 				await debtCache.takeDebtSnapshot();
@@ -1035,9 +1144,12 @@ contract('DebtCache', async accounts => {
 				// set a high price deviation threshold factor to be sure it doesn't trigger here
 				await systemSettings.setPriceDeviationThresholdFactor(toUnit('99'), { from: owner });
 
-				await exchangeRates.updateRates([sAUD, sEUR], ['2', '1'].map(toUnit), await currentTime(), {
-					from: oracle,
-				});
+				await updateAggregatorRates(
+					exchangeRates,
+					circuitBreaker,
+					[sAUD, sEUR],
+					['2', '1'].map(toUnit)
+				);
 
 				await fastForward(100);
 
@@ -1447,7 +1559,6 @@ contract('DebtCache', async accounts => {
 				await sETHContract.issue(account1, amount, { from: owner });
 
 				await setupShort();
-				await systemSettings.setMinCratio(short.address, toUnit(1.5), { from: owner });
 				await short.setIssueFeeRate(toUnit('0'), { from: owner });
 				await short.open(amount, oneETH, sETH, { from: account1 });
 			});

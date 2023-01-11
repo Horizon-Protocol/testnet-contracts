@@ -54,7 +54,7 @@ contract('VirtualSynthMastercopy (unit tests)', async accounts => {
 			assert.equal(await instance.balanceOf(owner), '0');
 			assert.equal(await instance.balanceOfUnderlying(owner), '0');
 			assert.equal(await instance.currencyKey(), ZERO_BYTES32);
-			assert.equal(trimUtf8EscapeChars(await instance.name()), 'Virtual Zasset ');
+			assert.equal(trimUtf8EscapeChars(await instance.name()), 'Virtual Synth ');
 			assert.equal(trimUtf8EscapeChars(await instance.symbol()), 'v');
 		});
 

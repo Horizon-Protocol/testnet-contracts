@@ -14,19 +14,23 @@ const { skipWaitingPeriod } = require('../utils/skip');
 
 function itCanOpenAndCloseShort({ ctx }) {
 	describe('shorting', () => {
-		const amountOfsUSDRequired = parseEther('2000'); // sUSD
+		const amountOfsUSDRequired = parseEther('5000'); // sUSD
 		const amountToDeposit = parseEther('1000'); // sUSD
-		const amountToBorrow = parseEther('0.000001'); // sETH
+		const amountToBorrow = parseEther('0.00000000001'); // sETH
 		const amountToExchange = parseEther('100'); // sUSD
 
-		let user;
-		let CollateralShort, Synthetix, SynthsUSD, interactionDelay;
+		const shortableSynth = toBytes32('sETH');
+
+		let user, owner;
+		let CollateralShort, CollateralManager, Synthetix, SynthsUSD, interactionDelay;
 
 		before('target contracts and users', () => {
-			({ CollateralShort, Synthetix, SynthsUSD } = ctx.contracts);
+			({ CollateralShort, CollateralManager, Synthetix, SynthsUSD } = ctx.contracts);
 
 			user = ctx.users.someUser;
+			owner = ctx.users.owner;
 
+			CollateralManager = CollateralManager.connect(owner);
 			CollateralShort = CollateralShort.connect(user);
 			Synthetix = Synthetix.connect(user);
 		});
@@ -42,15 +46,15 @@ function itCanOpenAndCloseShort({ ctx }) {
 
 		describe('when opening is enabled', () => {
 			before('ensure user should have sUSD', async () => {
-				await ensureBalance({ ctx, symbol: 'zUSD', user, balance: amountOfsUSDRequired });
+				await ensureBalance({ ctx, symbol: 'sUSD', user, balance: amountOfsUSDRequired });
 			});
 
 			before('ensure sETH supply exists', async () => {
 				// CollateralManager.getShortRate requires existing sETH else div by zero
 				await exchangeSynths({
 					ctx,
-					src: 'zUSD',
-					dest: 'zBNB',
+					src: 'sUSD',
+					dest: 'sETH',
 					amount: parseEther('1'),
 					user: ctx.users.otherUser,
 				});
@@ -73,7 +77,7 @@ function itCanOpenAndCloseShort({ ctx }) {
 					before('skip if max borrowing power reached', async function() {
 						const maxBorrowingPower = await CollateralShort.maxLoan(
 							amountToDeposit,
-							toBytes32('zBNB')
+							shortableSynth
 						);
 						const maxBorrowingPowerReached = maxBorrowingPower <= amountToBorrow;
 
@@ -87,6 +91,17 @@ function itCanOpenAndCloseShort({ ctx }) {
 						}
 					});
 
+					before('add the shortable synths if needed', async () => {
+						await CollateralShort.connect(owner).addSynths(
+							[toBytes32(`SynthsETH`)],
+							[shortableSynth]
+						);
+
+						await CollateralManager.addSynths([toBytes32(`SynthsETH`)], [shortableSynth]);
+
+						await CollateralManager.addShortableSynths([toBytes32(`SynthsETH`)], [shortableSynth]);
+					});
+
 					before('approve the synths for collateral short', async () => {
 						await approveIfNeeded({
 							token: SynthsUSD,
@@ -97,7 +112,7 @@ function itCanOpenAndCloseShort({ ctx }) {
 					});
 
 					before('open the loan', async () => {
-						tx = await CollateralShort.open(amountToDeposit, amountToBorrow, toBytes32('zBNB'));
+						tx = await CollateralShort.open(amountToDeposit, amountToBorrow, shortableSynth);
 
 						const { events } = await tx.wait();
 
@@ -156,8 +171,8 @@ function itCanOpenAndCloseShort({ ctx }) {
 
 							await exchangeSynths({
 								ctx,
-								src: 'zUSD',
-								dest: 'zBNB',
+								src: 'sUSD',
+								dest: 'sETH',
 								amount: amountToExchange,
 								user,
 							});
@@ -169,7 +184,7 @@ function itCanOpenAndCloseShort({ ctx }) {
 						});
 
 						before('settle', async () => {
-							const tx = await Synthetix.settle(toBytes32('zBNB'));
+							const tx = await Synthetix.settle(shortableSynth);
 							await tx.wait();
 						});
 

@@ -5,7 +5,12 @@ const {
 	toBytes32,
 	constants: { ZERO_ADDRESS },
 } = require('../..');
-const { onlyGivenAddressCanInvoke, ensureOnlyExpectedMutativeFunctions } = require('./helpers');
+const {
+	onlyGivenAddressCanInvoke,
+	ensureOnlyExpectedMutativeFunctions,
+	setupPriceAggregators,
+	updateAggregatorRates,
+} = require('./helpers');
 const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 const { setupAllContracts, setupContract } = require('./setup');
 const { currentTime, toUnit, fastForward } = require('../utils')();
@@ -17,7 +22,7 @@ contract('ShortingRewards', accounts => {
 	const [
 		deployerAccount,
 		owner,
-		oracle,
+		,
 		authority,
 		rewardEscrowAddress,
 		account1,
@@ -25,12 +30,15 @@ contract('ShortingRewards', accounts => {
 		account2,
 	] = accounts;
 
-	const sUSD = toBytes32('zUSD');
-	const sETH = toBytes32('zBNB');
-	const sBTC = toBytes32('zBTC');
+	const sUSD = toBytes32('sUSD');
+	const sETH = toBytes32('sETH');
+	const iETH = toBytes32('iETH');
+	const sBTC = toBytes32('sBTC');
+	const iBTC = toBytes32('iBTC');
 
 	// Synthetix is the rewardsToken
 	let rewardsToken,
+		rewardsTokenProxy,
 		exchangeRates,
 		shortingRewards,
 		rewardsDistribution,
@@ -57,32 +65,15 @@ contract('ShortingRewards', accounts => {
 		return event.args.id;
 	};
 
-	const updateRatesWithDefaults = async () => {
-		const timestamp = await currentTime();
-
-		await exchangeRates.updateRates([sETH], ['100'].map(toUnit), timestamp, {
-			from: oracle,
-		});
-
-		const sBTC = toBytes32('zBTC');
-
-		await exchangeRates.updateRates([sBTC], ['10000'].map(toUnit), timestamp, {
-			from: oracle,
-		});
-	};
-
 	const setRewardsTokenExchangeRate = async ({ rateStaleDays } = { rateStaleDays: 7 }) => {
 		const rewardsTokenIdentifier = await rewardsToken.symbol();
 
 		await systemSettings.setRateStalePeriod(DAY * rateStaleDays, { from: owner });
-		const updatedTime = await currentTime();
-		await exchangeRates.updateRates(
+		await updateAggregatorRates(
+			exchangeRates,
+			null,
 			[toBytes32(rewardsTokenIdentifier)],
-			[toUnit('2')],
-			updatedTime,
-			{
-				from: oracle,
-			}
+			[toUnit('2')]
 		);
 		assert.equal(await exchangeRates.rateIsStale(toBytes32(rewardsTokenIdentifier)), false);
 	};
@@ -114,23 +105,23 @@ contract('ShortingRewards', accounts => {
 
 	before(async () => {
 		CollateralManager = artifacts.require(`CollateralManager`);
-		CollateralState = artifacts.require(`CollateralState`);
 		CollateralManagerState = artifacts.require('CollateralManagerState');
 	});
 
 	before(async () => {
-		synths = ['zUSD', 'zBTC', 'zBNB', 'iBTC', 'iBNB'];
+		synths = ['sUSD', 'sBTC', 'sETH', 'iBTC', 'iETH'];
 		({
 			ExchangeRates: exchangeRates,
-			ZassetzUSD: sUSDSynth,
-			ZassetzBTC: sBTCSynth,
-			ZassetzBNB: sETHSynth,
+			SynthsUSD: sUSDSynth,
+			SynthsBTC: sBTCSynth,
+			SynthsETH: sETHSynth,
 			FeePool: feePool,
 			AddressResolver: addressResolver,
 			Issuer: issuer,
 			DebtCache: debtCache,
 			RewardsDistribution: rewardsDistribution,
 			Synthetix: rewardsToken,
+			ProxyERC20Synthetix: rewardsTokenProxy,
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
@@ -151,6 +142,11 @@ contract('ShortingRewards', accounts => {
 			],
 		}));
 
+		// use implementation ABI on the proxy address to simplify calling
+		rewardsToken = await artifacts.require('Synthetix').at(rewardsTokenProxy.address);
+
+		await setupPriceAggregators(exchangeRates, owner, [sBTC, iBTC, sETH, iETH]);
+
 		managerState = await CollateralManagerState.new(owner, ZERO_ADDRESS, { from: deployerAccount });
 
 		const maxDebt = toUnit(10000000);
@@ -160,6 +156,8 @@ contract('ShortingRewards', accounts => {
 			owner,
 			addressResolver.address,
 			maxDebt,
+			0,
+			0,
 			0,
 			{
 				from: deployerAccount,
@@ -177,8 +175,6 @@ contract('ShortingRewards', accounts => {
 			minSize: toUnit(0.1),
 		});
 
-		await state.setAssociatedContract(short.address, { from: owner });
-
 		await addressResolver.importAddresses(
 			[toBytes32('CollateralShort'), toBytes32('CollateralManager')],
 			[short.address, manager.address],
@@ -195,14 +191,14 @@ contract('ShortingRewards', accounts => {
 		await manager.addCollaterals([short.address], { from: owner });
 
 		await short.addSynths(
-			['ZassetzBTC', 'ZassetzBNB'].map(toBytes32),
-			['zBTC', 'zBNB'].map(toBytes32),
+			['SynthsBTC', 'SynthsETH'].map(toBytes32),
+			['sBTC', 'sETH'].map(toBytes32),
 			{ from: owner }
 		);
 
 		await manager.addShortableSynths(
-			['ZassetzBTC', 'ZassetzBNB'].map(toBytes32),
-			['zBTC', 'zBNB'].map(toBytes32),
+			['SynthsBTC', 'SynthsETH'].map(toBytes32),
+			['sBTC', 'sETH'].map(toBytes32),
 			{ from: owner }
 		);
 
@@ -233,7 +229,7 @@ contract('ShortingRewards', accounts => {
 	});
 
 	beforeEach(async () => {
-		await updateRatesWithDefaults();
+		await updateAggregatorRates(exchangeRates, null, [sETH, sBTC], [100, 10000].map(toUnit));
 
 		await issuesUSDToAccount(toUnit(100000), owner);
 		await issuesBTCtoAccount(toUnit(10), owner);
@@ -444,10 +440,7 @@ contract('ShortingRewards', accounts => {
 			await fastForward(DAY);
 
 			// Make the short so underwater it must get closed.
-			const timestamp = await currentTime();
-			await exchangeRates.updateRates([sBTC], ['20000'].map(toUnit), timestamp, {
-				from: oracle,
-			});
+			await updateAggregatorRates(exchangeRates, null, [sBTC], ['20000'].map(toUnit));
 
 			// close the loan via liquidation
 			await issuesBTCtoAccount(toUnit(1), account2);
@@ -466,10 +459,7 @@ contract('ShortingRewards', accounts => {
 			await fastForward(DAY);
 
 			// Make the short so underwater it must get closed.
-			const timestamp = await currentTime();
-			await exchangeRates.updateRates([sBTC], ['20000'].map(toUnit), timestamp, {
-				from: oracle,
-			});
+			await updateAggregatorRates(exchangeRates, null, [sBTC], ['20000'].map(toUnit));
 
 			// close the loan via liquidation
 			await issuesBTCtoAccount(toUnit(1), account2);

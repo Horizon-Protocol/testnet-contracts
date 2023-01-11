@@ -3,12 +3,66 @@ const chalk = require('chalk');
 const { assert } = require('../../contracts/common');
 const { ensureBalance } = require('../utils/balances');
 
-function itCanWrapETH({ ctx, wrapperOptions }) {
+// Load Compiled
+const path = require('path');
+const {
+	toBytes32,
+	constants: { BUILD_FOLDER },
+} = require('../../..');
+const buildPath = path.join(__dirname, '..', '..', '..', `${BUILD_FOLDER}`);
+const { loadCompiledFiles } = require('../../../publish/src/solidity');
+const { compiled } = loadCompiledFiles({ buildPath });
+
+function itCanWrapETH({ ctx }) {
+	// deploy a test wrapper
+	const wrapperOptions = { Wrapper: null, Synth: null, Token: null };
+
+	before(async () => {
+		const WrapperFactory = ctx.contracts.WrapperFactory.connect(ctx.users.owner);
+
+		const wrapperCreatedEvent = new Promise((resolve, reject) => {
+			WrapperFactory.on('WrapperCreated', (token, currencyKey, wrapperAddress, event) => {
+				event.removeListener();
+
+				resolve({
+					token: token,
+					currencyKey: currencyKey,
+					wrapperAddress: wrapperAddress,
+				});
+			});
+
+			setTimeout(() => {
+				reject(new Error('timeout'));
+			}, 60000);
+		});
+
+		await WrapperFactory.createWrapper(
+			ctx.contracts.WETH.address,
+			toBytes32('sETH'),
+			toBytes32('SynthsETH')
+		);
+
+		const event = await wrapperCreatedEvent;
+
+		// extract address from events
+		const etherWrapperAddress = event.wrapperAddress;
+
+		ctx.contracts.Wrapper = new ethers.Contract(
+			etherWrapperAddress,
+			compiled.Wrapper.abi,
+			ctx.provider
+		);
+		wrapperOptions.Wrapper = ctx.contracts.Wrapper;
+		wrapperOptions.Synth = ctx.contracts.SynthsETH;
+		wrapperOptions.Token = ctx.contracts.WETH;
+	});
+
 	describe('ether wrapping', () => {
 		let user;
 		let balanceToken, balanceSynth;
 
 		let Wrapper, Token, Synth;
+
 		const amountToMint = ethers.utils.parseEther('1');
 
 		before('target contracts and users', async () => {
@@ -49,7 +103,7 @@ function itCanWrapETH({ ctx, wrapperOptions }) {
 					await tx.wait();
 				});
 
-				it('decreases the users Token balance', async () => {
+				it('decreases the users token balance', async () => {
 					assert.bnLt(await Token.balanceOf(user.address), balanceToken);
 				});
 
@@ -59,7 +113,7 @@ function itCanWrapETH({ ctx, wrapperOptions }) {
 
 				describe('when the user burns sETH', () => {
 					before('record balances', async () => {
-						balanceToken = await balanceToken.balanceOf(user.address);
+						balanceToken = await Token.balanceOf(user.address);
 						balanceSynth = await Synth.balanceOf(user.address);
 					});
 
@@ -77,11 +131,11 @@ function itCanWrapETH({ ctx, wrapperOptions }) {
 						await tx.wait();
 					});
 
-					it('increases the users Token balance', async () => {
+					it('increases the users token balance', async () => {
 						assert.bnGt(await Token.balanceOf(user.address), balanceToken);
 					});
 
-					it('decreases the users sETH balance', async () => {
+					it('decreases the users synth balance', async () => {
 						assert.bnEqual(await Synth.balanceOf(user.address), ethers.constants.Zero);
 					});
 				});

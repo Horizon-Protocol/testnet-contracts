@@ -8,11 +8,16 @@ const BN = require('bn.js');
 
 const PublicEST8Decimals = artifacts.require('PublicEST8Decimals');
 
-const { fastForward, toUnit, currentTime } = require('../utils')();
+const { fastForward, toUnit } = require('../utils')();
 
 const { setupAllContracts, setupContract } = require('./setup');
 
-const { ensureOnlyExpectedMutativeFunctions, setStatus } = require('./helpers');
+const {
+	ensureOnlyExpectedMutativeFunctions,
+	setStatus,
+	setupPriceAggregators,
+	updateAggregatorRates,
+} = require('./helpers');
 
 const {
 	toBytes32,
@@ -28,9 +33,9 @@ contract('CollateralErc20', async accounts => {
 	const YEAR = 31536000;
 	const INTERACTION_DELAY = 300;
 
-	const zUSD = toBytes32('zUSD');
-	const zBNB = toBytes32('zBNB');
-	const zBTC = toBytes32('zBTC');
+	const sUSD = toBytes32('sUSD');
+	const sETH = toBytes32('sETH');
+	const sBTC = toBytes32('sBTC');
 
 	const oneRenBTC = web3.utils.toBN('100000000');
 	const twoRenBTC = web3.utils.toBN('200000000');
@@ -47,7 +52,7 @@ contract('CollateralErc20', async accounts => {
 	let id;
 	let proxy, tokenState;
 
-	const [deployerAccount, owner, oracle, , account1, account2] = accounts;
+	const [deployerAccount, owner, , , account1, account2] = accounts;
 
 	let cerc20,
 		managerState,
@@ -85,17 +90,7 @@ contract('CollateralErc20', async accounts => {
 	};
 
 	const updateRatesWithDefaults = async () => {
-		const timestamp = await currentTime();
-
-		await exchangeRates.updateRates([zBNB], ['100'].map(toUnit), timestamp, {
-			from: oracle,
-		});
-
-		const zBTC = toBytes32('zBTC');
-
-		await exchangeRates.updateRates([zBTC], ['10000'].map(toUnit), timestamp, {
-			from: oracle,
-		});
+		await updateAggregatorRates(exchangeRates, null, [sETH, sBTC], [100, 10000].map(toUnit));
 	};
 
 	const fastForwardAndUpdateRates = async seconds => {
@@ -121,12 +116,12 @@ contract('CollateralErc20', async accounts => {
 	};
 
 	const setupMultiCollateral = async () => {
-		synths = ['zUSD', 'zBTC'];
+		synths = ['sUSD', 'sBTC'];
 		({
 			SystemStatus: systemStatus,
 			ExchangeRates: exchangeRates,
-			ZassetzUSD: sUSDSynth,
-			ZassetzBTC: sBTCSynth,
+			SynthsUSD: sUSDSynth,
+			SynthsBTC: sBTCSynth,
 			FeePool: feePool,
 			AddressResolver: addressResolver,
 			Issuer: issuer,
@@ -146,6 +141,8 @@ contract('CollateralErc20', async accounts => {
 				'CollateralUtil',
 			],
 		}));
+
+		await setupPriceAggregators(exchangeRates, owner, [sBTC, sETH]);
 
 		managerState = await CollateralManagerState.new(owner, ZERO_ADDRESS, { from: deployerAccount });
 
@@ -196,7 +193,7 @@ contract('CollateralErc20', async accounts => {
 			owner: owner,
 			manager: manager.address,
 			resolver: addressResolver.address,
-			collatKey: zBTC,
+			collatKey: sBTC,
 			minColat: toUnit(1.5),
 			minSize: toUnit(0.1),
 			underCon: renBTC.address,
@@ -219,14 +216,14 @@ contract('CollateralErc20', async accounts => {
 		await manager.addCollaterals([cerc20.address], { from: owner });
 
 		await cerc20.addSynths(
-			['ZassetzUSD', 'ZassetzBTC'].map(toBytes32),
-			['zUSD', 'zBTC'].map(toBytes32),
+			['SynthsUSD', 'SynthsBTC'].map(toBytes32),
+			['sUSD', 'sBTC'].map(toBytes32),
 			{ from: owner }
 		);
 
 		await manager.addSynths(
-			['ZassetzUSD', 'ZassetzBTC'].map(toBytes32),
-			['zUSD', 'zBTC'].map(toBytes32),
+			['SynthsUSD', 'SynthsBTC'].map(toBytes32),
+			['sUSD', 'sBTC'].map(toBytes32),
 			{ from: owner }
 		);
 		// rebuild the cache to add the synths we need.
@@ -260,9 +257,9 @@ contract('CollateralErc20', async accounts => {
 	it('should set constructor params on deployment', async () => {
 		assert.equal(await cerc20.owner(), owner);
 		assert.equal(await cerc20.resolver(), addressResolver.address);
-		assert.equal(await cerc20.collateralKey(), zBTC);
-		assert.equal(await cerc20.synths(0), toBytes32('ZassetzUSD'));
-		assert.equal(await cerc20.synths(1), toBytes32('ZassetzBTC'));
+		assert.equal(await cerc20.collateralKey(), sBTC);
+		assert.equal(await cerc20.synths(0), toBytes32('SynthsUSD'));
+		assert.equal(await cerc20.synths(1), toBytes32('SynthsBTC'));
 		assert.bnEqual(await cerc20.minCratio(), toUnit(1.5));
 		assert.bnEqual(await cerc20.minCollateral(), toUnit(0.1));
 		assert.equal(await cerc20.underlyingContract(), renBTC.address);
@@ -278,7 +275,7 @@ contract('CollateralErc20', async accounts => {
 	});
 
 	it('should access its dependencies via the address resolver', async () => {
-		assert.equal(await addressResolver.getAddress(toBytes32('ZassetzUSD')), sUSDSynth.address);
+		assert.equal(await addressResolver.getAddress(toBytes32('SynthsUSD')), sUSDSynth.address);
 		assert.equal(await addressResolver.getAddress(toBytes32('FeePool')), feePool.address);
 		assert.equal(
 			await addressResolver.getAddress(toBytes32('ExchangeRates')),
@@ -288,9 +285,9 @@ contract('CollateralErc20', async accounts => {
 
 	// PUBLIC VIEW TESTS
 	describe('cratio test', async () => {
-		describe('zUSD loans', async () => {
+		describe('sUSD loans', async () => {
 			beforeEach(async () => {
-				tx = await cerc20.open(oneRenBTC, fiveThousandsUSD, zUSD, {
+				tx = await cerc20.open(oneRenBTC, fiveThousandsUSD, sUSD, {
 					from: account1,
 				});
 
@@ -304,35 +301,27 @@ contract('CollateralErc20', async accounts => {
 			});
 
 			it('when the price falls by 25% our c ratio is 150%', async () => {
-				await exchangeRates.updateRates([zBTC], ['7500'].map(toUnit), await currentTime(), {
-					from: oracle,
-				});
+				await updateAggregatorRates(exchangeRates, null, [sBTC], [7500].map(toUnit));
 
 				const ratio = await cerc20.collateralRatio(id);
 				assert.bnEqual(ratio, toUnit(1.5));
 			});
 
 			it('when the price increases by 100% our c ratio is 400%', async () => {
-				await exchangeRates.updateRates([zBTC], ['20000'].map(toUnit), await currentTime(), {
-					from: oracle,
-				});
-
+				await updateAggregatorRates(exchangeRates, null, [sBTC], [20000].map(toUnit));
 				const ratio = await cerc20.collateralRatio(id);
 				assert.bnEqual(ratio, toUnit(4));
 			});
 
 			it('when the price fallsby 50% our cratio is 100%', async () => {
-				await exchangeRates.updateRates([zBTC], ['5000'].map(toUnit), await currentTime(), {
-					from: oracle,
-				});
-
+				await updateAggregatorRates(exchangeRates, null, [sBTC], [5000].map(toUnit));
 				const ratio = await cerc20.collateralRatio(id);
 				assert.bnEqual(ratio, toUnit(1));
 			});
 		});
-		describe('zBTC loans', async () => {
+		describe('sBTC loans', async () => {
 			beforeEach(async () => {
-				tx = await cerc20.open(twoRenBTC, toUnit(1), zBTC, {
+				tx = await cerc20.open(twoRenBTC, toUnit(1), sBTC, {
 					from: account1,
 				});
 
@@ -346,10 +335,7 @@ contract('CollateralErc20', async accounts => {
 			});
 
 			it('price changes should not change the cratio', async () => {
-				await exchangeRates.updateRates([zBTC], ['75'].map(toUnit), await currentTime(), {
-					from: oracle,
-				});
-
+				await updateAggregatorRates(exchangeRates, null, [sBTC], [75].map(toUnit));
 				const ratio = await cerc20.collateralRatio(id);
 				assert.bnEqual(ratio, toUnit(2));
 			});
@@ -358,13 +344,13 @@ contract('CollateralErc20', async accounts => {
 
 	describe('max loan test', async () => {
 		it('should convert correctly', async () => {
-			// $150 worth of btc should allow 100 zUSD to be issued.
-			const sUSDAmount = await cerc20.maxLoan(toUnit(0.015), zUSD);
+			// $150 worth of btc should allow 100 sUSD to be issued.
+			const sUSDAmount = await cerc20.maxLoan(toUnit(0.015), sUSD);
 
 			assert.bnClose(sUSDAmount, toUnit(100), 100);
 
-			// $150 worth of btc should allow $100 (1) of zBNB to be issued.
-			const sETHAmount = await cerc20.maxLoan(toUnit(0.015), zBNB);
+			// $150 worth of btc should allow $100 (1) of sETH to be issued.
+			const sETHAmount = await cerc20.maxLoan(toUnit(0.015), sETH);
 
 			assert.bnEqual(sETHAmount, toUnit(1));
 		});
@@ -419,7 +405,7 @@ contract('CollateralErc20', async accounts => {
 					});
 					it('then calling openLoan() reverts', async () => {
 						await assert.revert(
-							cerc20.open(oneRenBTC, onesUSD, zUSD, { from: account1 }),
+							cerc20.open(oneRenBTC, onesUSD, sUSD, { from: account1 }),
 							'Operation prohibited'
 						);
 					});
@@ -428,7 +414,7 @@ contract('CollateralErc20', async accounts => {
 							await setStatus({ owner, systemStatus, section, suspend: false });
 						});
 						it('then calling openLoan() succeeds', async () => {
-							await cerc20.open(oneRenBTC, onesUSD, zUSD, {
+							await cerc20.open(oneRenBTC, onesUSD, sUSD, {
 								from: account1,
 							});
 						});
@@ -441,7 +427,7 @@ contract('CollateralErc20', async accounts => {
 				});
 				it('then calling openLoan() reverts', async () => {
 					await assert.revert(
-						cerc20.open(oneRenBTC, onesUSD, zUSD, { from: account1 }),
+						cerc20.open(oneRenBTC, onesUSD, sUSD, { from: account1 }),
 						'Invalid rate'
 					);
 				});
@@ -450,7 +436,7 @@ contract('CollateralErc20', async accounts => {
 						await updateRatesWithDefaults();
 					});
 					it('then calling openLoan() succeeds', async () => {
-						await cerc20.open(oneRenBTC, onesUSD, zUSD, { from: account1 });
+						await cerc20.open(oneRenBTC, onesUSD, sUSD, { from: account1 });
 					});
 				});
 			});
@@ -466,14 +452,14 @@ contract('CollateralErc20', async accounts => {
 
 			it('should revert if they send 0 collateral', async () => {
 				await assert.revert(
-					cerc20.open(toUnit(0), onesUSD, zUSD, { from: account1 }),
+					cerc20.open(toUnit(0), onesUSD, sUSD, { from: account1 }),
 					'Not enough collateral'
 				);
 			});
 
 			it('should revert if the requested loan exceeds borrowing power', async () => {
 				await assert.revert(
-					cerc20.open(oneRenBTC, toUnit(10000), zUSD, {
+					cerc20.open(oneRenBTC, toUnit(10000), sUSD, {
 						from: account1,
 					}),
 					'Exceed max borrow power'
@@ -481,13 +467,13 @@ contract('CollateralErc20', async accounts => {
 			});
 		});
 
-		describe('should open a btc loan denominated in zUSD', async () => {
+		describe('should open a btc loan denominated in sUSD', async () => {
 			const fiveHundredSUSD = toUnit(500);
 			let issueFeeRate;
 			let issueFee;
 
 			beforeEach(async () => {
-				tx = await cerc20.open(oneRenBTC, fiveHundredSUSD, zUSD, {
+				tx = await cerc20.open(oneRenBTC, fiveHundredSUSD, sUSD, {
 					from: account1,
 				});
 
@@ -502,7 +488,7 @@ contract('CollateralErc20', async accounts => {
 			it('should set the loan correctly', async () => {
 				assert.equal(loan.account, account1);
 				assert.equal(loan.collateral, toUnit(1).toString());
-				assert.equal(loan.currency, zUSD);
+				assert.equal(loan.currency, sUSD);
 				assert.equal(loan.amount, fiveHundredSUSD.toString());
 				assert.bnEqual(loan.accruedInterest, toUnit(0));
 			});
@@ -525,17 +511,17 @@ contract('CollateralErc20', async accounts => {
 					id: id,
 					amount: fiveHundredSUSD,
 					collateral: toUnit(1),
-					currency: zUSD,
+					currency: sUSD,
 				});
 			});
 		});
 
-		describe('should open a btc loan denominated in zBTC', async () => {
+		describe('should open a btc loan denominated in sBTC', async () => {
 			let issueFeeRate;
 			let issueFee;
 
 			beforeEach(async () => {
-				tx = await cerc20.open(fiveRenBTC, toUnit(2), zBTC, {
+				tx = await cerc20.open(fiveRenBTC, toUnit(2), sBTC, {
 					from: account1,
 				});
 
@@ -550,7 +536,7 @@ contract('CollateralErc20', async accounts => {
 			it('should set the loan correctly', async () => {
 				assert.equal(loan.account, account1);
 				assert.equal(loan.collateral, toUnit(5).toString());
-				assert.equal(loan.currency, zBTC);
+				assert.equal(loan.currency, sBTC);
 				assert.equal(loan.amount, toUnit(2).toString());
 				assert.bnEqual(loan.accruedInterest, toUnit(0));
 			});
@@ -573,7 +559,7 @@ contract('CollateralErc20', async accounts => {
 					id: id,
 					amount: toUnit(2),
 					collateral: toUnit(5),
-					currency: zBTC,
+					currency: sBTC,
 				});
 			});
 		});
@@ -581,7 +567,7 @@ contract('CollateralErc20', async accounts => {
 
 	describe('deposits', async () => {
 		beforeEach(async () => {
-			tx = await cerc20.open(twoRenBTC, oneHundredsUSD, zUSD, {
+			tx = await cerc20.open(twoRenBTC, oneHundredsUSD, sUSD, {
 				from: account1,
 			});
 
@@ -640,7 +626,7 @@ contract('CollateralErc20', async accounts => {
 		let accountRenBalBefore;
 
 		beforeEach(async () => {
-			loan = await cerc20.open(twoRenBTC, oneHundredsUSD, zUSD, {
+			loan = await cerc20.open(twoRenBTC, oneHundredsUSD, sUSD, {
 				from: account1,
 			});
 
@@ -718,7 +704,7 @@ contract('CollateralErc20', async accounts => {
 	describe('repayments', async () => {
 		beforeEach(async () => {
 			// make a loan here so we have a valid ID to pass to the blockers and reverts.
-			tx = await cerc20.open(twoRenBTC, oneHundredsUSD, zUSD, {
+			tx = await cerc20.open(twoRenBTC, oneHundredsUSD, sUSD, {
 				from: account1,
 			});
 
@@ -760,8 +746,8 @@ contract('CollateralErc20', async accounts => {
 				);
 			});
 
-			// account 2 had no zUSD
-			it('should revert if they have no zUSD', async () => {
+			// account 2 had no sUSD
+			it('should revert if they have no sUSD', async () => {
 				await assert.revert(
 					cerc20.repay(account1, id, tensUSD, { from: account2 }),
 					'Not enough balance'
@@ -777,7 +763,7 @@ contract('CollateralErc20', async accounts => {
 			});
 		});
 
-		describe('should allow repayments on an zUSD loan', async () => {
+		describe('should allow repayments on an sUSD loan', async () => {
 			// I'm not testing interest here, just that payment reduces the amounts.
 			const expectedString = '90000';
 
@@ -807,11 +793,11 @@ contract('CollateralErc20', async accounts => {
 			});
 		});
 
-		describe('it should allow repayments on an zBTC loan', async () => {
+		describe('it should allow repayments on an sBTC loan', async () => {
 			const expectedString = '10000';
 
 			beforeEach(async () => {
-				tx = await cerc20.open(fiveRenBTC, twoRenBTC, zBTC, {
+				tx = await cerc20.open(fiveRenBTC, twoRenBTC, sBTC, {
 					from: account1,
 				});
 
@@ -850,7 +836,7 @@ contract('CollateralErc20', async accounts => {
 	describe('liquidations', async () => {
 		beforeEach(async () => {
 			// make a loan here so we have a valid ID to pass to the blockers and reverts.
-			tx = await cerc20.open(oneRenBTC, toUnit(5000), zUSD, {
+			tx = await cerc20.open(oneRenBTC, toUnit(5000), sUSD, {
 				from: account1,
 			});
 
@@ -886,7 +872,7 @@ contract('CollateralErc20', async accounts => {
 		});
 
 		describe('revert conditions', async () => {
-			it('should revert if they have no zUSD', async () => {
+			it('should revert if they have no sUSD', async () => {
 				await assert.revert(
 					cerc20.liquidate(account1, id, onesUSD, { from: account2 }),
 					'Not enough balance'
@@ -903,16 +889,13 @@ contract('CollateralErc20', async accounts => {
 			});
 		});
 
-		describe('should allow liquidations on an undercollateralised zUSD loan', async () => {
+		describe('should allow liquidations on an undercollateralised sUSD loan', async () => {
 			const renAmount = new BN('19642857');
 			const internalAmount = new BN('196428571428571428');
 			let liquidationAmount;
 
 			beforeEach(async () => {
-				const timestamp = await currentTime();
-				await exchangeRates.updateRates([zBTC], ['7000'].map(toUnit), timestamp, {
-					from: oracle,
-				});
+				await updateAggregatorRates(exchangeRates, null, [sBTC], [7000].map(toUnit));
 
 				await issuesUSDToAccount(toUnit(5000), account2);
 
@@ -956,16 +939,13 @@ contract('CollateralErc20', async accounts => {
 				const ratio = await cerc20.collateralRatio(id);
 
 				// the loan is very close 150%, we are in 10^18 land.
-				assert.bnClose(ratio, toUnit(1.5), '1000000000000');
+				assert.bnClose(ratio, toUnit(1.5), '1500000000000');
 			});
 		});
 
 		describe('when a loan needs to be completely liquidated', async () => {
 			beforeEach(async () => {
-				const timestamp = await currentTime();
-				await exchangeRates.updateRates([zBTC], ['5000'].map(toUnit), timestamp, {
-					from: oracle,
-				});
+				await updateAggregatorRates(exchangeRates, null, [sBTC], [5000].map(toUnit));
 
 				loan = await cerc20.loans(id);
 
@@ -1016,7 +996,7 @@ contract('CollateralErc20', async accounts => {
 			accountRenBalBefore = await renBTC.balanceOf(account1);
 
 			// make a loan here so we have a valid ID to pass to the blockers and reverts.
-			tx = await cerc20.open(twoRenBTC, oneHundredsUSD, zUSD, {
+			tx = await cerc20.open(twoRenBTC, oneHundredsUSD, sUSD, {
 				from: account1,
 			});
 
@@ -1039,7 +1019,7 @@ contract('CollateralErc20', async accounts => {
 							await setStatus({ owner, systemStatus, section, suspend: false });
 						});
 						it('then calling close() succeeds', async () => {
-							// Give them some more zUSD to make up for the fees.
+							// Give them some more sUSD to make up for the fees.
 							await issuesUSDToAccount(tensUSD, account1);
 							await cerc20.close(id, { from: account1 });
 						});
@@ -1049,7 +1029,7 @@ contract('CollateralErc20', async accounts => {
 		});
 
 		describe('revert conditions', async () => {
-			it('should revert if they have no zUSD', async () => {
+			it('should revert if they have no sUSD', async () => {
 				await assert.revert(cerc20.close(id, { from: account1 }), 'Not enough balance');
 			});
 
@@ -1060,7 +1040,7 @@ contract('CollateralErc20', async accounts => {
 
 		describe('when it works', async () => {
 			beforeEach(async () => {
-				// Give them some more zUSD to make up for the fees.
+				// Give them some more sUSD to make up for the fees.
 				await issuesUSDToAccount(tensUSD, account1);
 
 				tx = await cerc20.close(id, { from: account1 });
@@ -1098,7 +1078,7 @@ contract('CollateralErc20', async accounts => {
 	describe('drawing', async () => {
 		beforeEach(async () => {
 			// make a loan here so we have a valid ID to pass to the blockers and reverts.
-			tx = await cerc20.open(oneRenBTC, fiveThousandsUSD, zUSD, {
+			tx = await cerc20.open(oneRenBTC, fiveThousandsUSD, sUSD, {
 				from: account1,
 			});
 

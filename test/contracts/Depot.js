@@ -5,7 +5,6 @@ const { contract, web3 } = require('hardhat');
 const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 
 const {
-	currentTime,
 	fastForward,
 	getEthBalance,
 	toUnit,
@@ -17,25 +16,36 @@ const {
 	onlyGivenAddressCanInvoke,
 	ensureOnlyExpectedMutativeFunctions,
 	setStatus,
+	setupPriceAggregators,
+	updateAggregatorRates,
 } = require('./helpers');
 
 const { mockToken, setupAllContracts } = require('./setup');
 
 const { toBytes32 } = require('../..');
+const { artifacts } = require('hardhat');
 
 contract('Depot', async accounts => {
-	let synthetix, synth, depot, addressResolver, systemStatus, exchangeRates, ethRate, snxRate;
+	let synthetix,
+		synthetixProxy,
+		synth,
+		depot,
+		addressResolver,
+		systemStatus,
+		exchangeRates,
+		ethRate,
+		snxRate;
 
-	const [, owner, oracle, fundsWallet, address1, address2, address3] = accounts;
+	const [, owner, , fundsWallet, address1, address2, address3] = accounts;
 
-	const [SNX, BNB] = ['HZN', 'BNB'].map(toBytes32);
+	const [SNX, ETH] = ['SNX', 'ETH'].map(toBytes32);
 
 	const approveAndDepositSynths = async (synthsToDeposit, depositor) => {
 		// Approve Transaction
 		await synth.approve(depot.address, synthsToDeposit, { from: depositor });
 
-		// Deposit hUSD in Depot
-		// console.log('Deposit hUSD in Depot amount', synthsToDeposit, depositor);
+		// Deposit sUSD in Depot
+		// console.log('Deposit sUSD in Depot amount', synthsToDeposit, depositor);
 		const txn = await depot.depositSynths(synthsToDeposit, {
 			from: depositor,
 		});
@@ -45,9 +55,9 @@ contract('Depot', async accounts => {
 
 	// Run once at beginning - snapshots will take care of resetting this before each test
 	before(async () => {
-		// Mock hUSD as Depot only needs its ERC20 methods (System Pause will not work for suspending hUSD transfers)
+		// Mock sUSD as Depot only needs its ERC20 methods (System Pause will not work for suspending sUSD transfers)
 		[{ token: synth }] = await Promise.all([
-			mockToken({ accounts, synth: 'zUSD', name: 'Horizon USD', symbol: 'zUSD' }),
+			mockToken({ accounts, synth: 'sUSD', name: 'Synthetic USD', symbol: 'sUSD' }),
 		]);
 
 		({
@@ -56,11 +66,12 @@ contract('Depot', async accounts => {
 			ExchangeRates: exchangeRates,
 			SystemStatus: systemStatus,
 			Synthetix: synthetix,
+			ProxyERC20Synthetix: synthetixProxy,
 		} = await setupAllContracts({
 			accounts,
 			mocks: {
 				// mocks necessary for address resolver imports
-				ZassetzUSD: synth,
+				SynthsUSD: synth,
 			},
 			contracts: [
 				'Depot',
@@ -71,19 +82,19 @@ contract('Depot', async accounts => {
 				'Issuer',
 			],
 		}));
+
+		// use implementation ABI on the proxy address to simplify calling
+		synthetix = await artifacts.require('Synthetix').at(synthetixProxy.address);
+
+		await setupPriceAggregators(exchangeRates, owner, [ETH]);
 	});
 
 	addSnapshotBeforeRestoreAfterEach();
 
 	beforeEach(async () => {
-		const timestamp = await currentTime();
-
 		snxRate = toUnit('0.1');
 		ethRate = toUnit('172');
-
-		await exchangeRates.updateRates([SNX, BNB], [snxRate, ethRate], timestamp, {
-			from: oracle,
-		});
+		await updateAggregatorRates(exchangeRates, null, [SNX, ETH], [snxRate, ethRate]);
 	});
 
 	it('should set constructor params on deployment', async () => {
@@ -355,7 +366,7 @@ contract('Depot', async accounts => {
 					from: address1,
 					value: 10,
 				}),
-				'Rate invalid or not a zasset'
+				'Rate invalid or not a synth'
 			);
 			const depotSynthBalanceCurrent = await synth.balanceOf(depot.address);
 			assert.bnEqual(depotSynthBalanceCurrent, depotSynthBalanceBefore);
@@ -410,7 +421,7 @@ contract('Depot', async accounts => {
 		});
 	});
 
-	describe('Ensure user can exchange BNB for Synths where the amount', async () => {
+	describe('Ensure user can exchange ETH for Synths where the amount', async () => {
 		const depositor = address1;
 		const depositor2 = address2;
 		const purchaser = address3;
@@ -418,7 +429,7 @@ contract('Depot', async accounts => {
 		let ethUsd;
 
 		beforeEach(async () => {
-			ethUsd = await exchangeRates.rateForCurrency(BNB);
+			ethUsd = await exchangeRates.rateForCurrency(ETH);
 
 			// Assert that there are no deposits already.
 			const depositStartIndex = await depot.depositStartIndex();
@@ -479,9 +490,10 @@ contract('Depot', async accounts => {
 				});
 				const gasPaidApprove = web3.utils.toBN(approveTxn.receipt.gasUsed * gasPrice);
 
-				// Deposit hUSD in Depot
+				// Deposit sUSD in Depot
 				const depositTxn = await depot.depositSynths(synthsToDeposit, {
 					from: depositor,
+					gasPrice,
 				});
 
 				const gasPaidDeposit = web3.utils.toBN(depositTxn.receipt.gasUsed * gasPrice);
@@ -512,12 +524,12 @@ contract('Depot', async accounts => {
 					});
 				}
 
-				// Exchange("BNB", msg.value, "hUSD", fulfilled);
+				// Exchange("ETH", msg.value, "sUSD", fulfilled);
 				const exchangeEvent = txn.logs.find(log => log.event === 'Exchange');
 				assert.eventEqual(exchangeEvent, 'Exchange', {
-					fromCurrency: 'BNB',
+					fromCurrency: 'ETH',
 					fromAmount: ethToSend,
-					toCurrency: 'zUSD',
+					toCurrency: 'sUSD',
 					toAmount: synthsToDeposit,
 				});
 
@@ -536,7 +548,7 @@ contract('Depot', async accounts => {
 				// And our total should be 0 as the purchase amount was equal to the deposit
 				assert.equal(await depot.totalSellableDeposits(), 0);
 
-				// The depositor should have received the BNB
+				// The depositor should have received the ETH
 				const depositorEndingBalance = await getEthBalance(depositor);
 				assert.bnEqual(
 					web3.utils
@@ -548,7 +560,7 @@ contract('Depot', async accounts => {
 			});
 
 			it('is less than one deposit (and that the queue is correctly updated)', async () => {
-				const synthsToDeposit = web3.utils.toBN(ethUsd); // BNB Price
+				const synthsToDeposit = web3.utils.toBN(ethUsd); // ETH Price
 				const ethToSend = toUnit('0.5');
 
 				// Send the synths to the Token Depot.
@@ -582,12 +594,12 @@ contract('Depot', async accounts => {
 					});
 				}
 
-				// Exchange("BNB", msg.value, "hUSD", fulfilled);
+				// Exchange("ETH", msg.value, "sUSD", fulfilled);
 				const exchangeEvent = txn.logs.find(log => log.event === 'Exchange');
 				assert.eventEqual(exchangeEvent, 'Exchange', {
-					fromCurrency: 'BNB',
+					fromCurrency: 'ETH',
 					fromAmount: ethToSend,
-					toCurrency: 'zUSD',
+					toCurrency: 'sUSD',
 					toAmount: synthsToDeposit.div(web3.utils.toBN('2')),
 				});
 
@@ -604,8 +616,8 @@ contract('Depot', async accounts => {
 			});
 
 			it('exceeds one deposit (and that the queue is correctly updated)', async () => {
-				const synthsToDeposit = toUnit('172'); // 1 BNB worth
-				const totalSynthsDeposit = toUnit('344'); // 2 BNB worth
+				const synthsToDeposit = toUnit('172'); // 1 ETH worth
+				const totalSynthsDeposit = toUnit('344'); // 2 ETH worth
 				const ethToSend = toUnit('1.5');
 
 				// Send the synths to the Token Depot.
@@ -637,14 +649,14 @@ contract('Depot', async accounts => {
 					});
 				}
 
-				// Exchange("BNB", msg.value, "hUSD", fulfilled);
+				// Exchange("ETH", msg.value, "sUSD", fulfilled);
 				const exchangeEvent = transaction.logs.find(log => log.event === 'Exchange');
 				const synthsAmount = multiplyDecimal(ethToSend, ethUsd);
 
 				assert.eventEqual(exchangeEvent, 'Exchange', {
-					fromCurrency: 'BNB',
+					fromCurrency: 'ETH',
 					fromAmount: ethToSend,
-					toCurrency: 'zUSD',
+					toCurrency: 'sUSD',
 					toAmount: synthsAmount,
 				});
 
@@ -664,7 +676,7 @@ contract('Depot', async accounts => {
 				assert.bnEqual(await depot.totalSellableDeposits(), remainingSynths);
 			});
 
-			xit('exceeds available synths (and that the remainder of the BNB is correctly refunded)', async () => {
+			xit('exceeds available synths (and that the remainder of the ETH is correctly refunded)', async () => {
 				const gasPrice = 1e9;
 
 				const ethToSend = toUnit('2');
@@ -689,6 +701,7 @@ contract('Depot', async accounts => {
 					txn = await depot.sendTransaction({
 						from: purchaser,
 						value: ethToSend,
+						gasPrice,
 					});
 				} else {
 					txn = await depot.exchangeEtherForSynths({
@@ -700,18 +713,18 @@ contract('Depot', async accounts => {
 
 				const gasPaid = web3.utils.toBN(txn.receipt.gasUsed * gasPrice);
 
-				// Exchange("BNB", msg.value, "hUSD", fulfilled);
+				// Exchange("ETH", msg.value, "sUSD", fulfilled);
 				const exchangeEvent = txn.logs.find(log => log.event === 'Exchange');
 
 				assert.eventEqual(exchangeEvent, 'Exchange', {
-					fromCurrency: 'BNB',
+					fromCurrency: 'ETH',
 					fromAmount: ethToSend,
-					toCurrency: 'zUSD',
+					toCurrency: 'sUSD',
 					toAmount: synthsToDeposit,
 				});
 
 				// We need to calculate the amount - fees the purchaser is supposed to get
-				const synthsAvailableInBNB = divideDecimal(synthsToDeposit, ethUsd);
+				const synthsAvailableInETH = divideDecimal(synthsToDeposit, ethUsd);
 
 				// Purchaser should have received the total available synths
 				const purchaserSynthBalance = await synth.balanceOf(purchaser);
@@ -722,7 +735,7 @@ contract('Depot', async accounts => {
 				assert.equal(depotSynthBalance, 0);
 
 				// The purchaser should have received the refund
-				// which can be checked by initialBalance = endBalance + fees + amount of synths bought in BNB
+				// which can be checked by initialBalance = endBalance + fees + amount of synths bought in ETH
 				const purchaserEndingBalance = await getEthBalance(purchaser);
 
 				// Note: currently failing under coverage via:
@@ -734,7 +747,7 @@ contract('Depot', async accounts => {
 					web3.utils
 						.toBN(purchaserEndingBalance)
 						.add(gasPaid)
-						.add(synthsAvailableInBNB),
+						.add(synthsAvailableInETH),
 					web3.utils.toBN(purchaserInitialBalance)
 				);
 			});
@@ -757,9 +770,9 @@ contract('Depot', async accounts => {
 					txn = await depot.exchangeEtherForSynthsAtRate(ethRate, payload);
 					const exchangeEvent = txn.logs.find(log => log.event === 'Exchange');
 					assert.eventEqual(exchangeEvent, 'Exchange', {
-						fromCurrency: 'BNB',
+						fromCurrency: 'ETH',
 						fromAmount: ethToSend,
-						toCurrency: 'zUSD',
+						toCurrency: 'sUSD',
 						toAmount: synthsToPurchase,
 					});
 				});
@@ -776,10 +789,7 @@ contract('Depot', async accounts => {
 					);
 				});
 				it('when the purchaser supplies a rate and the rate is changed in by the oracle', async () => {
-					const timestamp = await currentTime();
-					await exchangeRates.updateRates([SNX, BNB], ['0.1', '134'].map(toUnit), timestamp, {
-						from: oracle,
-					});
+					await updateAggregatorRates(exchangeRates, null, [SNX, ETH], ['0.1', '134'].map(toUnit));
 					await assert.revert(
 						depot.exchangeEtherForSynthsAtRate(ethRate, payload),
 						'Guaranteed rate would not be received'
@@ -797,7 +807,7 @@ contract('Depot', async accounts => {
 			beforeEach(async () => {
 				const purchaseValueDollars = multiplyDecimal(ethToSend, ethRate);
 				snxToPurchase = divideDecimal(purchaseValueDollars, snxRate);
-				// Send some HZN to the Depot contract
+				// Send some SNX to the Depot contract
 				await synthetix.transfer(depot.address, toUnit('1000000'), {
 					from: owner,
 				});
@@ -809,9 +819,9 @@ contract('Depot', async accounts => {
 					const exchangeEvent = txn.logs.find(log => log.event === 'Exchange');
 
 					assert.eventEqual(exchangeEvent, 'Exchange', {
-						fromCurrency: 'BNB',
+						fromCurrency: 'ETH',
 						fromAmount: ethToSend,
-						toCurrency: 'HZN',
+						toCurrency: 'SNX',
 						toAmount: snxToPurchase,
 					});
 				});
@@ -828,10 +838,7 @@ contract('Depot', async accounts => {
 					);
 				});
 				it('when the purchaser supplies a rate and the rate is changed in by the oracle', async () => {
-					const timestamp = await currentTime();
-					await exchangeRates.updateRates([SNX, BNB], ['0.1', '134'].map(toUnit), timestamp, {
-						from: oracle,
-					});
+					await updateAggregatorRates(exchangeRates, null, [SNX, ETH], ['0.1', '134'].map(toUnit));
 					await assert.revert(
 						depot.exchangeEtherForSNXAtRate(ethRate, snxRate, ethToSendFromPurchaser),
 						'Guaranteed ether rate would not be received'
@@ -873,9 +880,9 @@ contract('Depot', async accounts => {
 					const exchangeEvent = txn.logs.find(log => log.event === 'Exchange');
 
 					assert.eventEqual(exchangeEvent, 'Exchange', {
-						fromCurrency: 'zUSD',
+						fromCurrency: 'sUSD',
 						fromAmount: synthsToSend,
-						toCurrency: 'HZN',
+						toCurrency: 'SNX',
 						toAmount: snxToPurchase,
 					});
 				});
@@ -891,11 +898,10 @@ contract('Depot', async accounts => {
 						'Guaranteed rate would not be received'
 					);
 				});
-				it('when the purchaser supplies a rate and the rate is changed in by the oracle', async () => {
-					const timestamp = await currentTime();
-					await exchangeRates.updateRates([SNX], ['0.05'].map(toUnit), timestamp, {
-						from: oracle,
-					});
+
+				// skipped because depot is deactivated on live networks and will be removed from the repo shortly
+				it.skip('when the purchaser supplies a rate and the rate is changed in by the oracle', async () => {
+					await updateAggregatorRates(exchangeRates, null, [SNX], ['0.05'].map(toUnit));
 					await assert.revert(
 						depot.exchangeSynthsForSNXAtRate(synthsToSend, snxRate, fromPurchaser),
 						'Guaranteed rate would not be received'
@@ -1004,7 +1010,7 @@ contract('Depot', async accounts => {
 			});
 		});
 
-		it('Ensure user can exchange BNB for Synths after a withdrawal and that the queue correctly skips the empty entry', async () => {
+		it('Ensure user can exchange ETH for Synths after a withdrawal and that the queue correctly skips the empty entry', async () => {
 			//   - e.g. Deposits of [1, 2, 3], user withdraws 2, so [1, (empty), 3], then
 			//      - User can exchange for 1, and queue is now [(empty), 3]
 			//      - User can exchange for 2 and queue is now [2]
@@ -1028,7 +1034,7 @@ contract('Depot', async accounts => {
 			const queueResultForDeposit2 = await depot.deposits(1);
 			assert.equal(queueResultForDeposit2.amount, 0);
 
-			// User exchange BNB for Synths (same amount as first deposit)
+			// User exchange ETH for Synths (same amount as first deposit)
 			const ethToSend = divideDecimal(deposit1, ethRate);
 			await depot.exchangeEtherForSynths({
 				from: purchaser,
@@ -1041,7 +1047,7 @@ contract('Depot', async accounts => {
 			const queueResultForDeposit1 = await depot.deposits(1);
 			assert.equal(queueResultForDeposit1.amount, 0);
 
-			// User exchange BNB for Synths
+			// User exchange ETH for Synths
 			await depot.exchangeEtherForSynths({
 				from: purchaser,
 				value: ethToSend,
@@ -1104,11 +1110,11 @@ contract('Depot', async accounts => {
 		});
 	});
 
-	describe('Ensure user can exchange BNB for HZN', async () => {
+	describe('Ensure user can exchange ETH for SNX', async () => {
 		const purchaser = address1;
 
 		beforeEach(async () => {
-			// Send some HZN to the Depot contract
+			// Send some SNX to the Depot contract
 			await synthetix.transfer(depot.address, toUnit('1000000'), {
 				from: owner,
 			});
@@ -1141,14 +1147,14 @@ contract('Depot', async accounts => {
 			});
 		});
 
-		it('ensure user get the correct amount of HZN after sending BNB', async () => {
+		it('ensure user get the correct amount of SNX after sending ETH', async () => {
 			const ethToSend = toUnit('10');
 
 			const purchaserSNXStartBalance = await synthetix.balanceOf(purchaser);
-			// Purchaser should not have HZN yet
+			// Purchaser should not have SNX yet
 			assert.equal(purchaserSNXStartBalance, 0);
 
-			// Purchaser sends BNB
+			// Purchaser sends ETH
 			await depot.exchangeEtherForSNX({
 				from: purchaser,
 				value: ethToSend,
@@ -1159,7 +1165,7 @@ contract('Depot', async accounts => {
 
 			const purchaserSNXEndBalance = await synthetix.balanceOf(purchaser);
 
-			// Purchaser HZN balance should be equal to the purchase value we calculated above
+			// Purchaser SNX balance should be equal to the purchase value we calculated above
 			assert.bnEqual(purchaserSNXEndBalance, purchaseValueInSynthetix);
 		});
 	});
@@ -1175,7 +1181,7 @@ contract('Depot', async accounts => {
 			await synth.transfer(purchaser, purchaserSynthAmount, {
 				from: owner,
 			});
-			// We need to send some HZN to the Token Depot contract
+			// We need to send some SNX to the Token Depot contract
 			await synthetix.transfer(depot.address, depotSNXAmount, {
 				from: owner,
 			});
@@ -1213,12 +1219,12 @@ contract('Depot', async accounts => {
 			});
 		});
 
-		it('ensure user gets the correct amount of HZN after sending 10 hUSD', async () => {
+		it('ensure user gets the correct amount of SNX after sending 10 sUSD', async () => {
 			const purchaserSNXStartBalance = await synthetix.balanceOf(purchaser);
-			// Purchaser should not have HZN yet
+			// Purchaser should not have SNX yet
 			assert.equal(purchaserSNXStartBalance, 0);
 
-			// Purchaser sends hUSD
+			// Purchaser sends sUSD
 			const txn = await depot.exchangeSynthsForSNX(synthsToSend, {
 				from: purchaser,
 			});
@@ -1227,16 +1233,16 @@ contract('Depot', async accounts => {
 
 			const purchaserSNXEndBalance = await synthetix.balanceOf(purchaser);
 
-			// Purchaser HZN balance should be equal to the purchase value we calculated above
+			// Purchaser SNX balance should be equal to the purchase value we calculated above
 			assert.bnEqual(purchaserSNXEndBalance, purchaseValueInSynthetix);
 
 			// assert the exchange event
 			const exchangeEvent = txn.logs.find(log => log.event === 'Exchange');
 
 			assert.eventEqual(exchangeEvent, 'Exchange', {
-				fromCurrency: 'zUSD',
+				fromCurrency: 'sUSD',
 				fromAmount: synthsToSend,
-				toCurrency: 'HZN',
+				toCurrency: 'SNX',
 				toAmount: purchaseValueInSynthetix,
 			});
 		});
@@ -1246,7 +1252,7 @@ contract('Depot', async accounts => {
 		const snxAmount = toUnit('1000000');
 
 		beforeEach(async () => {
-			// Send some HZN to the Depot contract
+			// Send some SNX to the Depot contract
 			await synthetix.transfer(depot.address, snxAmount, {
 				from: owner,
 			});

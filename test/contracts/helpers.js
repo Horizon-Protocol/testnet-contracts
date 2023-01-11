@@ -5,11 +5,77 @@ const { smockit } = require('@eth-optimism/smock');
 
 const { assert } = require('./common');
 
-const { currentTime, toUnit } = require('../utils')();
+const { currentTime, toUnit, toBN } = require('../utils')();
 const {
 	toBytes32,
 	constants: { ZERO_ADDRESS, ZERO_BYTES32 },
 } = require('../..');
+
+const MockAggregator = artifacts.require('MockAggregatorV2V3');
+
+/// utility function to setup price aggregators
+/// @param exchangeRates instance of ExchangeRates contract
+/// @param owner owner account of exchangeRates contract for adding an aggregator
+/// @param keys array of bytes32 currency keys
+/// @param decimalsArray optional array of ints for each key, defaults to 18 decimals
+async function setupPriceAggregators(exchangeRates, owner, keys, decimalsArray = []) {
+	let aggregator;
+	for (let i = 0; i < keys.length; i++) {
+		aggregator = await MockAggregator.new({ from: owner });
+		await aggregator.setDecimals(decimalsArray.length > 0 ? decimalsArray[i] : 18);
+		await exchangeRates.addAggregator(keys[i], aggregator.address, { from: owner });
+	}
+}
+
+/// same as setupPriceAggregators, but checks if an aggregator for that currency is already setup up
+async function setupMissingPriceAggregators(exchangeRates, owner, keys) {
+	const missingKeys = [];
+	for (let i = 0; i < keys.length; i++) {
+		if ((await exchangeRates.aggregators(keys[i])) === ZERO_ADDRESS) {
+			missingKeys.push(keys[i]);
+		}
+	}
+	await setupPriceAggregators(exchangeRates, owner, missingKeys);
+}
+// utility function update rates for aggregators that are already set up
+/// @param exchangeRates instance of ExchangeRates contract
+/// @param owner owner account of exchangeRates contract for adding an aggregator
+/// @param keys array of bytes32 currency keys
+/// @param rates array of BN rates
+/// @param timestamp optional timestamp for the update, currentTime() is used by default
+async function updateAggregatorRates(
+	exchangeRates,
+	circuitBreaker,
+	keys,
+	rates,
+	timestamp = undefined
+) {
+	timestamp = timestamp || (await currentTime());
+	for (let i = 0; i < keys.length; i++) {
+		const aggregatorAddress = await exchangeRates.aggregators(keys[i]);
+		if (aggregatorAddress === ZERO_ADDRESS) {
+			throw new Error(`Aggregator set to zero address, use "setupPriceAggregators" to set it up`);
+		}
+		const aggregator = await MockAggregator.at(aggregatorAddress);
+		// set the rate
+		await aggregator.setLatestAnswer(rates[i], timestamp);
+
+		if (circuitBreaker) {
+			await circuitBreaker.resetLastValue([aggregatorAddress], [rates[i]], {
+				from: await circuitBreaker.owner(),
+			});
+		}
+	}
+}
+
+function convertToDecimals(val, decimals) {
+	if (decimals <= 18) {
+		return web3.utils.toBN(Math.round(val * Math.pow(10, decimals)));
+	} else {
+		/// JS can't handle large decimals, convert to 18 first, and add decimals as BN.mul
+		return convertToDecimals(val, 18).mul(toBN(10).pow(toBN(decimals - 18)));
+	}
+}
 
 module.exports = {
 	/**
@@ -37,11 +103,15 @@ module.exports = {
 		args.forEach((arg, i) => {
 			const { type, value } = log.events[i];
 
+			// // for debugging
+			// console.log(i, arg.toString(), value.toString())
+
 			if (type === 'address') {
-				assert.equal(web3.utils.toChecksumAddress(value),
-				web3.utils.toChecksumAddress(arg),
-				`arg '${arg}' does not match`
-			);
+				assert.equal(
+					web3.utils.toChecksumAddress(value),
+					web3.utils.toChecksumAddress(arg),
+					`arg '${arg}' does not match`
+				);
 			} else if (/^u?int/.test(type)) {
 				assert.bnClose(new web3.utils.BN(value), arg, bnCloseVariance);
 			} else {
@@ -86,28 +156,17 @@ module.exports = {
 		return web3.utils.hexToAscii(web3.utils.utf8ToHex(input));
 	},
 
-	async updateRatesWithDefaults({ exchangeRates, oracle, debtCache }) {
-		const timestamp = await currentTime();
+	setupPriceAggregators,
 
-		const [HZN, zAUD, zEUR, zBTC, iBTC, zETH, ETH] = [
-			'HZN',
-			'zAUD',
-			'zEUR',
-			'zBTC',
-			'iBTC',
-			'zBNB',
-			'BNB',
-		].map(toBytes32);
+	updateAggregatorRates,
 
-		await exchangeRates.updateRates(
-			[HZN, zAUD, zEUR, zBTC, iBTC, zETH, ETH],
-			['0.1', '0.5', '1.25', '5000', '4000', '172', '172'].map(toUnit),
-			timestamp,
-			{
-				from: oracle,
-			}
-		);
+	async updateRatesWithDefaults({ exchangeRates, circuitBreaker, owner, debtCache }) {
+		const keys = ['SNX', 'sAUD', 'sEUR', 'sBTC', 'iBTC', 'sETH', 'ETH'].map(toBytes32);
+		const rates = ['0.1', '0.5', '1.25', '5000', '4000', '172', '172'].map(toUnit);
+		// set up any missing aggregators
+		await setupMissingPriceAggregators(exchangeRates, owner, keys);
 
+		await updateAggregatorRates(exchangeRates, circuitBreaker, keys, rates);
 		await debtCache.takeDebtSnapshot();
 	},
 
@@ -165,9 +224,7 @@ module.exports = {
 		return web3.utils.toBN(Math.round(val * 1e8));
 	},
 
-	convertToDecimals(val, decimals) {
-		return web3.utils.toBN(Math.round(val * Math.pow(10, decimals)));
-	},
+	convertToDecimals,
 
 	ensureOnlyExpectedMutativeFunctions({
 		abi,
@@ -298,6 +355,7 @@ module.exports = {
 
 		const flexibleStorageTypes = [
 			['uint', 'getUIntValue', '0'],
+			['uints', 'getUIntValues', ['0', '0', '0', '0']],
 			['int', 'getIntValue', '0'],
 			['address', 'getAddressValue', ZERO_ADDRESS],
 			['bool', 'getBoolValue', false],
@@ -334,7 +392,7 @@ module.exports = {
 			},
 		};
 	},
-	
+
 	getEventByName({ tx, name }) {
 		return tx.logs.find(({ event }) => event === name);
 	},

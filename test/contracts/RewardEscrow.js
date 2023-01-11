@@ -23,8 +23,8 @@ contract('RewardEscrow', async accounts => {
 
 	// Run once at beginning - snapshots will take care of resetting this before each test
 	before(async () => {
-		// Mock HZN
-		({ token: synthetix } = await mockToken({ accounts, name: 'Horizon', symbol: 'HZN' }));
+		// Mock SNX
+		({ token: synthetix } = await mockToken({ accounts, name: 'Synthetix', symbol: 'SNX' }));
 
 		feePool = { address: feePoolAccount }; // mock contract with address
 
@@ -94,7 +94,7 @@ contract('RewardEscrow', async accounts => {
 
 		describe('Vesting Schedule Writes', async () => {
 			it('should not create a vesting entry with a zero amount', async () => {
-				// Transfer of HZN to the escrow must occur before creating an entry
+				// Transfer of SNX to the escrow must occur before creating an entry
 				await synthetix.transfer(rewardEscrow.address, toUnit('1'), {
 					from: owner,
 				});
@@ -104,8 +104,8 @@ contract('RewardEscrow', async accounts => {
 				);
 			});
 
-			it('should not create a vesting entry if there is not enough HZN in the contracts balance', async () => {
-				// Transfer of HZN to the escrow must occur before creating an entry
+			it('should not create a vesting entry if there is not enough SNX in the contracts balance', async () => {
+				// Transfer of SNX to the escrow must occur before creating an entry
 				await synthetix.transfer(rewardEscrow.address, toUnit('1'), {
 					from: owner,
 				});
@@ -117,7 +117,7 @@ contract('RewardEscrow', async accounts => {
 
 		describe('Vesting Schedule Reads ', async () => {
 			beforeEach(async () => {
-				// Transfer of HZN to the escrow must occur before creating a vestinng entry
+				// Transfer of SNX to the escrow must occur before creating a vestinng entry
 				await synthetix.transfer(rewardEscrow.address, toUnit('6000'), {
 					from: owner,
 				});

@@ -21,7 +21,8 @@ module.exports = function({ accounts }) {
 	});
 
 	before(async () => {
-		ExchangerWithFeeRecAlternatives.link(await artifacts.require('SafeDecimalMath').new());
+		const safeDecimalMath = await artifacts.require('SafeDecimalMath').new();
+		ExchangerWithFeeRecAlternatives.link(safeDecimalMath);
 	});
 
 	beforeEach(async () => {
@@ -29,9 +30,11 @@ module.exports = function({ accounts }) {
 
 		({ mocks: this.mocks, resolver: this.resolver } = await prepareSmocks({
 			contracts: [
+				'CircuitBreaker',
 				'DebtCache',
 				'DelegateApprovals',
 				'ExchangeRates',
+				'ExchangeCircuitBreaker',
 				'ExchangeState',
 				'FeePool',
 				'FlexibleStorage',
@@ -104,7 +107,19 @@ module.exports = function({ accounts }) {
 		whenMockedWithExchangeRatesValidity: ({ valid = true }, cb) => {
 			describe(`when mocked with ${valid ? 'valid' : 'invalid'} exchange rates`, () => {
 				beforeEach(async () => {
-					this.mocks.ExchangeRates.smocked.anyRateIsInvalid.will.return.with(!valid);
+					this.mocks.ExchangeRates.smocked.rateWithSafetyChecks.will.return.with([
+						0,
+						false,
+						!valid,
+					]);
+				});
+				cb();
+			});
+		},
+		whenMockedWithExchangeRatesValidityAtRound: ({ valid = true }, cb) => {
+			describe(`when mocked with ${valid ? 'valid' : 'invalid'} exchange rates`, () => {
+				beforeEach(async () => {
+					this.mocks.ExchangeRates.smocked.anyRateIsInvalidAtRound.will.return.with(!valid);
 				});
 				cb();
 			});
@@ -134,6 +149,14 @@ module.exports = function({ accounts }) {
 				cb();
 			});
 		},
+		whenMockedWithUintsSystemSetting: ({ setting, value }, cb) => {
+			describe(`when SystemSetting.${setting} is mocked to ${value}`, () => {
+				beforeEach(async () => {
+					this.flexibleStorageMock.mockSystemSetting({ setting, value, type: 'uints' });
+				});
+				cb();
+			});
+		},
 		whenMockedWithSynthUintSystemSetting: ({ setting, synth, value }, cb) => {
 			const settingForSynth = web3.utils.soliditySha3(
 				{ type: 'bytes32', value: toBytes32(setting) },
@@ -155,6 +178,16 @@ module.exports = function({ accounts }) {
 			describe(`when mocked with exchange rates giving an effective value of 1:1`, () => {
 				beforeEach(async () => {
 					this.mocks.ExchangeRates.smocked.effectiveValueAndRates.will.return.with(
+						(srcKey, amount, destKey) => [amount, (1e18).toString(), (1e18).toString()]
+					);
+				});
+				cb();
+			});
+		},
+		whenMockedEffectiveRateAsEqualAtRound: cb => {
+			describe(`when mocked with exchange rates giving an effective value of 1:1`, () => {
+				beforeEach(async () => {
+					this.mocks.ExchangeRates.smocked.effectiveValueAndRatesAtRound.will.return.with(
 						(srcKey, amount, destKey) => [amount, (1e18).toString(), (1e18).toString()]
 					);
 				});
@@ -198,29 +231,11 @@ module.exports = function({ accounts }) {
 			});
 		},
 		whenMockedEntireExchangeRateConfiguration: (
-			{
-				sourceCurrency,
-				atomicRate,
-				systemSourceRate,
-				systemDestinationRate,
-				deviationFactor,
-				lastExchangeRates,
-				owner,
-			},
+			{ sourceCurrency, atomicRate, systemSourceRate, systemDestinationRate },
 			cb
 		) => {
-			const lastRates = lastExchangeRates
-				.map(([asset, lastRate]) => `${fromBytes32(asset)}: ${lastRate}`)
-				.join(',');
-
-			describe(`when mocked with atomic rate ${atomicRate}, src rate ${systemSourceRate}, dest rate ${systemDestinationRate}, deviationFactor ${deviationFactor}, lastExchangeRates ${lastRates}`, () => {
+			describe(`when mocked with atomic rate ${atomicRate}, src rate ${systemSourceRate}, dest rate ${systemDestinationRate}`, () => {
 				beforeEach(async () => {
-					this.flexibleStorageMock.mockSystemSetting({
-						setting: 'priceDeviationThresholdFactor',
-						value: deviationFactor,
-						type: 'uint',
-					});
-
 					mockEffectiveAtomicRate({
 						sourceCurrency,
 						atomicRate,
@@ -240,20 +255,6 @@ module.exports = function({ accounts }) {
 								multiplyDecimal(sourceAmount, sourceRate),
 								destinationRate
 							).toString();
-						}
-					);
-
-					// mock last rates
-					this.mocks.ExchangeRates.smocked.ratesAndInvalidForCurrencies.will.return.with([
-						lastExchangeRates.map(([, rate]) => require('ethers').BigNumber.from(rate.toString())),
-						false,
-					]);
-
-					// tell exchanger to update last rates
-					await this.instance.resetLastExchangeRate(
-						lastExchangeRates.map(([asset]) => asset),
-						{
-							from: owner,
 						}
 					);
 				});

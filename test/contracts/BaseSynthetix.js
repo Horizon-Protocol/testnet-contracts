@@ -15,6 +15,8 @@ const { currentTime, fastForward, toUnit } = require('../utils')();
 const {
 	ensureOnlyExpectedMutativeFunctions,
 	onlyGivenAddressCanInvoke,
+	setupPriceAggregators,
+	updateAggregatorRates,
 	updateRatesWithDefaults,
 	setStatus,
 } = require('./helpers');
@@ -25,35 +27,38 @@ const {
 } = require('../..');
 
 contract('BaseSynthetix', async accounts => {
-	const [sUSD, sAUD, sEUR, SNX, sETH] = ['zUSD', 'zAUD', 'zEUR', 'HZN', 'zBNB'].map(toBytes32);
+	const [sUSD, sAUD, sEUR, SNX, sETH] = ['sUSD', 'sAUD', 'sEUR', 'SNX', 'sETH'].map(toBytes32);
 
 	const [, owner, account1, account2, account3] = accounts;
 
-	let baseSynthetix,
+	let baseSynthetixImpl,
+		baseSynthetixProxy,
 		exchangeRates,
 		debtCache,
 		escrow,
-		oracle,
-		timestamp,
 		addressResolver,
 		systemSettings,
-		systemStatus;
+		systemStatus,
+		circuitBreaker,
+		aggregatorDebtRatio;
 
 	before(async () => {
 		({
-			Synthetix: baseSynthetix,
+			Synthetix: baseSynthetixImpl,
+			ProxyERC20BaseSynthetix: baseSynthetixProxy,
 			AddressResolver: addressResolver,
 			ExchangeRates: exchangeRates,
 			SystemSettings: systemSettings,
 			DebtCache: debtCache,
 			SystemStatus: systemStatus,
+			CircuitBreaker: circuitBreaker,
 			SynthetixEscrow: escrow,
+			'ext:AggregatorDebtRatio': aggregatorDebtRatio,
 		} = await setupAllContracts({
 			accounts,
-			synths: ['zUSD', 'zBNB', 'zEUR', 'zAUD'],
+			synths: ['sUSD', 'sETH', 'sEUR', 'sAUD'],
 			contracts: [
 				'BaseSynthetix',
-				'SynthetixState',
 				'SupplySchedule',
 				'AddressResolver',
 				'ExchangeRates',
@@ -61,23 +66,27 @@ contract('BaseSynthetix', async accounts => {
 				'SystemStatus',
 				'DebtCache',
 				'Issuer',
+				'LiquidatorRewards',
+				'OneNetAggregatorDebtRatio',
 				'Exchanger',
 				'RewardsDistribution',
 				'CollateralManager',
+				'CircuitBreaker',
 				'RewardEscrowV2', // required for collateral check in issuer
 			],
 		}));
 
-		// Send a price update to guarantee we're not stale.
-		oracle = account1;
-		timestamp = await currentTime();
+		// use implementation ABI on the proxy address to simplify calling
+		baseSynthetixProxy = await artifacts.require('BaseSynthetix').at(baseSynthetixProxy.address);
+
+		await setupPriceAggregators(exchangeRates, owner, [sAUD, sEUR, sETH]);
 	});
 
 	addSnapshotBeforeRestoreAfterEach();
 
 	it('ensure only expected functions are mutative', async () => {
 		ensureOnlyExpectedMutativeFunctions({
-			abi: baseSynthetix.abi,
+			abi: baseSynthetixImpl.abi,
 			ignoreParents: ['ExternStateToken', 'MixinResolver'],
 			expected: [
 				'burnSecondary',
@@ -106,7 +115,10 @@ contract('BaseSynthetix', async accounts => {
 				'settle',
 				'transfer',
 				'transferFrom',
+				'liquidateSelf',
 				'liquidateDelinquentAccount',
+				'liquidateDelinquentAccountEscrowIndex',
+				'migrateEscrowContractBalance',
 			],
 		});
 	});
@@ -149,7 +161,7 @@ contract('BaseSynthetix', async accounts => {
 		const amount = 100;
 		it('exchangeWithVirtual should revert no matter who the caller is', async () => {
 			await onlyGivenAddressCanInvoke({
-				fnc: baseSynthetix.exchangeWithVirtual,
+				fnc: baseSynthetixImpl.exchangeWithVirtual,
 				accounts,
 				args: [sUSD, amount, sAUD, toBytes32('AGGREGATOR')],
 				reason: 'Cannot be run on this layer',
@@ -158,7 +170,7 @@ contract('BaseSynthetix', async accounts => {
 
 		it('exchangeWithTrackingForInitiator should revert no matter who the caller is', async () => {
 			await onlyGivenAddressCanInvoke({
-				fnc: baseSynthetix.exchangeWithTrackingForInitiator,
+				fnc: baseSynthetixImpl.exchangeWithTrackingForInitiator,
 				accounts,
 				args: [sUSD, amount, sAUD, owner, toBytes32('AGGREGATOR')],
 				reason: 'Cannot be run on this layer',
@@ -167,16 +179,16 @@ contract('BaseSynthetix', async accounts => {
 
 		it('ExchangeAtomically should revert no matter who the caller is', async () => {
 			await onlyGivenAddressCanInvoke({
-				fnc: baseSynthetix.exchangeAtomically,
+				fnc: baseSynthetixImpl.exchangeAtomically,
 				accounts,
-				args: [sUSD, amount, sETH, toBytes32('AGGREGATOR')],
+				args: [sUSD, amount, sETH, toBytes32('AGGREGATOR'), 0],
 				reason: 'Cannot be run on this layer',
 			});
 		});
 
 		it('mint should revert no matter who the caller is', async () => {
 			await onlyGivenAddressCanInvoke({
-				fnc: baseSynthetix.mint,
+				fnc: baseSynthetixImpl.mint,
 				accounts,
 				args: [],
 				reason: 'Cannot be run on this layer',
@@ -185,7 +197,7 @@ contract('BaseSynthetix', async accounts => {
 
 		it('mintSecondary should revert no matter who the caller is', async () => {
 			await onlyGivenAddressCanInvoke({
-				fnc: baseSynthetix.mintSecondary,
+				fnc: baseSynthetixImpl.mintSecondary,
 				accounts,
 				args: [account1, amount],
 				reason: 'Cannot be run on this layer',
@@ -193,7 +205,7 @@ contract('BaseSynthetix', async accounts => {
 		});
 		it('mintSecondaryRewards should revert no matter who the caller is', async () => {
 			await onlyGivenAddressCanInvoke({
-				fnc: baseSynthetix.mintSecondaryRewards,
+				fnc: baseSynthetixImpl.mintSecondaryRewards,
 				accounts,
 				args: [amount],
 				reason: 'Cannot be run on this layer',
@@ -201,7 +213,7 @@ contract('BaseSynthetix', async accounts => {
 		});
 		it('burnSecondary should revert no matter who the caller is', async () => {
 			await onlyGivenAddressCanInvoke({
-				fnc: baseSynthetix.burnSecondary,
+				fnc: baseSynthetixImpl.burnSecondary,
 				accounts,
 				args: [account1, amount],
 				reason: 'Cannot be run on this layer',
@@ -218,7 +230,7 @@ contract('BaseSynthetix', async accounts => {
 
 		it('emitExchangeTracking() cannot be invoked directly by any account', async () => {
 			await onlyGivenAddressCanInvoke({
-				fnc: baseSynthetix.emitExchangeTracking,
+				fnc: baseSynthetixImpl.emitExchangeTracking,
 				accounts,
 				args: [trackingCode, currencyKey1, amount1, amount2],
 				reason: 'Only Exchanger can invoke this',
@@ -226,7 +238,7 @@ contract('BaseSynthetix', async accounts => {
 		});
 		it('emitExchangeRebate() cannot be invoked directly by any account', async () => {
 			await onlyGivenAddressCanInvoke({
-				fnc: baseSynthetix.emitExchangeRebate,
+				fnc: baseSynthetixImpl.emitExchangeRebate,
 				accounts,
 				args: [account1, currencyKey1, amount1],
 				reason: 'Only Exchanger can invoke this',
@@ -234,7 +246,7 @@ contract('BaseSynthetix', async accounts => {
 		});
 		it('emitExchangeReclaim() cannot be invoked directly by any account', async () => {
 			await onlyGivenAddressCanInvoke({
-				fnc: baseSynthetix.emitExchangeReclaim,
+				fnc: baseSynthetixImpl.emitExchangeReclaim,
 				accounts,
 				args: [account1, currencyKey1, amount1],
 				reason: 'Only Exchanger can invoke this',
@@ -242,7 +254,7 @@ contract('BaseSynthetix', async accounts => {
 		});
 		it('emitSynthExchange() cannot be invoked directly by any account', async () => {
 			await onlyGivenAddressCanInvoke({
-				fnc: baseSynthetix.emitSynthExchange,
+				fnc: baseSynthetixImpl.emitSynthExchange,
 				accounts,
 				args: [account1, currencyKey1, amount1, currencyKey2, amount2, account2],
 				reason: 'Only Exchanger can invoke this',
@@ -256,16 +268,16 @@ contract('BaseSynthetix', async accounts => {
 				await addressResolver.importAddresses(['Exchanger'].map(toBytes32), [exchanger], {
 					from: owner,
 				});
-				await baseSynthetix.rebuildCache();
+				await baseSynthetixImpl.rebuildCache();
 			});
 			beforeEach('call event emission functions', async () => {
-				tx1 = await baseSynthetix.emitExchangeRebate(account1, currencyKey1, amount1, {
+				tx1 = await baseSynthetixImpl.emitExchangeRebate(account1, currencyKey1, amount1, {
 					from: exchanger,
 				});
-				tx2 = await baseSynthetix.emitExchangeReclaim(account1, currencyKey1, amount1, {
+				tx2 = await baseSynthetixImpl.emitExchangeReclaim(account1, currencyKey1, amount1, {
 					from: exchanger,
 				});
-				tx3 = await baseSynthetix.emitSynthExchange(
+				tx3 = await baseSynthetixImpl.emitSynthExchange(
 					account1,
 					currencyKey1,
 					amount1,
@@ -274,7 +286,7 @@ contract('BaseSynthetix', async accounts => {
 					account2,
 					{ from: exchanger }
 				);
-				tx4 = await baseSynthetix.emitExchangeTracking(
+				tx4 = await baseSynthetixImpl.emitExchangeTracking(
 					trackingCode,
 					currencyKey1,
 					amount1,
@@ -325,7 +337,7 @@ contract('BaseSynthetix', async accounts => {
 				[smockExchanger.address],
 				{ from: owner }
 			);
-			await baseSynthetix.rebuildCache();
+			await baseSynthetixImpl.rebuildCache();
 		});
 
 		const amount1 = '10';
@@ -335,7 +347,7 @@ contract('BaseSynthetix', async accounts => {
 		const trackingCode = toBytes32('1inch');
 
 		it('exchangeOnBehalf is called with the right arguments ', async () => {
-			await baseSynthetix.exchangeOnBehalf(account1, currencyKey1, amount1, currencyKey2, {
+			await baseSynthetixImpl.exchangeOnBehalf(account1, currencyKey1, amount1, currencyKey2, {
 				from: msgSender,
 			});
 			assert.equal(smockExchanger.smocked.exchange.calls[0][0], account1);
@@ -350,7 +362,7 @@ contract('BaseSynthetix', async accounts => {
 		});
 
 		it('exchangeWithTracking is called with the right arguments ', async () => {
-			await baseSynthetix.exchangeWithTracking(
+			await baseSynthetixImpl.exchangeWithTracking(
 				currencyKey1,
 				amount1,
 				currencyKey2,
@@ -370,7 +382,7 @@ contract('BaseSynthetix', async accounts => {
 		});
 
 		it('exchangeOnBehalfWithTracking is called with the right arguments ', async () => {
-			await baseSynthetix.exchangeOnBehalfWithTracking(
+			await baseSynthetixImpl.exchangeOnBehalfWithTracking(
 				account1,
 				currencyKey1,
 				amount1,
@@ -392,7 +404,7 @@ contract('BaseSynthetix', async accounts => {
 		});
 
 		it('settle is called with the right arguments ', async () => {
-			await baseSynthetix.settle(currencyKey1, {
+			await baseSynthetixImpl.settle(currencyKey1, {
 				from: owner,
 			});
 			assert.equal(smockExchanger.smocked.settle.calls[0][0], msgSender);
@@ -402,74 +414,71 @@ contract('BaseSynthetix', async accounts => {
 
 	describe('isWaitingPeriod()', () => {
 		it('returns false by default', async () => {
-			assert.isFalse(await baseSynthetix.isWaitingPeriod(sETH));
+			assert.isFalse(await baseSynthetixImpl.isWaitingPeriod(sETH));
 		});
 		describe('when a user has exchanged into sETH', () => {
 			beforeEach(async () => {
-				await updateRatesWithDefaults({ exchangeRates, oracle, debtCache });
+				await updateRatesWithDefaults({ exchangeRates, owner, debtCache });
 
-				await baseSynthetix.issueSynths(toUnit('100'), { from: owner });
-				await baseSynthetix.exchange(sUSD, toUnit('10'), sETH, { from: owner });
+				await baseSynthetixImpl.issueSynths(toUnit('100'), { from: owner });
+				await baseSynthetixImpl.exchange(sUSD, toUnit('10'), sETH, { from: owner });
 			});
 			it('then waiting period is true', async () => {
-				assert.isTrue(await baseSynthetix.isWaitingPeriod(sETH));
+				assert.isTrue(await baseSynthetixImpl.isWaitingPeriod(sETH));
 			});
 			describe('when the waiting period expires', () => {
 				beforeEach(async () => {
 					await fastForward(await systemSettings.waitingPeriodSecs());
 				});
 				it('returns false by default', async () => {
-					assert.isFalse(await baseSynthetix.isWaitingPeriod(sETH));
+					assert.isFalse(await baseSynthetixImpl.isWaitingPeriod(sETH));
 				});
 			});
 		});
 	});
 
-	describe('anySynthOrHZNRateIsInvalid()', () => {
+	describe('anySynthOrSNXRateIsInvalid()', () => {
 		it('should have stale rates initially', async () => {
-			assert.equal(await baseSynthetix.anySynthOrSNXRateIsInvalid(), true);
+			assert.equal(await baseSynthetixImpl.anySynthOrSNXRateIsInvalid(), true);
 		});
 		describe('when synth rates set', () => {
 			beforeEach(async () => {
 				// fast forward to get past initial SNX setting
 				await fastForward((await exchangeRates.rateStalePeriod()).add(web3.utils.toBN('300')));
 
-				timestamp = await currentTime();
-
-				await exchangeRates.updateRates(
+				await updateAggregatorRates(
+					exchangeRates,
+					circuitBreaker,
 					[sAUD, sEUR, sETH],
-					['0.5', '1.25', '100'].map(toUnit),
-					timestamp,
-					{ from: oracle }
+					['0.5', '1.25', '100'].map(toUnit)
 				);
 				await debtCache.takeDebtSnapshot();
 			});
 			it('should still have stale rates', async () => {
-				assert.equal(await baseSynthetix.anySynthOrSNXRateIsInvalid(), true);
+				assert.equal(await baseSynthetixImpl.anySynthOrSNXRateIsInvalid(), true);
 			});
 			describe('when SNX is also set', () => {
 				beforeEach(async () => {
-					timestamp = await currentTime();
-
-					await exchangeRates.updateRates([SNX], ['1'].map(toUnit), timestamp, { from: oracle });
+					await updateAggregatorRates(exchangeRates, circuitBreaker, [SNX], ['1'].map(toUnit));
 				});
 				it('then no stale rates', async () => {
-					assert.equal(await baseSynthetix.anySynthOrSNXRateIsInvalid(), false);
+					assert.equal(await baseSynthetixImpl.anySynthOrSNXRateIsInvalid(), false);
 				});
 
 				describe('when only some synths are updated', () => {
 					beforeEach(async () => {
 						await fastForward((await exchangeRates.rateStalePeriod()).add(web3.utils.toBN('300')));
 
-						timestamp = await currentTime();
-
-						await exchangeRates.updateRates([SNX, sAUD], ['0.1', '0.78'].map(toUnit), timestamp, {
-							from: oracle,
-						});
+						await updateAggregatorRates(
+							exchangeRates,
+							circuitBreaker,
+							[SNX, sAUD],
+							['0.1', '0.78'].map(toUnit)
+						);
 					});
 
 					it('then anySynthOrSNXRateIsInvalid() returns true', async () => {
-						assert.equal(await baseSynthetix.anySynthOrSNXRateIsInvalid(), true);
+						assert.equal(await baseSynthetixImpl.anySynthOrSNXRateIsInvalid(), true);
 					});
 				});
 			});
@@ -478,13 +487,13 @@ contract('BaseSynthetix', async accounts => {
 
 	describe('availableCurrencyKeys()', () => {
 		it('returns all currency keys by default', async () => {
-			assert.deepEqual(await baseSynthetix.availableCurrencyKeys(), [sUSD, sETH, sEUR, sAUD]);
+			assert.deepEqual(await baseSynthetixImpl.availableCurrencyKeys(), [sUSD, sETH, sEUR, sAUD]);
 		});
 	});
 
 	describe('isWaitingPeriod()', () => {
 		it('returns false by default', async () => {
-			assert.isFalse(await baseSynthetix.isWaitingPeriod(sETH));
+			assert.isFalse(await baseSynthetixImpl.isWaitingPeriod(sETH));
 		});
 	});
 
@@ -492,18 +501,18 @@ contract('BaseSynthetix', async accounts => {
 		describe('when the system is suspended', () => {
 			beforeEach(async () => {
 				// approve for transferFrom to work
-				await baseSynthetix.approve(account1, toUnit('10'), { from: owner });
+				await baseSynthetixImpl.approve(account1, toUnit('10'), { from: owner });
 				await setStatus({ owner, systemStatus, section: 'System', suspend: true });
 			});
 			it('when transfer() is invoked, it reverts with operation prohibited', async () => {
 				await assert.revert(
-					baseSynthetix.transfer(account1, toUnit('10'), { from: owner }),
+					baseSynthetixProxy.transfer(account1, toUnit('10'), { from: owner }),
 					'Operation prohibited'
 				);
 			});
 			it('when transferFrom() is invoked, it reverts with operation prohibited', async () => {
 				await assert.revert(
-					baseSynthetix.transferFrom(owner, account2, toUnit('10'), { from: account1 }),
+					baseSynthetixProxy.transferFrom(owner, account2, toUnit('10'), { from: account1 }),
 					'Operation prohibited'
 				);
 			});
@@ -512,26 +521,100 @@ contract('BaseSynthetix', async accounts => {
 					await setStatus({ owner, systemStatus, section: 'System', suspend: false });
 				});
 				it('when transfer() is invoked, it works as expected', async () => {
-					await baseSynthetix.transfer(account1, toUnit('10'), { from: owner });
+					await baseSynthetixProxy.transfer(account1, toUnit('10'), { from: owner });
 				});
 				it('when transferFrom() is invoked, it works as expected', async () => {
-					await baseSynthetix.transferFrom(owner, account2, toUnit('10'), { from: account1 });
+					await baseSynthetixProxy.transferFrom(owner, account2, toUnit('10'), { from: account1 });
 				});
 			});
 		});
 
 		beforeEach(async () => {
 			// Ensure all synths have rates to allow issuance
-			await updateRatesWithDefaults({ exchangeRates, oracle, debtCache });
+			await updateRatesWithDefaults({ exchangeRates, owner, debtCache });
+		});
+
+		// SIP-238
+		describe('implementation does not allow transfers but allows approve', () => {
+			const amount = toUnit('10');
+			const revertMsg = 'Only the proxy';
+
+			it('approve does not revert', async () => {
+				await baseSynthetixImpl.approve(account1, amount, { from: owner });
+			});
+			it('transfer reverts', async () => {
+				await assert.revert(
+					baseSynthetixImpl.transfer(account1, amount, { from: owner }),
+					revertMsg
+				);
+			});
+			it('transferFrom reverts', async () => {
+				await baseSynthetixImpl.approve(account1, amount, { from: owner });
+				await assert.revert(
+					baseSynthetixImpl.transferFrom(owner, account1, amount, { from: account1 }),
+					revertMsg
+				);
+			});
+			it('transfer does not revert from a whitelisted contract', async () => {
+				// set owner as RewardEscrowV2
+				await addressResolver.importAddresses(['RewardEscrowV2'].map(toBytes32), [owner], {
+					from: owner,
+				});
+				await baseSynthetixImpl.transfer(account1, amount, { from: owner });
+			});
+		});
+
+		// SIP-252
+		describe('migrateEscrowContractBalance', () => {
+			it('restricted to owner', async () => {
+				await assert.revert(
+					baseSynthetixImpl.migrateEscrowContractBalance({ from: account2 }),
+					'contract owner'
+				);
+			});
+			it('reverts if both are the same address', async () => {
+				await addressResolver.importAddresses(
+					['RewardEscrowV2Frozen', 'RewardEscrowV2'].map(toBytes32),
+					[account1, account1],
+					{ from: owner }
+				);
+				await assert.revert(
+					baseSynthetixImpl.migrateEscrowContractBalance({ from: owner }),
+					'same address'
+				);
+			});
+			it('transfers balance as needed', async () => {
+				await baseSynthetixProxy.transfer(account1, toUnit('10'), { from: owner });
+				// check balances
+				assert.bnEqual(await baseSynthetixImpl.balanceOf(account1), toUnit('10'));
+				assert.bnEqual(await baseSynthetixImpl.balanceOf(account2), toUnit('0'));
+
+				await addressResolver.importAddresses(
+					['RewardEscrowV2Frozen', 'RewardEscrowV2'].map(toBytes32),
+					[account1, account2],
+					{ from: owner }
+				);
+
+				await baseSynthetixImpl.migrateEscrowContractBalance({ from: owner });
+
+				// check balances
+				assert.bnEqual(await baseSynthetixImpl.balanceOf(account1), toUnit('0'));
+				assert.bnEqual(await baseSynthetixImpl.balanceOf(account2), toUnit('10'));
+			});
 		});
 
 		it('should transfer using the ERC20 transfer function @gasprofile', async () => {
 			// Ensure our environment is set up correctly for our assumptions
 			// e.g. owner owns all SNX.
 
-			assert.bnEqual(await baseSynthetix.totalSupply(), await baseSynthetix.balanceOf(owner));
+			assert.bnEqual(
+				await baseSynthetixImpl.totalSupply(),
+				await baseSynthetixImpl.balanceOf(owner)
+			);
 
-			const transaction = await baseSynthetix.transfer(account1, toUnit('10'), { from: owner });
+			const transaction = await baseSynthetixProxy.transfer(account1, toUnit('10'), {
+				from: owner,
+			});
 
 			assert.eventEqual(transaction, 'Transfer', {
 				from: owner,
@@ -539,32 +622,35 @@ contract('BaseSynthetix', async accounts => {
 				value: toUnit('10'),
 			});
 
-			assert.bnEqual(await baseSynthetix.balanceOf(account1), toUnit('10'));
+			assert.bnEqual(await baseSynthetixImpl.balanceOf(account1), toUnit('10'));
 		});
 
 		it('should revert when exceeding locked synthetix and calling the ERC20 transfer function', async () => {
 			// Ensure our environment is set up correctly for our assumptions
 			// e.g. owner owns all SNX.
-			assert.bnEqual(await baseSynthetix.totalSupply(), await baseSynthetix.balanceOf(owner));
+			assert.bnEqual(
+				await baseSynthetixImpl.totalSupply(),
+				await baseSynthetixImpl.balanceOf(owner)
+			);
 
 			// Issue max synths.
-			await baseSynthetix.issueMaxSynths({ from: owner });
+			await baseSynthetixImpl.issueMaxSynths({ from: owner });
 
 			// Try to transfer 0.000000000000000001 SNX
 			await assert.revert(
-				baseSynthetix.transfer(account1, '1', { from: owner }),
-				'Cannot transfer staked or escrowed HZN'
+				baseSynthetixProxy.transfer(account1, '1', { from: owner }),
+				'Cannot transfer staked or escrowed SNX'
 			);
 		});
 
 		it('should transfer using the ERC20 transferFrom function @gasprofile', async () => {
 			// Ensure our environment is set up correctly for our assumptions
 			// e.g. owner owns all SNX.
-			const previousOwnerBalance = await baseSynthetix.balanceOf(owner);
-			assert.bnEqual(await baseSynthetix.totalSupply(), previousOwnerBalance);
+			const previousOwnerBalance = await baseSynthetixImpl.balanceOf(owner);
+			assert.bnEqual(await baseSynthetixImpl.totalSupply(), previousOwnerBalance);
 
 			// Approve account1 to act on our behalf for 10 SNX.
-			let transaction = await baseSynthetix.approve(account1, toUnit('10'), { from: owner });
+			let transaction = await baseSynthetixImpl.approve(account1, toUnit('10'), { from: owner });
 			assert.eventEqual(transaction, 'Approval', {
 				owner: owner,
 				spender: account1,
@@ -572,7 +658,7 @@ contract('BaseSynthetix', async accounts => {
 			});
 
 			// Assert that transferFrom works.
-			transaction = await baseSynthetix.transferFrom(owner, account2, toUnit('10'), {
+			transaction = await baseSynthetixProxy.transferFrom(owner, account2, toUnit('10'), {
 				from: account1,
 			});
 
@@ -583,12 +669,15 @@ contract('BaseSynthetix', async accounts => {
 			});
 
 			// Assert that account2 has 10 SNX and owner has 10 less SNX
-			assert.bnEqual(await baseSynthetix.balanceOf(account2), toUnit('10'));
-			assert.bnEqual(await baseSynthetix.balanceOf(owner), previousOwnerBalance.sub(toUnit('10')));
+			assert.bnEqual(await baseSynthetixImpl.balanceOf(account2), toUnit('10'));
+			assert.bnEqual(
+				await baseSynthetixImpl.balanceOf(owner),
+				previousOwnerBalance.sub(toUnit('10'))
+			);
 
 			// Assert that we can't transfer more even though there's a balance for owner.
 			await assert.revert(
-				baseSynthetix.transferFrom(owner, account2, '1', {
+				baseSynthetixProxy.transferFrom(owner, account2, '1', {
 					from: account1,
 				})
 			);
@@ -597,10 +686,13 @@ contract('BaseSynthetix', async accounts => {
 		it('should revert when exceeding locked synthetix and calling the ERC20 transferFrom function', async () => {
 			// Ensure our environment is set up correctly for our assumptions
 			// e.g. owner owns all SNX.
-			assert.bnEqual(await baseSynthetix.totalSupply(), await baseSynthetix.balanceOf(owner));
+			assert.bnEqual(
+				await baseSynthetixImpl.totalSupply(),
+				await baseSynthetixImpl.balanceOf(owner)
+			);
 
 			// Approve account1 to act on our behalf for 10 SNX.
-			const transaction = await baseSynthetix.approve(account1, toUnit('10'), { from: owner });
+			const transaction = await baseSynthetixImpl.approve(account1, toUnit('10'), { from: owner });
 			assert.eventEqual(transaction, 'Approval', {
 				owner: owner,
 				spender: account1,
@@ -608,51 +700,51 @@ contract('BaseSynthetix', async accounts => {
 			});
 
 			// Issue max synths
-			await baseSynthetix.issueMaxSynths({ from: owner });
+			await baseSynthetixImpl.issueMaxSynths({ from: owner });
 
 			// Assert that transferFrom fails even for the smallest amount of SNX.
 			await assert.revert(
-				baseSynthetix.transferFrom(owner, account2, '1', {
+				baseSynthetixProxy.transferFrom(owner, account2, '1', {
 					from: account1,
 				}),
-				'Cannot transfer staked or escrowed HZN'
+				'Cannot transfer staked or escrowed SNX'
 			);
 		});
 
 		describe('when the user has issued some sUSD and exchanged for other synths', () => {
 			beforeEach(async () => {
-				await baseSynthetix.issueSynths(toUnit('100'), { from: owner });
-				await baseSynthetix.exchange(sUSD, toUnit('10'), sETH, { from: owner });
-				await baseSynthetix.exchange(sUSD, toUnit('10'), sAUD, { from: owner });
-				await baseSynthetix.exchange(sUSD, toUnit('10'), sEUR, { from: owner });
+				await baseSynthetixImpl.issueSynths(toUnit('100'), { from: owner });
+				await baseSynthetixImpl.exchange(sUSD, toUnit('10'), sETH, { from: owner });
+				await baseSynthetixImpl.exchange(sUSD, toUnit('10'), sAUD, { from: owner });
+				await baseSynthetixImpl.exchange(sUSD, toUnit('10'), sEUR, { from: owner });
 			});
 			it('should transfer using the ERC20 transfer function @gasprofile', async () => {
-				await baseSynthetix.transfer(account1, toUnit('10'), { from: owner });
+				await baseSynthetixProxy.transfer(account1, toUnit('10'), { from: owner });
 
-				assert.bnEqual(await baseSynthetix.balanceOf(account1), toUnit('10'));
+				assert.bnEqual(await baseSynthetixImpl.balanceOf(account1), toUnit('10'));
 			});
 
 			it('should transfer using the ERC20 transferFrom function @gasprofile', async () => {
-				const previousOwnerBalance = await baseSynthetix.balanceOf(owner);
+				const previousOwnerBalance = await baseSynthetixImpl.balanceOf(owner);
 
 				// Approve account1 to act on our behalf for 10 SNX.
-				await baseSynthetix.approve(account1, toUnit('10'), { from: owner });
+				await baseSynthetixImpl.approve(account1, toUnit('10'), { from: owner });
 
 				// Assert that transferFrom works.
-				await baseSynthetix.transferFrom(owner, account2, toUnit('10'), {
+				await baseSynthetixProxy.transferFrom(owner, account2, toUnit('10'), {
 					from: account1,
 				});
 
 				// Assert that account2 has 10 SNX and owner has 10 less SNX
-				assert.bnEqual(await baseSynthetix.balanceOf(account2), toUnit('10'));
+				assert.bnEqual(await baseSynthetixImpl.balanceOf(account2), toUnit('10'));
 				assert.bnEqual(
-					await baseSynthetix.balanceOf(owner),
+					await baseSynthetixImpl.balanceOf(owner),
 					previousOwnerBalance.sub(toUnit('10'))
 				);
 
 				// Assert that we can't transfer more even though there's a balance for owner.
 				await assert.revert(
-					baseSynthetix.transferFrom(owner, account2, '1', {
+					baseSynthetixProxy.transferFrom(owner, account2, '1', {
 						from: account1,
 					})
 				);
@@ -663,32 +755,32 @@ contract('BaseSynthetix', async accounts => {
 			const value = toUnit('300');
 			const ensureTransferReverts = async () => {
 				await assert.revert(
-					baseSynthetix.transfer(account2, value, { from: account1 }),
-					'A zasset or HZN rate is invalid'
+					baseSynthetixProxy.transfer(account2, value, { from: account1 }),
+					'A synth or SNX rate is invalid'
 				);
 				await assert.revert(
-					baseSynthetix.transferFrom(account2, account1, value, {
+					baseSynthetixProxy.transferFrom(account2, account1, value, {
 						from: account3,
 					}),
-					'A zasset or HZN rate is invalid'
+					'A synth or SNX rate is invalid'
 				);
 			};
 
 			beforeEach(async () => {
 				// Give some SNX to account1 & account2
-				await baseSynthetix.transfer(account1, toUnit('10000'), {
+				await baseSynthetixProxy.transfer(account1, toUnit('10000'), {
 					from: owner,
 				});
-				await baseSynthetix.transfer(account2, toUnit('10000'), {
+				await baseSynthetixProxy.transfer(account2, toUnit('10000'), {
 					from: owner,
 				});
 
 				// Ensure that we can do a successful transfer before rates go stale
-				await baseSynthetix.transfer(account2, value, { from: account1 });
+				await baseSynthetixProxy.transfer(account2, value, { from: account1 });
 
 				// approve account3 to transferFrom account2
-				await baseSynthetix.approve(account3, toUnit('10000'), { from: account2 });
-				await baseSynthetix.transferFrom(account2, account1, value, {
+				await baseSynthetixImpl.approve(account3, toUnit('10000'), { from: account2 });
+				await baseSynthetixProxy.transferFrom(account2, account1, value, {
 					from: account3,
 				});
 			});
@@ -697,9 +789,12 @@ contract('BaseSynthetix', async accounts => {
 				beforeEach(async () => {
 					// ensure the accounts have a debt position
 					await Promise.all([
-						baseSynthetix.issueSynths(toUnit('1'), { from: account1 }),
-						baseSynthetix.issueSynths(toUnit('1'), { from: account2 }),
+						baseSynthetixImpl.issueSynths(toUnit('1'), { from: account1 }),
+						baseSynthetixImpl.issueSynths(toUnit('1'), { from: account2 }),
 					]);
+
+					// make aggregator debt info rate stale
+					await aggregatorDebtRatio.setOverrideTimestamp(await currentTime());
 
 					// Now jump forward in time so the rates are stale
 					await fastForward((await exchangeRates.rateStalePeriod()) + 1);
@@ -707,66 +802,50 @@ contract('BaseSynthetix', async accounts => {
 				it('should not allow transfer if the exchange rate for SNX is stale', async () => {
 					await ensureTransferReverts();
 
-					const timestamp = await currentTime();
-
 					// now give some synth rates
-					await exchangeRates.updateRates([sAUD, sEUR], ['0.5', '1.25'].map(toUnit), timestamp, {
-						from: oracle,
-					});
+					await aggregatorDebtRatio.setOverrideTimestamp(0);
+
+					await updateAggregatorRates(
+						exchangeRates,
+						circuitBreaker,
+						[sAUD, sEUR],
+						['0.5', '1.25'].map(toUnit)
+					);
 					await debtCache.takeDebtSnapshot();
 
 					await ensureTransferReverts();
 
 					// the remainder of the synths have prices
-					await exchangeRates.updateRates([sETH], ['100'].map(toUnit), timestamp, {
-						from: oracle,
-					});
+					await updateAggregatorRates(exchangeRates, circuitBreaker, [sETH], ['100'].map(toUnit));
 					await debtCache.takeDebtSnapshot();
 
 					await ensureTransferReverts();
 
 					// now give SNX rate
-					await exchangeRates.updateRates([SNX], ['1'].map(toUnit), timestamp, {
-						from: oracle,
-					});
+					await updateAggregatorRates(exchangeRates, circuitBreaker, [SNX], ['1'].map(toUnit));
 
 					// now SNX transfer should work
-					await baseSynthetix.transfer(account2, value, { from: account1 });
-					await baseSynthetix.transferFrom(account2, account1, value, {
+					await baseSynthetixProxy.transfer(account2, value, { from: account1 });
+					await baseSynthetixProxy.transferFrom(account2, account1, value, {
 						from: account3,
 					});
 				});
 
-				it('should not allow transfer if the exchange rate for any synth is stale', async () => {
+				it('should not allow transfer if debt aggregator is stale', async () => {
 					await ensureTransferReverts();
-
-					const timestamp = await currentTime();
 
 					// now give SNX rate
-					await exchangeRates.updateRates([SNX], ['1'].map(toUnit), timestamp, {
-						from: oracle,
-					});
+					await updateAggregatorRates(exchangeRates, circuitBreaker, [SNX], ['1'].map(toUnit));
 					await debtCache.takeDebtSnapshot();
 
 					await ensureTransferReverts();
 
-					// now give some synth rates
-					await exchangeRates.updateRates([sAUD, sEUR], ['0.5', '1.25'].map(toUnit), timestamp, {
-						from: oracle,
-					});
-					await debtCache.takeDebtSnapshot();
-
-					await ensureTransferReverts();
-
-					// now give the remainder of synths rates
-					await exchangeRates.updateRates([sETH], ['100'].map(toUnit), timestamp, {
-						from: oracle,
-					});
-					await debtCache.takeDebtSnapshot();
+					// now give the aggregator debt info rate
+					await aggregatorDebtRatio.setOverrideTimestamp(0);
 
 					// now SNX transfer should work
-					await baseSynthetix.transfer(account2, value, { from: account1 });
-					await baseSynthetix.transferFrom(account2, account1, value, {
+					await baseSynthetixProxy.transfer(account2, value, { from: account1 });
+					await baseSynthetixProxy.transferFrom(account2, account1, value, {
 						from: account3,
 					});
 				});
@@ -775,16 +854,16 @@ contract('BaseSynthetix', async accounts => {
 			describe('when the user has no debt', () => {
 				it('should allow transfer if the exchange rate for SNX is stale', async () => {
 					// SNX transfer should work
-					await baseSynthetix.transfer(account2, value, { from: account1 });
-					await baseSynthetix.transferFrom(account2, account1, value, {
+					await baseSynthetixProxy.transfer(account2, value, { from: account1 });
+					await baseSynthetixProxy.transferFrom(account2, account1, value, {
 						from: account3,
 					});
 				});
 
 				it('should allow transfer if the exchange rate for any synth is stale', async () => {
 					// now SNX transfer should work
-					await baseSynthetix.transfer(account2, value, { from: account1 });
-					await baseSynthetix.transferFrom(account2, account1, value, {
+					await baseSynthetixProxy.transfer(account2, value, { from: account1 });
+					await baseSynthetixProxy.transferFrom(account2, account1, value, {
 						from: account3,
 					});
 				});
@@ -793,7 +872,7 @@ contract('BaseSynthetix', async accounts => {
 
 		describe('when the user holds SNX', () => {
 			beforeEach(async () => {
-				await baseSynthetix.transfer(account1, toUnit('1000'), {
+				await baseSynthetixProxy.transfer(account1, toUnit('1000'), {
 					from: owner,
 				});
 			});
@@ -802,25 +881,25 @@ contract('BaseSynthetix', async accounts => {
 				beforeEach(async () => {
 					// Setup escrow
 					const escrowedSynthetixs = toUnit('30000');
-					await baseSynthetix.transfer(escrow.address, escrowedSynthetixs, {
+					await baseSynthetixProxy.transfer(escrow.address, escrowedSynthetixs, {
 						from: owner,
 					});
 				});
 
 				it('should allow transfer of synthetix by default', async () => {
-					await baseSynthetix.transfer(account2, toUnit('100'), { from: account1 });
+					await baseSynthetixProxy.transfer(account2, toUnit('100'), { from: account1 });
 				});
 
 				describe('when the user has a debt position (i.e. has issued)', () => {
 					beforeEach(async () => {
-						await baseSynthetix.issueSynths(toUnit('10'), { from: account1 });
+						await baseSynthetixImpl.issueSynths(toUnit('10'), { from: account1 });
 					});
 
 					it('should not allow transfer of synthetix in escrow', async () => {
 						// Ensure the transfer fails as all the synthetix are in escrow
 						await assert.revert(
-							baseSynthetix.transfer(account2, toUnit('990'), { from: account1 }),
-							'Cannot transfer staked or escrowed HZN'
+							baseSynthetixProxy.transfer(account2, toUnit('990'), { from: account1 }),
+							'Cannot transfer staked or escrowed SNX'
 						);
 					});
 				});
@@ -829,137 +908,141 @@ contract('BaseSynthetix', async accounts => {
 
 		it('should not be possible to transfer locked synthetix', async () => {
 			const issuedSynthetixs = web3.utils.toBN('200000');
-			await baseSynthetix.transfer(account1, toUnit(issuedSynthetixs), {
+			await baseSynthetixProxy.transfer(account1, toUnit(issuedSynthetixs), {
 				from: owner,
 			});
 
 			// Issue
 			const amountIssued = toUnit('2000');
-			await baseSynthetix.issueSynths(amountIssued, { from: account1 });
+			await baseSynthetixImpl.issueSynths(amountIssued, { from: account1 });
 
 			await assert.revert(
-				baseSynthetix.transfer(account2, toUnit(issuedSynthetixs), {
+				baseSynthetixProxy.transfer(account2, toUnit(issuedSynthetixs), {
 					from: account1,
 				}),
-				'Cannot transfer staked or escrowed HZN'
+				'Cannot transfer staked or escrowed SNX'
 			);
 		});
 
 		it("should lock newly received synthetix if the user's collaterisation is too high", async () => {
+			// Disable Dynamic fee so that we can neglect it.
+			await systemSettings.setExchangeDynamicFeeRounds('0', { from: owner });
+
 			// Set sEUR for purposes of this test
-			const timestamp1 = await currentTime();
-			await exchangeRates.updateRates([sEUR], [toUnit('0.75')], timestamp1, { from: oracle });
+			await updateAggregatorRates(exchangeRates, circuitBreaker, [sEUR], [toUnit('0.75')]);
 			await debtCache.takeDebtSnapshot();
 
 			const issuedSynthetixs = web3.utils.toBN('200000');
-			await baseSynthetix.transfer(account1, toUnit(issuedSynthetixs), {
+			await baseSynthetixProxy.transfer(account1, toUnit(issuedSynthetixs), {
 				from: owner,
 			});
-			await baseSynthetix.transfer(account2, toUnit(issuedSynthetixs), {
+			await baseSynthetixProxy.transfer(account2, toUnit(issuedSynthetixs), {
 				from: owner,
 			});
 
-			const maxIssuableSynths = await baseSynthetix.maxIssuableSynths(account1);
+			const maxIssuableSynths = await baseSynthetixImpl.maxIssuableSynths(account1);
 
 			// Issue
-			await baseSynthetix.issueSynths(maxIssuableSynths, { from: account1 });
+			await baseSynthetixImpl.issueSynths(maxIssuableSynths, { from: account1 });
 
 			// Exchange into sEUR
-			await baseSynthetix.exchange(sUSD, maxIssuableSynths, sEUR, { from: account1 });
+			await baseSynthetixImpl.exchange(sUSD, maxIssuableSynths, sEUR, { from: account1 });
 
 			// Ensure that we can transfer in and out of the account successfully
-			await baseSynthetix.transfer(account1, toUnit('10000'), {
+			await baseSynthetixProxy.transfer(account1, toUnit('10000'), {
 				from: account2,
 			});
-			await baseSynthetix.transfer(account2, toUnit('10000'), {
+			await baseSynthetixProxy.transfer(account2, toUnit('10000'), {
 				from: account1,
 			});
 
 			// Increase the value of sEUR relative to synthetix
-			const timestamp2 = await currentTime();
-			await exchangeRates.updateRates([sEUR], [toUnit('2.10')], timestamp2, { from: oracle });
+			await updateAggregatorRates(exchangeRates, circuitBreaker, [sEUR], [toUnit('2.10')]);
 			await debtCache.takeDebtSnapshot();
 
 			// Ensure that the new synthetix account1 receives cannot be transferred out.
-			await baseSynthetix.transfer(account1, toUnit('10000'), {
+			await baseSynthetixProxy.transfer(account1, toUnit('10000'), {
 				from: account2,
 			});
-			await assert.revert(baseSynthetix.transfer(account2, toUnit('10000'), { from: account1 }));
+			await assert.revert(
+				baseSynthetixProxy.transfer(account2, toUnit('10000'), { from: account1 })
+			);
 		});
 
 		it('should unlock synthetix when collaterisation ratio changes', async () => {
+			// Disable Dynamic fee so that we can neglect it.
+			await systemSettings.setExchangeDynamicFeeRounds('0', { from: owner });
+
 			// prevent circuit breaker from firing by upping the threshold to factor 5
 			await systemSettings.setPriceDeviationThresholdFactor(toUnit('5'), { from: owner });
 
 			// Set sAUD for purposes of this test
-			const timestamp1 = await currentTime();
 			const aud2usdrate = toUnit('2');
 
-			await exchangeRates.updateRates([sAUD], [aud2usdrate], timestamp1, { from: oracle });
+			await updateAggregatorRates(exchangeRates, null, [sAUD], [aud2usdrate]);
 			await debtCache.takeDebtSnapshot();
 
 			const issuedSynthetixs = web3.utils.toBN('200000');
-			await baseSynthetix.transfer(account1, toUnit(issuedSynthetixs), {
+			await baseSynthetixProxy.transfer(account1, toUnit(issuedSynthetixs), {
 				from: owner,
 			});
 
 			// Issue
-			const issuedSynths = await baseSynthetix.maxIssuableSynths(account1);
-			await baseSynthetix.issueSynths(issuedSynths, { from: account1 });
-			const remainingIssuable = (await baseSynthetix.remainingIssuableSynths(account1))[0];
+			const issuedSynths = await baseSynthetixImpl.maxIssuableSynths(account1);
+			await baseSynthetixImpl.issueSynths(issuedSynths, { from: account1 });
+			const remainingIssuable = (await baseSynthetixImpl.remainingIssuableSynths(account1))[0];
 
 			assert.bnClose(remainingIssuable, '0');
 
-			const transferable1 = await baseSynthetix.transferableSynthetix(account1);
+			const transferable1 = await baseSynthetixProxy.transferableSynthetix(account1);
 			assert.bnEqual(transferable1, '0');
 
 			// Exchange into sAUD
-			await baseSynthetix.exchange(sUSD, issuedSynths, sAUD, { from: account1 });
+			await baseSynthetixImpl.exchange(sUSD, issuedSynths, sAUD, { from: account1 });
 
 			// Increase the value of sAUD relative to synthetix
-			const timestamp2 = await currentTime();
 			const newAUDExchangeRate = toUnit('1');
-			await exchangeRates.updateRates([sAUD], [newAUDExchangeRate], timestamp2, { from: oracle });
+			await updateAggregatorRates(exchangeRates, circuitBreaker, [sAUD], [newAUDExchangeRate]);
 			await debtCache.takeDebtSnapshot();
 
-			const transferable2 = await baseSynthetix.transferableSynthetix(account1);
+			const transferable2 = await baseSynthetixProxy.transferableSynthetix(account1);
 			assert.equal(transferable2.gt(toUnit('1000')), true);
 		});
 
 		describe('when the user has issued some sUSD and exchanged for other synths', () => {
 			beforeEach(async () => {
-				await baseSynthetix.issueSynths(toUnit('100'), { from: owner });
-				await baseSynthetix.exchange(sUSD, toUnit('10'), sETH, { from: owner });
-				await baseSynthetix.exchange(sUSD, toUnit('10'), sAUD, { from: owner });
-				await baseSynthetix.exchange(sUSD, toUnit('10'), sEUR, { from: owner });
+				await baseSynthetixImpl.issueSynths(toUnit('100'), { from: owner });
+				await baseSynthetixImpl.exchange(sUSD, toUnit('10'), sETH, { from: owner });
+				await baseSynthetixImpl.exchange(sUSD, toUnit('10'), sAUD, { from: owner });
+				await baseSynthetixImpl.exchange(sUSD, toUnit('10'), sEUR, { from: owner });
 			});
 			it('should transfer using the ERC20 transfer function @gasprofile', async () => {
-				await baseSynthetix.transfer(account1, toUnit('10'), { from: owner });
+				await baseSynthetixProxy.transfer(account1, toUnit('10'), { from: owner });
 
-				assert.bnEqual(await baseSynthetix.balanceOf(account1), toUnit('10'));
+				assert.bnEqual(await baseSynthetixImpl.balanceOf(account1), toUnit('10'));
 			});
 
 			it('should transfer using the ERC20 transferFrom function @gasprofile', async () => {
-				const previousOwnerBalance = await baseSynthetix.balanceOf(owner);
+				const previousOwnerBalance = await baseSynthetixImpl.balanceOf(owner);
 
 				// Approve account1 to act on our behalf for 10 SNX.
-				await baseSynthetix.approve(account1, toUnit('10'), { from: owner });
+				await baseSynthetixImpl.approve(account1, toUnit('10'), { from: owner });
 
 				// Assert that transferFrom works.
-				await baseSynthetix.transferFrom(owner, account2, toUnit('10'), {
+				await baseSynthetixProxy.transferFrom(owner, account2, toUnit('10'), {
 					from: account1,
 				});
 
 				// Assert that account2 has 10 SNX and owner has 10 less SNX
-				assert.bnEqual(await baseSynthetix.balanceOf(account2), toUnit('10'));
+				assert.bnEqual(await baseSynthetixImpl.balanceOf(account2), toUnit('10'));
 				assert.bnEqual(
-					await baseSynthetix.balanceOf(owner),
+					await baseSynthetixImpl.balanceOf(owner),
 					previousOwnerBalance.sub(toUnit('10'))
 				);
 
 				// Assert that we can't transfer more even though there's a balance for owner.
 				await assert.revert(
-					baseSynthetix.transferFrom(owner, account2, '1', {
+					baseSynthetixProxy.transferFrom(owner, account2, '1', {
 						from: account1,
 					})
 				);

@@ -16,7 +16,7 @@ contract('Collateral', async accounts => {
 	const [, owner] = accounts;
 
 	before(async () => {
-		synths = ['zUSD', 'zBTC', 'zBNB'];
+		synths = ['sUSD', 'sBTC', 'sETH'];
 		({ Collateral: collateral } = await setupAllContracts({
 			accounts,
 			synths,

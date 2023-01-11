@@ -6,7 +6,7 @@ const {
 } = require('../../../index');
 const { ensureBalance } = require('../utils/balances');
 const { skipWaitingPeriod } = require('../utils/skip');
-const { updateExchangeRatesIfNeeded } = require('../utils/rates');
+const { increaseStalePeriodAndCheckRatesAndCache } = require('../utils/rates');
 
 function itCanRedeem({ ctx }) {
 	describe('redemption of deprecated synths', () => {
@@ -17,9 +17,9 @@ function itCanRedeem({ ctx }) {
 		let synth;
 
 		before('target contracts and users', () => {
-			const { addedSynths } = ctx;
-			// when no added synths, then just use sDEFI for testing (useful for the simulation)
-			synth = addedSynths.length ? addedSynths[0].name : 'sDEFI';
+			// sETH and sBTC can't be removed because the debt may be too large for removeSynth to not underflow
+			// during debt update, so sLINK is used here
+			synth = 'sLINK';
 
 			({
 				Synthetix,
@@ -43,13 +43,12 @@ function itCanRedeem({ ctx }) {
 		});
 
 		before(`ensure the user has some of the target synth`, async () => {
-			Synthetix = Synthetix.connect(someUser);
-			const tx = await Synthetix.exchange(
-				toBytes32('sUSD'),
-				ethers.utils.parseEther('50'),
-				toBytes32(synth)
-			);
-			await tx.wait();
+			await ensureBalance({
+				ctx,
+				symbol: synth,
+				user: someUser,
+				balance: ethers.utils.parseEther('100'),
+			});
 		});
 
 		before('skip waiting period', async () => {
@@ -57,7 +56,7 @@ function itCanRedeem({ ctx }) {
 		});
 
 		before('update rates and take snapshot if needed', async () => {
-			await updateExchangeRatesIfNeeded({ ctx });
+			await increaseStalePeriodAndCheckRatesAndCache({ ctx });
 		});
 
 		before('record total system debt', async () => {

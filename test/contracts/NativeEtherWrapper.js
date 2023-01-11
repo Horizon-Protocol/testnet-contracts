@@ -4,13 +4,15 @@ const { contract, web3 } = require('hardhat');
 
 const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 
-const { currentTime, toUnit } = require('../utils')();
+const { toUnit } = require('../utils')();
 const { GAS_PRICE } = require('../../hardhat.config');
 
 const {
 	ensureOnlyExpectedMutativeFunctions,
 	getDecodedLogs,
 	decodedEventEqual,
+	setupPriceAggregators,
+	updateAggregatorRates,
 } = require('./helpers');
 
 const { setupAllContracts } = require('./setup');
@@ -19,10 +21,10 @@ const { toBytes32 } = require('../..');
 const { toBN } = require('web3-utils');
 
 contract('NativeEtherWrapper', async accounts => {
-	const synths = ['zUSD', 'zBNB', 'BNB', 'HZN'];
-	const [sETH, ETH] = ['zBNB', 'BNB'].map(toBytes32);
+	const synths = ['sUSD', 'sETH', 'ETH', 'SNX'];
+	const [sETH, ETH] = ['sETH', 'ETH'].map(toBytes32);
 
-	const [, owner, oracle, , account1] = accounts;
+	const [, owner, , , account1] = accounts;
 
 	let systemSettings,
 		exchangeRates,
@@ -30,8 +32,7 @@ contract('NativeEtherWrapper', async accounts => {
 		sETHSynth,
 		etherWrapper,
 		nativeEtherWrapper,
-		weth,
-		timestamp;
+		weth;
 
 	before(async () => {
 		({
@@ -40,7 +41,7 @@ contract('NativeEtherWrapper', async accounts => {
 			ExchangeRates: exchangeRates,
 			EtherWrapper: etherWrapper,
 			NativeEtherWrapper: nativeEtherWrapper,
-			ZassetzBNB: sETHSynth,
+			SynthsETH: sETHSynth,
 			WETH: weth,
 		} = await setupAllContracts({
 			accounts,
@@ -63,12 +64,10 @@ contract('NativeEtherWrapper', async accounts => {
 			],
 		}));
 
-		timestamp = await currentTime();
+		await setupPriceAggregators(exchangeRates, owner, [sETH, ETH]);
 
 		// Depot requires ETH rates
-		await exchangeRates.updateRates([sETH, ETH], ['1500', '1500'].map(toUnit), timestamp, {
-			from: oracle,
-		});
+		await updateAggregatorRates(exchangeRates, null, [sETH, ETH], ['1500', '1500'].map(toUnit));
 	});
 
 	addSnapshotBeforeRestoreAfterEach();
@@ -93,7 +92,7 @@ contract('NativeEtherWrapper', async accounts => {
 		});
 
 		it('should access its dependencies via the address resolver', async () => {
-			assert.equal(await addressResolver.getAddress(toBytes32('ZassetzBNB')), sETHSynth.address);
+			assert.equal(await addressResolver.getAddress(toBytes32('SynthsETH')), sETHSynth.address);
 			assert.equal(
 				await addressResolver.getAddress(toBytes32('EtherWrapper')),
 				etherWrapper.address

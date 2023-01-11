@@ -1,4 +1,3 @@
-
 const chalk = require('chalk');
 const { ethers, contract, artifacts } = require('hardhat');
 const { assert } = require('./common');
