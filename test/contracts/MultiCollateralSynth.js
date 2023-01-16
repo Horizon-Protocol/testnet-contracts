@@ -23,8 +23,8 @@ const { setupAllContracts } = require('./setup');
 contract('MultiCollateralSynth', accounts => {
 	const [deployerAccount, owner, , , account1] = accounts;
 
-	const sETH = toBytes32('sETH');
-	const sBTC = toBytes32('sBTC');
+	const sETH = toBytes32('zBNB');
+	const sBTC = toBytes32('zBTC');
 
 	let issuer,
 		resolver,
@@ -56,11 +56,11 @@ contract('MultiCollateralSynth', accounts => {
 	const onlyInternalString = 'Only internal contracts allowed';
 
 	before(async () => {
-		synths = ['sUSD'];
+		synths = ['zUSD'];
 		({
 			AddressResolver: resolver,
 			Issuer: issuer,
-			SynthsUSD: sUSDSynth,
+			ZassetzUSD: sUSDSynth,
 			ExchangeRates: exchangeRates,
 			DebtCache: debtCache,
 			FeePool: feePool,

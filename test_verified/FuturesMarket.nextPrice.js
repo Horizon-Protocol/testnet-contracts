@@ -46,13 +46,13 @@ contract('FuturesMarket MixinFuturesNextPriceOrders', accounts => {
 			FuturesMarketBTC: futuresMarket,
 			ExchangeRates: exchangeRates,
 			CircuitBreaker: circuitBreaker,
-			SynthsUSD: sUSD,
+			ZassetzUSD: sUSD,
 			FeePool: feePool,
 			SystemSettings: systemSettings,
 			SystemStatus: systemStatus,
 		} = await setupAllContracts({
 			accounts,
-			synths: ['sUSD', 'sBTC', 'sETH'],
+			synths: ['zUSD', 'zBTC', 'zBNB'],
 			contracts: [
 				'FuturesMarketManager',
 				'FuturesMarketSettings',

@@ -13,7 +13,7 @@ require('@nomiclabs/hardhat-etherscan');
 require('@nomiclabs/hardhat-truffle5');
 require('@nomiclabs/hardhat-ethers');
 require('hardhat-gas-reporter');
-
+// require('@eth-optimism/smock/build/src/plugins/hardhat-storagelayout');
 require('hardhat-cannon');
 
 const {
@@ -30,9 +30,23 @@ module.exports = {
 		compilers: [
 			{
 				version: '0.4.25',
+				// settings: {
+				// 	outputSelection: {
+				// 		"*": {
+				// 			"*": ["storageLayout"],
+				// 		},
+				// 	},
+				// },
 			},
 			{
 				version: '0.5.16',
+				// settings: {
+				// 	outputSelection: {
+				// 		"*": {
+				// 			"*": ["storageLayout"],
+				// 		},
+				// 	},
+				// },
 			},
 		],
 	},

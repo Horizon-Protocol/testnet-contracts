@@ -41,7 +41,7 @@ contract('NativeEtherWrapper', async accounts => {
 			ExchangeRates: exchangeRates,
 			EtherWrapper: etherWrapper,
 			NativeEtherWrapper: nativeEtherWrapper,
-			SynthsETH: sETHSynth,
+			ZassetzBNB: sETHSynth,
 			WETH: weth,
 		} = await setupAllContracts({
 			accounts,

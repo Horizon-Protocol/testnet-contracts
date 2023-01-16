@@ -52,8 +52,8 @@ contract('Synthetix', async accounts => {
 			RewardEscrow: rewardEscrow,
 			RewardEscrowV2: rewardEscrowV2,
 			SupplySchedule: supplySchedule,
-			SynthsUSD: sUSDContract,
-			SynthsETH: sETHContract,
+			ZassetzUSD: sUSDContract,
+			ZassetzBNB: sETHContract,
 		} = await setupAllContracts({
 			accounts,
 			synths: ['sUSD', 'sETH', 'sEUR', 'sAUD'],

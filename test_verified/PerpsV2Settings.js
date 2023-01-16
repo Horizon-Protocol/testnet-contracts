@@ -37,7 +37,7 @@ contract('PerpsV2Settings', accounts => {
 			FuturesMarketManager: futuresMarketManager,
 		} = await setupAllContracts({
 			accounts,
-			synths: ['sUSD'],
+			synths: ['zUSD'],
 			feeds: ['BTC'],
 			contracts: [
 				'PerpsV2Settings',

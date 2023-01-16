@@ -21,8 +21,11 @@ const { toBytes32 } = require('../..');
 const { toBN } = require('web3-utils');
 
 contract('WrapperFactory', async accounts => {
-	const synths = ['sUSD', 'sETH', 'ETH', 'SNX'];
-	const [sETH, ETH] = ['sETH', 'ETH'].map(toBytes32);
+	// const synths = ['sUSD', 'sETH', 'ETH', 'SNX'];
+	// const [sETH, ETH] = ['sETH', 'ETH'].map(toBytes32);
+
+	const synths = ['zUSD', 'zBNB', 'BNB', 'HZN'];
+	const [sETH, ETH] = ['zBNB', 'BNB'].map(toBytes32);
 
 	const [, owner, , , account1] = accounts;
 
@@ -43,7 +46,7 @@ contract('WrapperFactory', async accounts => {
 			FeePool: feePool,
 			ExchangeRates: exchangeRates,
 			WrapperFactory: wrapperFactory,
-			SynthsUSD: sUSDSynth,
+			ZassetzUSD: sUSDSynth,
 			WETH: weth,
 			FlexibleStorage: flexibleStorage,
 		} = await setupAllContracts({
@@ -130,7 +133,7 @@ contract('WrapperFactory', async accounts => {
 			let txn;
 
 			before(async () => {
-				txn = await wrapperFactory.createWrapper(weth.address, sETH, toBytes32('SynthsETH'), {
+				txn = await wrapperFactory.createWrapper(weth.address, sETH, toBytes32('ZassetzBNB'), {
 					from: owner,
 				});
 			});
@@ -165,7 +168,7 @@ contract('WrapperFactory', async accounts => {
 
 		before(async () => {
 			// deploy a wrapper
-			const txn = await wrapperFactory.createWrapper(weth.address, sETH, toBytes32('SynthsETH'), {
+			const txn = await wrapperFactory.createWrapper(weth.address, sETH, toBytes32('ZassetzBNB'), {
 				from: owner,
 			});
 

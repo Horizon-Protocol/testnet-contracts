@@ -50,13 +50,13 @@ const MockToken = artifacts.require('MockToken');
 
 contract('Exchanger (spec tests)', async accounts => {
 	const [sUSD, sAUD, sEUR, SNX, sBTC, iBTC, sETH, iETH] = [
-		'sUSD',
-		'sAUD',
-		'sEUR',
-		'SNX',
-		'sBTC',
+		'zUSD',
+		'zAUD',
+		'zEUR',
+		'HZN',
+		'zBTC',
 		'iBTC',
-		'sETH',
+		'zETH',
 		'iETH',
 	].map(toBytes32);
 
@@ -2176,9 +2176,9 @@ contract('Exchanger (spec tests)', async accounts => {
 						const synthExchangeEvent = txn.logs.find(log => log.event === 'SynthExchange');
 						assert.eventEqual(synthExchangeEvent, 'SynthExchange', {
 							account: account1,
-							fromCurrencyKey: toBytes32('sUSD'),
+							fromCurrencyKey: toBytes32('zUSD'),
 							fromAmount: amountIssued,
-							toCurrencyKey: toBytes32('sAUD'),
+							toCurrencyKey: toBytes32('zAUD'),
 							toAmount: sAUDBalance,
 							toAddress: account1,
 						});
@@ -2205,9 +2205,9 @@ contract('Exchanger (spec tests)', async accounts => {
 						const synthExchangeEvent = txn.logs.find(log => log.event === 'SynthExchange');
 						assert.eventEqual(synthExchangeEvent, 'SynthExchange', {
 							account: account1,
-							fromCurrencyKey: toBytes32('sUSD'),
+							fromCurrencyKey: toBytes32('zUSD'),
 							fromAmount: amountIssued,
-							toCurrencyKey: toBytes32('sAUD'),
+							toCurrencyKey: toBytes32('zAUD'),
 							toAmount: sAUDBalance,
 							toAddress: account1,
 						});
@@ -2215,7 +2215,7 @@ contract('Exchanger (spec tests)', async accounts => {
 						const trackingEvent = txn.logs.find(log => log.event === 'ExchangeTracking');
 						assert.eventEqual(trackingEvent, 'ExchangeTracking', {
 							trackingCode,
-							toCurrencyKey: toBytes32('sAUD'),
+							toCurrencyKey: toBytes32('zAUD'),
 							toAmount: sAUDBalance,
 							fee: usdFeeAmount,
 						});
@@ -4034,7 +4034,7 @@ contract('Exchanger (spec tests)', async accounts => {
 	describe('With L1 configuration (Synthetix, ExchangerWithFeeRecAlternatives, ExchangeRatesWithDexPricing)', () => {
 		before(async () => {
 			const VirtualSynthMastercopy = artifacts.require('VirtualSynthMastercopy');
-			const synths = ['sUSD', 'sETH', 'sEUR', 'sAUD', 'sBTC', 'iBTC', 'sTRX'];
+			const synths = ['zUSD', 'zBNB', 'zEUR', 'zAUD', 'zBTC', 'iBTC', 'zTRX'];
 
 			({
 				Exchanger: exchanger,
@@ -4043,11 +4043,11 @@ contract('Exchanger (spec tests)', async accounts => {
 				ExchangeState: exchangeState,
 				FeePool: feePool,
 				SystemStatus: systemStatus,
-				SynthsUSD: sUSDContract,
-				SynthsBTC: sBTCContract,
-				SynthsEUR: sEURContract,
-				SynthsAUD: sAUDContract,
-				SynthsETH: sETHContract,
+				ZassetzUSD: sUSDContract,
+				ZassetzBTC: sBTCContract,
+				ZassetzEUR: sEURContract,
+				ZassetzAUD: sAUDContract,
+				ZassetzBNB: sETHContract,
 				SystemSettings: systemSettings,
 				DelegateApprovals: delegateApprovals,
 				AddressResolver: resolver,
@@ -4137,7 +4137,7 @@ contract('Exchanger (spec tests)', async accounts => {
 
 	describe('With L2 configuration (MintableSynthetix, Exchanger, ExchangeRates)', () => {
 		before(async () => {
-			const synths = ['sUSD', 'sETH', 'sEUR', 'sAUD', 'sBTC', 'iBTC', 'sTRX'];
+			const synths = ['zUSD', 'zBNB', 'zEUR', 'zAUD', 'zBTC', 'iBTC', 'zTRX'];
 			({
 				Exchanger: exchanger,
 				Synthetix: synthetix,
@@ -4145,11 +4145,11 @@ contract('Exchanger (spec tests)', async accounts => {
 				ExchangeState: exchangeState,
 				FeePool: feePool,
 				SystemStatus: systemStatus,
-				SynthsUSD: sUSDContract,
-				SynthsBTC: sBTCContract,
-				SynthsEUR: sEURContract,
-				SynthsAUD: sAUDContract,
-				SynthsETH: sETHContract,
+				ZassetzUSD: sUSDContract,
+				ZassetzBTC: sBTCContract,
+				ZassetzEUR: sEURContract,
+				ZassetzAUD: sAUDContract,
+				ZassetzBNB: sETHContract,
 				SystemSettings: systemSettings,
 				DelegateApprovals: delegateApprovals,
 				AddressResolver: resolver,

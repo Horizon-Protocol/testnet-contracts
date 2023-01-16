@@ -110,7 +110,7 @@ contract('FuturesMarket', accounts => {
 			Exchanger: exchanger,
 			CircuitBreaker: circuitBreaker,
 			AddressResolver: addressResolver,
-			SynthsUSD: sUSD,
+			ZassetzUSD: sUSD,
 			Synthetix: synthetix,
 			FeePool: feePool,
 			DebtCache: debtCache,
@@ -118,7 +118,7 @@ contract('FuturesMarket', accounts => {
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
-			synths: ['sUSD', 'sBTC', 'sETH'],
+			synths: ['zUSD', 'zBTC', 'zBNB'],
 			contracts: [
 				'FuturesMarketManager',
 				'FuturesMarketSettings',

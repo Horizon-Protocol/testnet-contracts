@@ -16,14 +16,14 @@ contract('SynthUtil', accounts => {
 	const [, ownerAccount, , account2] = accounts;
 	let synthUtil, sUSDContract, synthetix, exchangeRates, systemSettings, debtCache, circuitBreaker;
 
-	const [sUSD, sBTC, iBTC, SNX] = ['sUSD', 'sBTC', 'iBTC', 'SNX'].map(toBytes32);
+	const [sUSD, sBTC, iBTC, SNX] = ['zUSD', 'zBTC', 'iBTC', 'HZN'].map(toBytes32);
 	const synthKeys = [sUSD, sBTC, iBTC];
 	const synthPrices = [toUnit('1'), toUnit('5000'), toUnit('5000')];
 
 	before(async () => {
 		({
 			SynthUtil: synthUtil,
-			SynthsUSD: sUSDContract,
+			ZassetzUSD: sUSDContract,
 			Synthetix: synthetix,
 			ExchangeRates: exchangeRates,
 			SystemSettings: systemSettings,
@@ -31,7 +31,7 @@ contract('SynthUtil', accounts => {
 			DebtCache: debtCache,
 		} = await setupAllContracts({
 			accounts,
-			synths: ['sUSD', 'sBTC', 'iBTC'],
+			synths: ['zUSD', 'zBTC', 'iBTC'],
 			contracts: [
 				'SynthUtil',
 				'Synthetix',

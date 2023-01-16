@@ -23,9 +23,9 @@ const {
 contract('CollateralManager', async accounts => {
 	const [, owner, , , account1] = accounts;
 
-	const sETH = toBytes32('sETH');
-	const sUSD = toBytes32('sUSD');
-	const sBTC = toBytes32('sBTC');
+	const sETH = toBytes32('zBNB');
+	const sUSD = toBytes32('zUSD');
+	const sBTC = toBytes32('zBTC');
 
 	const name = 'Some name';
 	const symbol = 'TOKEN';
@@ -89,12 +89,12 @@ contract('CollateralManager', async accounts => {
 	};
 
 	const setupManager = async () => {
-		synths = ['sUSD', 'sBTC', 'sETH', 'iBTC', 'iETH'];
+		synths = ['zUSD', 'zBTC', 'zBNB', 'iBTC', 'iETH'];
 		({
 			ExchangeRates: exchangeRates,
-			SynthsUSD: sUSDSynth,
-			SynthsETH: sETHSynth,
-			SynthsBTC: sBTCSynth,
+			ZassetzUSD: sUSDSynth,
+			ZassetzBNB: sETHSynth,
+			ZassetzBTC: sBTCSynth,
 			FeePool: feePool,
 			AddressResolver: addressResolver,
 			Issuer: issuer,
@@ -173,31 +173,31 @@ contract('CollateralManager', async accounts => {
 		await manager.addCollaterals([ceth.address, cerc20.address, short.address], { from: owner });
 
 		await ceth.addSynths(
-			['SynthsUSD', 'SynthsETH'].map(toBytes32),
-			['sUSD', 'sETH'].map(toBytes32),
+			['ZassetzUSD', 'ZassetzBNB'].map(toBytes32),
+			['zUSD', 'zBNB'].map(toBytes32),
 			{ from: owner }
 		);
 		await cerc20.addSynths(
-			['SynthsUSD', 'SynthsBTC'].map(toBytes32),
-			['sUSD', 'sBTC'].map(toBytes32),
+			['ZassetzUSD', 'ZassetzBTC'].map(toBytes32),
+			['zUSD', 'zBTC'].map(toBytes32),
 			{ from: owner }
 		);
 		await short.addSynths(
-			['SynthsBTC', 'SynthsETH'].map(toBytes32),
-			['sBTC', 'sETH'].map(toBytes32),
+			['ZassetzBTC', 'ZassetzBNB'].map(toBytes32),
+			['zBTC', 'zBNB'].map(toBytes32),
 			{ from: owner }
 		);
 
 		await manager.addSynths(
-			[toBytes32('SynthsUSD'), toBytes32('SynthsBTC'), toBytes32('SynthsETH')],
-			[toBytes32('sUSD'), toBytes32('sBTC'), toBytes32('sETH')],
+			[toBytes32('ZassetzUSD'), toBytes32('ZassetzBTC'), toBytes32('ZassetzBNB')],
+			[toBytes32('zUSD'), toBytes32('zBTC'), toBytes32('zBNB')],
 			{
 				from: owner,
 			}
 		);
 
 		await manager.addShortableSynths(
-			[toBytes32('SynthsETH'), toBytes32('SynthsBTC')],
+			[toBytes32('ZassetzBNB'), toBytes32('ZassetzBTC')],
 			[sETH, sBTC],
 			{
 				from: owner,
@@ -207,15 +207,15 @@ contract('CollateralManager', async accounts => {
 		// check synths, currencies, and shortable synths are set
 		assert.isTrue(
 			await manager.areSynthsAndCurrenciesSet(
-				['SynthsUSD', 'SynthsBTC', 'SynthsETH'].map(toBytes32),
-				['sUSD', 'sBTC', 'sETH'].map(toBytes32)
+				['ZassetzUSD', 'ZassetzBTC', 'ZassetzBNB'].map(toBytes32),
+				['zUSD', 'zBTC', 'zBNB'].map(toBytes32)
 			)
 		);
 
 		assert.isTrue(
 			await manager.areShortableSynthsSet(
-				['SynthsBTC', 'SynthsETH'].map(toBytes32),
-				['sBTC', 'sETH'].map(toBytes32)
+				['ZassetzBTC', 'ZassetzBNB'].map(toBytes32),
+				['zBTC', 'zBNB'].map(toBytes32)
 			)
 		);
 
@@ -274,7 +274,7 @@ contract('CollateralManager', async accounts => {
 	});
 
 	it('should access its dependencies via the address resolver', async () => {
-		assert.equal(await addressResolver.getAddress(toBytes32('SynthsUSD')), sUSDSynth.address);
+		assert.equal(await addressResolver.getAddress(toBytes32('ZassetzUSD')), sUSDSynth.address);
 		assert.equal(await addressResolver.getAddress(toBytes32('FeePool')), feePool.address);
 		assert.equal(
 			await addressResolver.getAddress(toBytes32('ExchangeRates')),
@@ -297,19 +297,19 @@ contract('CollateralManager', async accounts => {
 			assert.isTrue(await manager.isSynthManaged(sETH));
 		});
 		it('should not allow duplicate synths to be added', async () => {
-			await manager.addSynths([toBytes32('SynthsUSD')], [toBytes32('sUSD')], {
+			await manager.addSynths([toBytes32('ZassetzUSD')], [toBytes32('zUSD')], {
 				from: owner,
 			});
 			assert.isTrue(
 				await manager.areSynthsAndCurrenciesSet(
-					['SynthsUSD', 'SynthsBTC', 'SynthsETH'].map(toBytes32),
-					['sUSD', 'sBTC', 'sETH'].map(toBytes32)
+					['ZassetzUSD', 'ZassetzBTC', 'ZassetzBNB'].map(toBytes32),
+					['zUSD', 'zBTC', 'zBNB'].map(toBytes32)
 				)
 			);
 		});
 		it('should revert when input array lengths dont match', async () => {
 			await assert.revert(
-				manager.addSynths([toBytes32('SynthsUSD'), toBytes32('SynthsBTC')], [toBytes32('sUSD')], {
+				manager.addSynths([toBytes32('ZassetzUSD'), toBytes32('ZassetzBTC')], [toBytes32('zUSD')], {
 					from: owner,
 				}),
 				'Input array length mismatch'
@@ -319,32 +319,32 @@ contract('CollateralManager', async accounts => {
 
 	describe('removing synths', async () => {
 		after('restore removed synth', async () => {
-			await manager.addSynths([toBytes32('SynthsETH')], [toBytes32('sETH')], {
+			await manager.addSynths([toBytes32('ZassetzBNB')], [toBytes32('zBNB')], {
 				from: owner,
 			});
 			assert.isTrue(
 				await manager.areSynthsAndCurrenciesSet(
-					['SynthsUSD', 'SynthsBTC', 'SynthsETH'].map(toBytes32),
-					['sUSD', 'sBTC', 'sETH'].map(toBytes32)
+					['ZassetzUSD', 'ZassetzBTC', 'ZassetzBNB'].map(toBytes32),
+					['zUSD', 'zBTC', 'zBNB'].map(toBytes32)
 				)
 			);
 		});
 		it('should successfully remove a synth', async () => {
-			await manager.removeSynths([toBytes32('SynthsETH')], [toBytes32('sETH')], {
+			await manager.removeSynths([toBytes32('ZassetzBNB')], [toBytes32('zBNB')], {
 				from: owner,
 			});
 			assert.isTrue(
 				await manager.areSynthsAndCurrenciesSet(
-					['SynthsUSD', 'SynthsBTC'].map(toBytes32),
-					['sUSD', 'sBTC'].map(toBytes32)
+					['ZassetzUSD', 'ZassetzBTC'].map(toBytes32),
+					['zUSD', 'zBTC'].map(toBytes32)
 				)
 			);
 		});
 		it('should revert when input array lengths dont match', async () => {
 			await assert.revert(
 				manager.removeSynths(
-					[toBytes32('SynthsUSD'), toBytes32('SynthsBTC')],
-					[toBytes32('sUSD')],
+					[toBytes32('ZassetzUSD'), toBytes32('ZassetzBTC')],
+					[toBytes32('zUSD')],
 					{
 						from: owner,
 					}
@@ -678,7 +678,7 @@ contract('CollateralManager', async accounts => {
 		describe('revert conditions', async () => {
 			it('should revert if the caller is not the owner', async () => {
 				await assert.revert(
-					manager.removeSynths([toBytes32('SynthsBTC')], [toBytes32('sBTC')], { from: account1 }),
+					manager.removeSynths([toBytes32('ZassetzBTC')], [toBytes32('zBTC')], { from: account1 }),
 					'Only the contract owner may perform this action'
 				);
 			});
@@ -686,7 +686,7 @@ contract('CollateralManager', async accounts => {
 
 		describe('it should remove a synth', async () => {
 			beforeEach(async () => {
-				await manager.removeSynths([toBytes32('SynthsBTC')], [toBytes32('sBTC')], { from: owner });
+				await manager.removeSynths([toBytes32('ZassetzBTC')], [toBytes32('zBTC')], { from: owner });
 			});
 		});
 	});
@@ -695,7 +695,7 @@ contract('CollateralManager', async accounts => {
 		describe('revert conditions', async () => {
 			it('should revert if the caller is not the owner', async () => {
 				await assert.revert(
-					manager.removeShortableSynths([toBytes32('SynthsBTC')], { from: account1 }),
+					manager.removeShortableSynths([toBytes32('ZassetzBTC')], { from: account1 }),
 					'Only the contract owner may perform this action'
 				);
 			});
@@ -703,10 +703,10 @@ contract('CollateralManager', async accounts => {
 
 		describe('when a shortable synth is removed', async () => {
 			it('should emit the ShortableSynthRemoved event', async () => {
-				const txn = await manager.removeShortableSynths([toBytes32('SynthsBTC')], { from: owner });
+				const txn = await manager.removeShortableSynths([toBytes32('ZassetzBTC')], { from: owner });
 
 				assert.eventEqual(txn, 'ShortableSynthRemoved', {
-					synth: toBytes32('SynthsBTC'),
+					synth: toBytes32('ZassetzBTC'),
 				});
 			});
 		});

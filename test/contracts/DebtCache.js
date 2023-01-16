@@ -135,13 +135,13 @@ contract('DebtCache', async accounts => {
 		await manager.addCollaterals([ceth.address], { from: owner });
 
 		await ceth.addSynths(
-			['SynthsUSD', 'SynthsETH'].map(toBytes32),
+			['ZassetzUSD', 'ZassetzBNB'].map(toBytes32),
 			['sUSD', 'sETH'].map(toBytes32),
 			{ from: owner }
 		);
 
 		await manager.addSynths(
-			['SynthsUSD', 'SynthsETH'].map(toBytes32),
+			['ZassetzUSD', 'ZassetzBNB'].map(toBytes32),
 			['sUSD', 'sETH'].map(toBytes32),
 			{ from: owner }
 		);
@@ -215,9 +215,9 @@ contract('DebtCache', async accounts => {
 
 		await manager.addCollaterals([short.address], { from: owner });
 
-		await short.addSynths(['SynthsETH'].map(toBytes32), ['sETH'].map(toBytes32), { from: owner });
+		await short.addSynths(['ZassetzBNB'].map(toBytes32), ['sETH'].map(toBytes32), { from: owner });
 
-		await manager.addShortableSynths(['SynthsETH'].map(toBytes32), [sETH], {
+		await manager.addShortableSynths(['ZassetzBNB'].map(toBytes32), [sETH], {
 			from: owner,
 		});
 
@@ -228,7 +228,7 @@ contract('DebtCache', async accounts => {
 		const etherWrapperCreateTx = await wrapperFactory.createWrapper(
 			weth.address,
 			sETH,
-			toBytes32('SynthsETH'),
+			toBytes32('ZassetzBNB'),
 			{ from: owner }
 		);
 

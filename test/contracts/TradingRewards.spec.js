@@ -21,7 +21,7 @@ const { toBytes32 } = require('../..');
 contract('TradingRewards', accounts => {
 	const [, owner, account1] = accounts;
 
-	const synths = ['sUSD', 'sETH', 'sBTC', 'SNX'];
+	const synths = ['zUSD', 'zBNB', 'zBTC', 'HZN'];
 	const synthKeys = synths.map(toBytes32);
 	const [sUSD, sETH, sBTC, SNX] = synthKeys;
 
@@ -81,9 +81,9 @@ contract('TradingRewards', accounts => {
 				AddressResolver: resolver,
 				Exchanger: exchanger,
 				ExchangeRates: exchangeRates,
-				SynthsUSD: sUSDContract,
-				SynthsETH: sETHContract,
-				SynthsBTC: sBTCContract,
+				ZassetzUSD: sUSDContract,
+				ZassetzBNB: sETHContract,
+				ZassetzBTC: sBTCContract,
 				SystemSettings: systemSettings,
 			} = await setupAllContracts({
 				accounts,

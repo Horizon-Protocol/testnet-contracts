@@ -89,12 +89,11 @@ contract('Wrapper', async accounts => {
 			],
 		}));
 
-		console.log("**************** sETHSynth ******************", sETHSynth);
 		// deploy an eth wrapper
 		const etherWrapperCreateTx = await wrapperFactory.createWrapper(
 			weth.address,
 			sETH,
-			toBytes32('ZassetzUSD'),
+			toBytes32('ZassetzBNB'),
 			{ from: owner }
 		);
 

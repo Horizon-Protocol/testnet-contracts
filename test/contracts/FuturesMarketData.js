@@ -22,8 +22,8 @@ contract('FuturesMarketData', accounts => {
 		marketKey,
 		baseAsset;
 	const keySuffix = '-perp';
-	const newMarketKey = toBytes32('sETH' + keySuffix);
-	const newAssetKey = toBytes32('sETH');
+	const newMarketKey = toBytes32('zBNB' + keySuffix);
+	const newAssetKey = toBytes32('zBNB');
 
 	const owner = accounts[1];
 	const trader1 = accounts[2];
@@ -49,11 +49,11 @@ contract('FuturesMarketData', accounts => {
 			FuturesMarketData: futuresMarketData,
 			ExchangeRates: exchangeRates,
 			CircuitBreaker: circuitBreaker,
-			SynthsUSD: sUSD,
+			ZassetzUSD: sUSD,
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
-			synths: ['sUSD', 'sBTC', 'sETH', 'sLINK'],
+			synths: ['zUSD', 'zBTC', 'zBNB', 'zLINK'],
 			contracts: [
 				'FuturesMarketManager',
 				'FuturesMarketSettings',
@@ -71,7 +71,7 @@ contract('FuturesMarketData', accounts => {
 		}));
 
 		// Add a couple of additional markets.
-		for (const symbol of ['sETH', 'sLINK']) {
+		for (const symbol of ['zBNB', 'zLINK']) {
 			const assetKey = toBytes32(symbol);
 			const marketKey = toBytes32(symbol + keySuffix);
 
@@ -271,7 +271,7 @@ contract('FuturesMarketData', accounts => {
 				sethMarket.address,
 			]);
 			const summariesForAsset = await futuresMarketData.marketSummariesForKeys(
-				['sBTC', 'sETH' + keySuffix].map(toBytes32)
+				['zBTC', 'zBNB' + keySuffix].map(toBytes32)
 			);
 			assert.equal(JSON.stringify(summaries), JSON.stringify(summariesForAsset));
 		});
@@ -279,9 +279,9 @@ contract('FuturesMarketData', accounts => {
 		it('All summaries', async () => {
 			const summaries = await futuresMarketData.allMarketSummaries();
 
-			const sBTCSummary = summaries.find(summary => summary.asset === toBytes32('sBTC'));
-			const sETHSummary = summaries.find(summary => summary.asset === toBytes32('sETH'));
-			const sLINKSummary = summaries.find(summary => summary.asset === toBytes32('sLINK'));
+			const sBTCSummary = summaries.find(summary => summary.asset === toBytes32('zBTC'));
+			const sETHSummary = summaries.find(summary => summary.asset === toBytes32('zBNB'));
+			const sLINKSummary = summaries.find(summary => summary.asset === toBytes32('zLINK'));
 
 			const fmParams = await futuresMarketData.parameters(marketKey);
 
@@ -315,9 +315,9 @@ contract('FuturesMarketData', accounts => {
 
 			assert.equal(
 				sLINKSummary.market,
-				await futuresMarketManager.marketForKey(toBytes32('sLINK' + keySuffix))
+				await futuresMarketManager.marketForKey(toBytes32('zLINK' + keySuffix))
 			);
-			assert.equal(sLINKSummary.asset, toBytes32('sLINK'));
+			assert.equal(sLINKSummary.asset, toBytes32('zLINK'));
 			assert.equal(sLINKSummary.maxLeverage, toUnit(5));
 			assert.equal(sLINKSummary.price, toUnit(1000));
 			assert.equal(sLINKSummary.marketSize, toUnit(0));

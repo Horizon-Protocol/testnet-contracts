@@ -25,7 +25,7 @@ contract('SystemSettings', async accounts => {
 	let short, synths, systemSettings;
 
 	const setupSettings = async () => {
-		synths = ['sUSD', 'sBTC', 'sETH'];
+		synths = ['zUSD', 'zBTC', 'zBNB'];
 		({ SystemSettings: systemSettings, CollateralShort: short } = await setupAllContracts({
 			accounts,
 			synths,

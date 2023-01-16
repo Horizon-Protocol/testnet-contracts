@@ -30,9 +30,9 @@ const {
 contract('CollateralShort', async accounts => {
 	const YEAR = 31556926;
 
-	const sUSD = toBytes32('sUSD');
-	const sETH = toBytes32('sETH');
-	const sBTC = toBytes32('sBTC');
+	const sUSD = toBytes32('zUSD');
+	const sETH = toBytes32('zBNB');
+	const sBTC = toBytes32('zBTC');
 
 	const [, owner, , , account1, account2] = accounts;
 
@@ -69,19 +69,19 @@ contract('CollateralShort', async accounts => {
 	};
 
 	const updateRatesWithDefaults = async () => {
-		const sBTC = toBytes32('sBTC');
+		const sBTC = toBytes32('zBTC');
 
 		await updateAggregatorRates(exchangeRates, null, [sETH, sBTC], [100, 10000].map(toUnit));
 	};
 
 	const setupShort = async () => {
-		synths = ['sUSD', 'sBTC', 'sETH'];
+		synths = ['zUSD', 'zBTC', 'zBNB'];
 		({
 			ExchangeRates: exchangeRates,
 			Exchanger: exchanger,
-			SynthsUSD: sUSDSynth,
-			SynthsBTC: sBTCSynth,
-			SynthsETH: sETHSynth,
+			ZassetzUSD: sUSDSynth,
+			ZassetzBTC: sBTCSynth,
+			ZassetzBNB: sETHSynth,
 			FeePool: feePool,
 			AddressResolver: addressResolver,
 			Issuer: issuer,
@@ -132,37 +132,37 @@ contract('CollateralShort', async accounts => {
 		await manager.addCollaterals([short.address], { from: owner });
 
 		await short.addSynths(
-			['SynthsBTC', 'SynthsETH'].map(toBytes32),
-			['sBTC', 'sETH'].map(toBytes32),
+			['ZassetzBTC', 'ZassetzBNB'].map(toBytes32),
+			['zBTC', 'zBNB'].map(toBytes32),
 			{ from: owner }
 		);
 
 		await manager.addSynths(
-			[toBytes32('SynthsUSD'), toBytes32('SynthsBTC'), toBytes32('SynthsETH')],
-			[toBytes32('sUSD'), toBytes32('sBTC'), toBytes32('sETH')],
+			[toBytes32('ZassetzUSD'), toBytes32('ZassetzBTC'), toBytes32('ZassetzBNB')],
+			[toBytes32('zUSD'), toBytes32('zBTC'), toBytes32('zBNB')],
 			{
 				from: owner,
 			}
 		);
 
 		await manager.addShortableSynths(
-			['SynthsBTC', 'SynthsETH'].map(toBytes32),
-			['sBTC', 'sETH'].map(toBytes32),
+			['ZassetzBTC', 'ZassetzBNB'].map(toBytes32),
+			['zBTC', 'zBNB'].map(toBytes32),
 			{ from: owner }
 		);
 
 		// check synths are set and currencyKeys set
 		assert.isTrue(
 			await manager.areSynthsAndCurrenciesSet(
-				['SynthsUSD', 'SynthsBTC', 'SynthsETH'].map(toBytes32),
-				['sUSD', 'sBTC', 'sETH'].map(toBytes32)
+				['ZassetzUSD', 'ZassetzBTC', 'ZassetzBNB'].map(toBytes32),
+				['zUSD', 'zBTC', 'zBNB'].map(toBytes32)
 			)
 		);
 
 		assert.isTrue(
 			await short.areSynthsAndCurrenciesSet(
-				['SynthsBTC', 'SynthsETH'].map(toBytes32),
-				['sBTC', 'sETH'].map(toBytes32)
+				['ZassetzBTC', 'ZassetzBNB'].map(toBytes32),
+				['zBTC', 'zBNB'].map(toBytes32)
 			)
 		);
 
@@ -220,14 +220,14 @@ contract('CollateralShort', async accounts => {
 			assert.equal(await short.owner(), owner);
 			assert.equal(await short.resolver(), addressResolver.address);
 			assert.equal(await short.collateralKey(), sUSD);
-			assert.equal(await short.synths(0), toBytes32('SynthsBTC'));
-			assert.equal(await short.synths(1), toBytes32('SynthsETH'));
+			assert.equal(await short.synths(0), toBytes32('ZassetzBTC'));
+			assert.equal(await short.synths(1), toBytes32('ZassetzBNB'));
 			assert.bnEqual(await short.minCratio(), toUnit(1.2));
 			assert.bnEqual(await systemSettings.liquidationPenalty(), LIQUIDATION_PENALTY); // 10% penalty
 		});
 
 		it('should access its dependencies via the address resolver', async () => {
-			assert.equal(await addressResolver.getAddress(toBytes32('SynthsUSD')), sUSDSynth.address);
+			assert.equal(await addressResolver.getAddress(toBytes32('ZassetzUSD')), sUSDSynth.address);
 			assert.equal(await addressResolver.getAddress(toBytes32('FeePool')), feePool.address);
 			assert.equal(
 				await addressResolver.getAddress(toBytes32('ExchangeRates')),
