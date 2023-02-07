@@ -27,7 +27,7 @@ const {
 } = require('../..');
 
 contract('BaseSynthetix', async accounts => {
-	const [sUSD, sAUD, sEUR, SNX, sETH] = ['sUSD', 'sAUD', 'sEUR', 'SNX', 'sETH'].map(toBytes32);
+	const [sUSD, sAUD, sEUR, SNX, sETH] = ['zUSD', 'zAUD', 'zEUR', 'HZN', 'zBNB'].map(toBytes32);
 
 	const [, owner, account1, account2, account3] = accounts;
 
@@ -56,7 +56,7 @@ contract('BaseSynthetix', async accounts => {
 			'ext:AggregatorDebtRatio': aggregatorDebtRatio,
 		} = await setupAllContracts({
 			accounts,
-			synths: ['sUSD', 'sETH', 'sEUR', 'sAUD'],
+			synths: ['zUSD', 'zBNB', 'zEUR', 'zAUD'],
 			contracts: [
 				'BaseSynthetix',
 				'SupplySchedule',

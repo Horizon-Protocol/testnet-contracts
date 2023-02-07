@@ -119,7 +119,7 @@ contract('MultiCollateralSynth', accounts => {
 		const synth = await MultiCollateralSynth.new(
 			proxy.address,
 			tokenState.address,
-			`Synth${currencyKey}`,
+			`Zasset${currencyKey}`,
 			currencyKey,
 			owner,
 			toBytes32(currencyKey),
@@ -130,7 +130,7 @@ contract('MultiCollateralSynth', accounts => {
 			}
 		);
 
-		await resolver.importAddresses([toBytes32(`Synth${currencyKey}`)], [synth.address], {
+		await resolver.importAddresses([toBytes32(`Zasset${currencyKey}`)], [synth.address], {
 			from: owner,
 		});
 
@@ -138,7 +138,7 @@ contract('MultiCollateralSynth', accounts => {
 		await manager.rebuildCache();
 		await debtCache.rebuildCache();
 
-		await ceth.addSynths([toBytes32(`Synth${currencyKey}`)], [toBytes32(currencyKey)], {
+		await ceth.addSynths([toBytes32(`Zasset${currencyKey}`)], [toBytes32(currencyKey)], {
 			from: owner,
 		});
 

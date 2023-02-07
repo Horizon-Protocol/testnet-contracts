@@ -25,7 +25,7 @@ const {
 } = require('../..');
 
 contract('Synthetix', async accounts => {
-	const [sAUD, sEUR, sUSD, sETH] = ['sAUD', 'sEUR', 'sUSD', 'sETH'].map(toBytes32);
+	const [sAUD, sEUR, sUSD, sETH] = ['zAUD', 'zEUR', 'zUSD', 'zBNB'].map(toBytes32);
 
 	const [, owner, account1, account2, account3] = accounts;
 
@@ -56,7 +56,7 @@ contract('Synthetix', async accounts => {
 			ZassetzBNB: sETHContract,
 		} = await setupAllContracts({
 			accounts,
-			synths: ['sUSD', 'sETH', 'sEUR', 'sAUD'],
+			synths: ['zUSD', 'zBNB', 'zEUR', 'zAUD'],
 			contracts: [
 				'Synthetix',
 				'SupplySchedule',

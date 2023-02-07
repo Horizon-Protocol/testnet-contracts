@@ -71,7 +71,7 @@ contract('Depot', async accounts => {
 			accounts,
 			mocks: {
 				// mocks necessary for address resolver imports
-				SynthsUSD: synth,
+				ZassetzUSD: synth,
 			},
 			contracts: [
 				'Depot',

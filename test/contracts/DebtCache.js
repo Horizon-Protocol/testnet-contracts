@@ -136,13 +136,13 @@ contract('DebtCache', async accounts => {
 
 		await ceth.addSynths(
 			['ZassetzUSD', 'ZassetzBNB'].map(toBytes32),
-			['sUSD', 'sETH'].map(toBytes32),
+			['zUSD', 'zBNB'].map(toBytes32),
 			{ from: owner }
 		);
 
 		await manager.addSynths(
 			['ZassetzUSD', 'ZassetzBNB'].map(toBytes32),
-			['sUSD', 'sETH'].map(toBytes32),
+			['zUSD', 'zBNB'].map(toBytes32),
 			{ from: owner }
 		);
 		// rebuild the cache to add the synths we need.
@@ -246,7 +246,7 @@ contract('DebtCache', async accounts => {
 	// run this once before all tests to prepare our environment, snapshots on beforeEach will take
 	// care of resetting to this state
 	before(async () => {
-		synths = ['sUSD', 'sAUD', 'sEUR', 'sETH', 'iETH'];
+		synths = ['zUSD', 'zAUD', 'zEUR', 'zBNB', 'iETH'];
 		({
 			Synthetix: synthetix,
 			ProxyERC20Synthetix: synthetixProxy,
@@ -254,10 +254,10 @@ contract('DebtCache', async accounts => {
 			SystemSettings: systemSettings,
 			ExchangeRates: exchangeRates,
 			CircuitBreaker: circuitBreaker,
-			SynthsUSD: sUSDContract,
-			SynthsETH: sETHContract,
-			SynthsAUD: sAUDContract,
-			SynthsEUR: sEURContract,
+			ZassetzUSD: sUSDContract,
+			ZassetzBNB: sETHContract,
+			ZassetzAUD: sAUDContract,
+			ZassetzEUR: sEURContract,
 			FeePool: feePool,
 			DebtCache: debtCache,
 			Issuer: issuer,

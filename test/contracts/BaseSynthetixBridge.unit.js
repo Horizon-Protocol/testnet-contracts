@@ -12,7 +12,7 @@ const BaseSynthetixBridge = artifacts.require('BaseSynthetixBridge');
 contract('BaseSynthetixBridge (unit tests)', accounts => {
 	const [, owner, user1, smockedMessenger] = accounts;
 
-	const [sUSD, sETH] = [toBytes32('sUSD'), toBytes32('sETH')];
+	const [sUSD, sETH] = [toBytes32('zUSD'), toBytes32('zBNB')];
 
 	it('ensure only known functions are mutative', () => {
 		ensureOnlyExpectedMutativeFunctions({

@@ -71,7 +71,7 @@ const removeSynths = async ({
 			process.exitCode = 1;
 			return;
 		} else if (['zUSD'].indexOf(synth) >= 0) {
-			console.error(red(`Synth ${synth} cannot be removed`));
+			console.error(red(`Zasset ${synth} cannot be removed`));
 			process.exitCode = 1;
 			return;
 		}

@@ -40,7 +40,7 @@ const {
 contract('Issuer (via Synthetix)', async accounts => {
 	const WEEK = 604800;
 
-	const [sUSD, sAUD, sEUR, SNX, sETH, ETH] = ['sUSD', 'sAUD', 'sEUR', 'SNX', 'sETH', 'ETH'].map(
+	const [sUSD, sAUD, sEUR, SNX, sETH, ETH] = ['zUSD', 'zAUD', 'zEUR', 'HZN', 'zETH', 'BNB'].map(
 		toBytes32
 	);
 	const synthKeys = [sUSD, sAUD, sEUR, sETH, SNX];
@@ -74,7 +74,7 @@ contract('Issuer (via Synthetix)', async accounts => {
 	// run this once before all tests to prepare our environment, snapshots on beforeEach will take
 	// care of resetting to this state
 	before(async () => {
-		synths = ['sUSD', 'sAUD', 'sEUR', 'sETH'];
+		synths = ['zUSD', 'zAUD', 'zEUR', 'zBNB'];
 		({
 			Synthetix: synthetix,
 			ProxyERC20Synthetix: synthetixProxy,
@@ -83,10 +83,10 @@ contract('Issuer (via Synthetix)', async accounts => {
 			ExchangeRates: exchangeRates,
 			SynthetixEscrow: escrow,
 			RewardEscrowV2: rewardEscrowV2,
-			SynthsUSD: sUSDContract,
-			SynthsETH: sETHContract,
-			SynthsAUD: sAUDContract,
-			SynthsEUR: sEURContract,
+			ZassetzUSD: sUSDContract,
+			ZassetzBNB: sETHContract,
+			ZassetzAUD: sAUDContract,
+			ZassetzEUR: sEURContract,
 			Exchanger: exchanger,
 			FeePool: feePool,
 			DebtCache: debtCache,

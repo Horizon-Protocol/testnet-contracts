@@ -41,7 +41,7 @@ const MockExchanger = artifacts.require('MockExchanger');
 const FlexibleStorage = artifacts.require('FlexibleStorage');
 
 contract('Liquidator', accounts => {
-	const [sUSD, SNX] = ['sUSD', 'SNX'].map(toBytes32);
+	const [sUSD, SNX] = ['zUSD', 'HZN'].map(toBytes32);
 	const [deployerAccount, owner, , account1, alice, bob, carol, david] = accounts;
 	const week = 3600 * 24 * 7;
 
@@ -74,7 +74,7 @@ contract('Liquidator', accounts => {
 			ProxyERC20Synthetix: synthetixProxy,
 			SynthetixDebtShare: synthetixDebtShare,
 			RewardEscrowV2: rewardEscrowV2,
-			SynthsUSD: synthsUSD,
+			ZassetzUSD: synthsUSD,
 			SystemSettings: systemSettings,
 			SystemStatus: systemStatus,
 			DebtCache: debtCache,
@@ -82,7 +82,7 @@ contract('Liquidator', accounts => {
 			SynthetixEscrow: legacySynthetixEscrow,
 		} = await setupAllContracts({
 			accounts,
-			synths: ['sUSD'],
+			synths: ['zUSD'],
 			contracts: [
 				'AddressResolver',
 				'ExchangeRates',

@@ -59,7 +59,7 @@ contract('FeePool', async accounts => {
 	};
 
 	// CURRENCIES
-	const [sUSD, sAUD, SNX] = ['sUSD', 'sAUD', 'SNX'].map(toBytes32);
+	const [sUSD, sAUD, SNX] = ['zUSD', 'zAUD', 'HZN'].map(toBytes32);
 
 	let feePool,
 		debtCache,
@@ -80,7 +80,7 @@ contract('FeePool', async accounts => {
 		synths;
 
 	before(async () => {
-		synths = ['sUSD', 'sAUD'];
+		synths = ['zUSD', 'zAUD'];
 		({
 			AddressResolver: addressResolver,
 			DelegateApprovals: delegateApprovals,
@@ -92,7 +92,7 @@ contract('FeePool', async accounts => {
 			Synthetix: synthetix,
 			ProxyERC20Synthetix: synthetixProxy,
 			SystemSettings: systemSettings,
-			SynthsUSD: sUSDContract,
+			ZassetzUSD: sUSDContract,
 			SystemStatus: systemStatus,
 			WrapperFactory: wrapperFactory,
 			'ext:AggregatorDebtRatio': aggregatorDebtRatio,

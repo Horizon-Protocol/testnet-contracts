@@ -18,13 +18,13 @@ const { toBytes32 } = require('../..');
 
 contract('ExchangeCircuitBreaker tests', async accounts => {
 	const [sUSD, sAUD, sEUR, SNX, sBTC, iBTC, sETH, iETH] = [
-		'sUSD',
-		'sAUD',
-		'sEUR',
-		'SNX',
-		'sBTC',
+		'zUSD',
+		'zAUD',
+		'zEUR',
+		'HZN',
+		'zBTC',
 		'iBTC',
-		'sETH',
+		'zBNB',
 		'iETH',
 	].map(toBytes32);
 
@@ -127,11 +127,11 @@ contract('ExchangeCircuitBreaker tests', async accounts => {
 				CircuitBreaker: circuitBreaker,
 				Synthetix: synthetix,
 				ExchangeRates: exchangeRates,
-				SynthsUSD: sUSDContract,
+				ZassetzUSD: sUSDContract,
 				SystemSettings: systemSettings,
 			} = await setupAllContracts({
 				accounts,
-				synths: ['sUSD', 'sETH', 'sEUR', 'sAUD', 'sBTC', 'iBTC', 'sTRX'],
+				synths: ['zUzD', 'zBNB', 'zEUR', 'zAUD', 'zBTC', 'iBTC', 'zTRX'],
 				contracts: [
 					'Exchanger',
 					'ExchangeCircuitBreaker',

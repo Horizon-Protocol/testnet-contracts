@@ -25,7 +25,7 @@ const {
 } = require('../..');
 
 contract('Synth', async accounts => {
-	const [sUSD, SNX, sEUR] = ['sUSD', 'SNX', 'sEUR'].map(toBytes32);
+	const [sUSD, SNX, sEUR] = ['zUSD', 'HZN', 'zEUR'].map(toBytes32);
 
 	const [deployerAccount, owner, , , account1, account2] = accounts;
 

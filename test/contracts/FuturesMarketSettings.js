@@ -39,7 +39,7 @@ contract('FuturesMarketSettings', accounts => {
 			FuturesMarketManager: futuresMarketManager,
 		} = await setupAllContracts({
 			accounts,
-			synths: ['sUSD'],
+			synths: ['zUSD'],
 			contracts: [
 				'FuturesMarketSettings',
 				'FuturesMarketManager',
@@ -74,14 +74,14 @@ contract('FuturesMarketSettings', accounts => {
 			instance: mockFuturesMarketBTC,
 			mock: 'FuturesMarket',
 			fncName: 'baseAsset',
-			returns: [toBytes32('sBTC')],
+			returns: [toBytes32('zBTC')],
 		});
 
 		await mockGenericContractFnc({
 			instance: mockFuturesMarketBTC,
 			mock: 'FuturesMarket',
 			fncName: 'marketKey',
-			returns: [toBytes32('sBTC')],
+			returns: [toBytes32('zBTC')],
 		});
 
 		// add the market

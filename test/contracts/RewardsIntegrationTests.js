@@ -54,14 +54,14 @@ contract('Rewards Integration Tests', accounts => {
 
 	// CURRENCIES
 	const [sUSD, sAUD, sEUR, sBTC, SNX, iBTC, sETH, ETH] = [
-		'sUSD',
-		'sAUD',
-		'sEUR',
-		'sBTC',
-		'SNX',
+		'zUSD',
+		'zAUD',
+		'zEUR',
+		'zBTC',
+		'HZN',
 		'iBTC',
-		'sETH',
-		'ETH',
+		'zBNB',
+		'BNB',
 	].map(toBytes32);
 
 	const synthKeys = [sUSD, sAUD, sEUR, sBTC, iBTC, sETH, ETH];
@@ -153,11 +153,11 @@ contract('Rewards Integration Tests', accounts => {
 			SupplySchedule: supplySchedule,
 			Synthetix: synthetix,
 			ProxyERC20Synthetix: synthetixProxy,
-			SynthsUSD: sUSDContract,
+			ZassetzUSD: sUSDContract,
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
-			synths: ['sUSD', 'sAUD', 'sEUR', 'sBTC', 'iBTC', 'sETH'],
+			synths: ['zUSD', 'zAUD', 'zEUR', 'zBTC', 'iBTC', 'zBNB'],
 			contracts: [
 				'AddressResolver',
 				'Exchanger', // necessary for burnSynths to check settlement of sUSD

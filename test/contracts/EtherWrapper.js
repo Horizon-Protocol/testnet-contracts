@@ -20,8 +20,8 @@ const { toBytes32 } = require('../..');
 const { toBN } = require('web3-utils');
 
 contract('EtherWrapper', async accounts => {
-	const synths = ['sUSD', 'sETH', 'ETH', 'SNX'];
-	const [sETH, ETH] = ['sETH', 'ETH'].map(toBytes32);
+	const synths = ['zUSD', 'zBNB', 'BNB', 'HZN'];
+	const [sETH, ETH] = ['zBNB', 'BNB'].map(toBytes32);
 
 	const ONE = toBN('1');
 
@@ -66,8 +66,8 @@ contract('EtherWrapper', async accounts => {
 			Depot: depot,
 			ExchangeRates: exchangeRates,
 			EtherWrapper: etherWrapper,
-			SynthsUSD: sUSDSynth,
-			SynthsETH: sETHSynth,
+			ZassetzUSD: sUSDSynth,
+			ZassetzBNB: sETHSynth,
 			WETH: weth,
 		} = await setupAllContracts({
 			accounts,
@@ -122,8 +122,8 @@ contract('EtherWrapper', async accounts => {
 		});
 
 		it('should access its dependencies via the address resolver', async () => {
-			assert.equal(await addressResolver.getAddress(toBytes32('SynthsETH')), sETHSynth.address);
-			assert.equal(await addressResolver.getAddress(toBytes32('SynthsUSD')), sUSDSynth.address);
+			assert.equal(await addressResolver.getAddress(toBytes32('ZassetzBNB')), sETHSynth.address);
+			assert.equal(await addressResolver.getAddress(toBytes32('ZassetzUSD')), sUSDSynth.address);
 			assert.equal(
 				await addressResolver.getAddress(toBytes32('ExchangeRates')),
 				exchangeRates.address
