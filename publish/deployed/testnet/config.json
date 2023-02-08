@@ -301,5 +301,11 @@
 	},
 	"RewardEscrowV2Storage": {
 		"deploy": false
+	},
+	"ExchangeSettlementLib": {
+		"deploy": false
+	},
+	"DirectIntegrationManager": {
+		"deploy": false
 	}
 }

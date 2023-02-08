@@ -1107,8 +1107,9 @@
 		"contracts": {
 			"SystemSettings": {
 				"address": "0x2223605d9aa4149137298fbEf6748ab5d033E46e",
-				"status": "current",
-				"keccak256": "0x603bef9aecf339bfe2ae97b8dcaec60392d3ed1cb3adc69b021bac12dfc5f308"
+				"status": "replaced",
+				"keccak256": "0x603bef9aecf339bfe2ae97b8dcaec60392d3ed1cb3adc69b021bac12dfc5f308",
+				"replaced_in": "v1.19.0"
 			},
 			"Issuer": {
 				"address": "0x50e24328514EB818d169B9e90aF708A04cCe6DDC",
@@ -1118,8 +1119,9 @@
 			},
 			"SystemSettingsLib": {
 				"address": "0x1ebA76db654F5544415308F1987E61b15AA9bC3d",
-				"status": "current",
-				"keccak256": "0x54c6bb3dc6c4c8421f34727ce3b3b87fa37ff88eace062e789d7afb051cf1a3e"
+				"status": "replaced",
+				"keccak256": "0x54c6bb3dc6c4c8421f34727ce3b3b87fa37ff88eace062e789d7afb051cf1a3e",
+				"replaced_in": "v1.19.0"
 			}
 		}
 	},
@@ -1132,8 +1134,9 @@
 		"contracts": {
 			"ExchangeRates": {
 				"address": "0xd90D755137aE8cA6CbEC73383BcA631dF3D29981",
-				"status": "current",
-				"keccak256": "0x8d80c9a61df1da024033e9ed72e98067362a32cca9aeb87c53792c1f0f664efa"
+				"status": "replaced",
+				"keccak256": "0x8d80c9a61df1da024033e9ed72e98067362a32cca9aeb87c53792c1f0f664efa",
+				"replaced_in": "v1.19.0"
 			},
 			"RewardEscrowV2": {
 				"address": "0x394c897Ab4eFB49eB7AD9f765F2D664402ee9264",
@@ -1147,13 +1150,15 @@
 			},
 			"Exchanger": {
 				"address": "0x2525e993dbA5545Ff89ACf64112F90698E1c7147",
-				"status": "current",
-				"keccak256": "0x3cbb0754cd15b9db3049cd5cc1d9e08832cb8c6dd82dfaaf9daef95b72686273"
+				"status": "replaced",
+				"keccak256": "0x3cbb0754cd15b9db3049cd5cc1d9e08832cb8c6dd82dfaaf9daef95b72686273",
+				"replaced_in": "v1.19.0"
 			},
 			"Issuer": {
 				"address": "0xe1B67FB9c546b2686a67969fBa57037A89F04D57",
-				"status": "current",
-				"keccak256": "0x81d13d4c89252d33028bc3308b924e504c56e165b6c7a2cd6da58fea3874ac44"
+				"status": "replaced",
+				"keccak256": "0x81d13d4c89252d33028bc3308b924e504c56e165b6c7a2cd6da58fea3874ac44",
+				"replaced_in": "v1.19.0"
 			},
 			"OneNetAggregatorDebtRatio": {
 				"address": "0x7309310b8a2013b5d34E438E8747876B17d6a801",
@@ -1179,6 +1184,50 @@
 				"address": "0xD1f4BEbcD168be7A481b38d563DbF57a0B1E61DD",
 				"status": "current",
 				"keccak256": "0xfad12ed07c073410f84cc5b948999cf88c89ff3f9303fb54dbf7bfdb776cf69f"
+			}
+		}
+	},
+	"v1.19.0": {
+		"tag": "v1.19.0",
+		"fulltag": "v1.19.0",
+		"network": "testnet",
+		"date": "2022-12-19T12:16:32+05:30",
+		"commit": "3440d830260feaf3d8e419347dc3978851a7bb75",
+		"contracts": {
+			"SystemSettings": {
+				"address": "0x896238C4eb3088aDCfF9EdbA02aC040322AaD93f",
+				"status": "current",
+				"keccak256": "0xde4aac2cd756970b54c07b8530c6d7b8f5ad9419355fb892f5b6975724c4ead9"
+			},
+			"ExchangeRates": {
+				"address": "0x241A82d4b2a7deCdd84Eb89e927278662a618CF8",
+				"status": "current",
+				"keccak256": "0x775255166cc8a7d5c59549a8b2d4e7a45fe0221587b0728c900d9a376eb016f0"
+			},
+			"Exchanger": {
+				"address": "0x633B0dC0B9bC320cE459458289693d3641D0E65d",
+				"status": "current",
+				"keccak256": "0xfcbc2e381865f08d35f890dc4a032a711b8325d9daffd59be95252eb0e81a007"
+			},
+			"Issuer": {
+				"address": "0x8bb0Bc50941A5c475B29F5CB2625C9956b081022",
+				"status": "current",
+				"keccak256": "0x315b37332def3712b4cdc8e5f0e348acae111f1af3d051a85e18deb23eab560e"
+			},
+			"SystemSettingsLib": {
+				"address": "0x75C3a5434680258E4ff4EB1052232332c436e7Df",
+				"status": "current",
+				"keccak256": "0xc998333b8954ec44b7fd5bb8a03350a84f817f4713dbb872eed4055010dfa782"
+			},
+			"ExchangeSettlementLib": {
+				"address": "0x4C27B81419136B88d16903A0beF8ae5c4DEA4A82",
+				"status": "current",
+				"keccak256": "0xc71f643c2847754c133fafdabdf8075e47e7157d60aa2836f55632fa8998374f"
+			},
+			"DirectIntegrationManager": {
+				"address": "0x59F2C7d5Cd82ECdeD0c13d152F6125b05325b38b",
+				"status": "current",
+				"keccak256": "0x69c8e2c172a4609df46d0503c30e7a2c7b21d3eccdef764a804e821760acb77f"
 			}
 		}
 	}
