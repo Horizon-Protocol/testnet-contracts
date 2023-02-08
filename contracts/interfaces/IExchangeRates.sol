@@ -1,4 +1,7 @@
 pragma solidity >=0.4.24;
+pragma experimental ABIEncoderV2;
+
+import "./IDirectIntegrationManager.sol";
 
 // https://docs.synthetix.io/contracts/source/interfaces/iexchangerates
 interface IExchangeRates {
@@ -45,6 +48,21 @@ interface IExchangeRates {
         bytes32 destinationCurrencyKey
     ) external view returns (uint value, uint systemValue, uint systemSourceRate, uint systemDestinationRate);
 
+    function effectiveAtomicValueAndRates(
+        IDirectIntegrationManager.ParameterIntegrationSettings calldata sourceSettings,
+        uint sourceAmount,
+        IDirectIntegrationManager.ParameterIntegrationSettings calldata destinationSettings,
+        IDirectIntegrationManager.ParameterIntegrationSettings calldata usdSettings
+    )
+        external
+        view
+        returns (
+            uint value,
+            uint systemValue,
+            uint systemSourceRate,
+            uint systemDestinationRate
+        );
+    
     function getCurrentRoundId(bytes32 currencyKey) external view returns (uint);
 
     function getLastRoundIdBeforeElapsedSecs(
@@ -87,5 +105,10 @@ interface IExchangeRates {
     // Mutative functions
     function synthTooVolatileForAtomicExchange(bytes32 currencyKey) external view returns (bool);
 
+    function synthTooVolatileForAtomicExchange(IDirectIntegrationManager.ParameterIntegrationSettings calldata settings)
+        external
+        view
+        returns (bool);
+    
     function rateWithSafetyChecks(bytes32 currencyKey) external returns (uint rate, bool broken, bool invalid);
 }
