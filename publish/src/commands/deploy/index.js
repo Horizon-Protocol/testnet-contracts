@@ -26,14 +26,17 @@ const configureLegacySettings = require('./configure-legacy-settings');
 const configureRewardEscrow = require('./configure-reward-escrow');
 const configureLoans = require('./configure-loans');
 const configureStandalonePriceFeeds = require('./configure-standalone-price-feeds');
+const configureOffchainPriceFeeds = require('./configure-offchain-price-feeds');
 const configureSynths = require('./configure-synths');
 const configureFutures = require('./configure-futures');
+const configurePerpsV2 = require('./configure-perpsv2');
 const configureSystemSettings = require('./configure-system-settings');
 const deployCore = require('./deploy-core');
 const deployDappUtils = require('./deploy-dapp-utils.js');
 const deployLoans = require('./deploy-loans');
 const deploySynths = require('./deploy-synths');
 const deployFutures = require('./deploy-futures');
+const deployPerpsV2 = require('./deploy-perpsv2');
 const generateSolidityOutput = require('./generate-solidity-output');
 const getDeployParameterFactory = require('./get-deploy-parameter-factory');
 const importAddresses = require('./import-addresses');
@@ -92,6 +95,7 @@ const deploy = async ({
 		ownerActions,
 		ownerActionsFile,
 		feeds,
+		offchainFeeds,
 	} = loadAndCheckRequiredSources({
 		deploymentPath,
 		network,
@@ -308,7 +312,7 @@ const deploy = async ({
 		useOvm,
 	});
 
-	await deployFutures({
+	const { futuresMarketManager } = await deployFutures({
 		account,
 		addressOf,
 		getDeployParameter,
@@ -318,6 +322,19 @@ const deploy = async ({
 		network,
 		deploymentPath,
 		loadAndCheckRequiredSources,
+	});
+
+	await deployPerpsV2({
+		account,
+		addressOf,
+		getDeployParameter,
+		deployer,
+		runStep,
+		useOvm,
+		network,
+		deploymentPath,
+		loadAndCheckRequiredSources,
+		futuresMarketManager,
 	});
 
 	await deployDappUtils({
@@ -401,6 +418,13 @@ const deploy = async ({
 		useOvm,
 	});
 
+	await configureOffchainPriceFeeds({
+		deployer,
+		runStep,
+		offchainFeeds,
+		useOvm,
+	});
+	
 	await configureSynths({
 		addressOf,
 		explorerLinkPrefix,
@@ -452,6 +476,20 @@ const deploy = async ({
 		yes,
 	});
 
+	await configurePerpsV2({
+		addressOf,
+		deployer,
+		loadAndCheckRequiredSources,
+		runStep,
+		getDeployParameter,
+		useOvm,
+		freshDeploy,
+		deploymentPath,
+		network,
+		generateSolidity,
+		yes,
+	});
+	
 	// await takeDebtSnapshotWhenRequired({
 	// 	debtSnapshotMaxDeviation: DEFAULTS.debtSnapshotMaxDeviation,
 	// 	deployer,

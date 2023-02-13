@@ -8,21 +8,21 @@
 		"setup": "npm install && allow-scripts",
 		"clean-install": "rm -rf build && rm ./package-lock.json && rm -rf node_modules/* && npm install",
 		"compile": "hardhat compile",
-		"coverage": "node --max-old-space-size=4096 ./node_modules/.bin/hardhat coverage",
+		"coverage": "node --max-old-space-size=8192 ./node_modules/.bin/hardhat coverage",
 		"format": "prettier --write \"contracts/**/*.sol\" \"**/*.js\" \"**/*.md\" \"**/*.yml\" \"**/*.json\"",
 		"lint": "solhint \"contracts/*.sol\" && solhint \"contracts/test-helpers/*.sol\" && solhint --config contracts/interfaces/.solhint.json \"contracts/interfaces/*.sol\" && prettier -c 'contracts/**/*.sol' && eslint \"**/*.js\"",
 		"lint:fix": "prettier --write 'contracts/**/*.sol' && eslint --fix \"**/*.js\"",
 		"build:ci": "node .circleci/pack.js",
 		"slither": "python3 -m venv .venv && .venv/bin/python -m pip install slither-analyzer && .venv/bin/python -m slither .",
 		"pack": "webpack --mode production",
-		"fork": "node --max-old-space-size=4096 ./node_modules/.bin/hardhat node",
-		"fork:mainnet": "node --max-old-space-size=4096 ./node_modules/.bin/hardhat node --target-network mainnet --port 9545",
-		"fork:ovm": "node --max-old-space-size=4096 ./node_modules/.bin/hardhat node --target-network mainnet --use-ovm",
-		"test": "node --max-old-space-size=4096 --openssl-legacy-provider ./node_modules/.bin/hardhat test",
+		"fork": "node --max-old-space-size=8192 ./node_modules/.bin/hardhat node",
+		"fork:mainnet": "node --max-old-space-size=8192 ./node_modules/.bin/hardhat node --target-network mainnet --port 9545",
+		"fork:ovm": "node --max-old-space-size=8192 ./node_modules/.bin/hardhat node --target-network mainnet --use-ovm",
+		"test": "node --max-old-space-size=8192 --openssl-legacy-provider ./node_modules/.bin/hardhat test",
 		"describe": "hardhat describe",
 		"test:deployments": "mocha test/deployments -- --timeout 100000",
 		"test:etherscan": "node test/etherscan",
-		"test:publish": "concurrently --kill-others --success first \"anvil > /dev/null\" \"wait-port 127.0.0.1:8545 && mocha test/publish --bail --timeout 240000\"",
+		"test:publish": "concurrently --kill-others --success first \"anvil > --prune-history /dev/null\" \"wait-port 127.0.0.1:8545 && mocha test/publish --bail --timeout 600000\"",
 		"test:integration:l1": "hardhat test:integration:l1 --compile --deploy",
 		"test:integration:l2": "hardhat test:integration:l2 --compile --deploy"
 	},
@@ -143,6 +143,7 @@
 		"web3-utils": "^1.2.2"
 	},
 	"overrides": {
+		"flat": "5.0.2",
 		"loader-utils": "1.4.1"
 	},
 	"lavamoat": {

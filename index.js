@@ -62,7 +62,9 @@ const constants = {
 	DEPLOYMENT_FILENAME: 'deployment.json',
 	VERSIONS_FILENAME: 'versions.json',
 	FEEDS_FILENAME: 'feeds.json',
+	OFFCHAIN_FEEDS_FILENAME: 'offchain-feeds.json',
 	FUTURES_MARKETS_FILENAME: 'futures-markets.json',
+	PERPS_V2_MARKETS_FILENAME: 'perpsv2-markets.json',
 
 	AST_FILENAME: 'asts.json',
 
@@ -177,6 +179,7 @@ const defaults = {
 	// ETHER_WRAPPER_BURN_FEE_RATE: w3utils.toWei('0'), // 0 bps
 
 	FUTURES_MIN_KEEPER_FEE: w3utils.toWei('1'), // 1 zUSD liquidation fee
+	FUTURES_MAX_KEEPER_FEE: w3utils.toWei('1000'), // 1000 zUSD min keeper fee
 	FUTURES_LIQUIDATION_FEE_RATIO: w3utils.toWei('0.0035'), // 35 basis points liquidation incentive
 	FUTURES_LIQUIDATION_BUFFER_RATIO: w3utils.toWei('0.0025'), // 25 basis points liquidation buffer
 	FUTURES_MIN_INITIAL_MARGIN: w3utils.toWei('40'), // minimum initial margin for all markets
@@ -310,11 +313,11 @@ const getFeeds = ({ network, path, fs, deploymentPath, useOvm = false } = {}) =>
 		const pathToFeeds = deploymentPath
 			? path.join(deploymentPath, constants.FEEDS_FILENAME)
 			: getPathToNetwork({
-					network,
-					path,
-					useOvm,
-					file: constants.FEEDS_FILENAME,
-			  });
+				network,
+				path,
+				useOvm,
+				file: constants.FEEDS_FILENAME,
+			});
 		if (!fs.existsSync(pathToFeeds)) {
 			throw Error(`Cannot find feeds file.`);
 		}
@@ -326,6 +329,25 @@ const getFeeds = ({ network, path, fs, deploymentPath, useOvm = false } = {}) =>
 		memo[asset] = Object.assign(assets[asset], entry);
 		return memo;
 	}, {});
+};
+
+const getOffchainFeeds = ({ network, path, fs, deploymentPath, useOvm = false } = {}) => {
+	if (!deploymentPath && (!path || !fs)) {
+		return data[getFolderNameForNetwork({ network, useOvm })].offchainFeeds;
+	} else {
+		const pathToFeeds = deploymentPath
+			? path.join(deploymentPath, constants.OFFCHAIN_FEEDS_FILENAME)
+			: getPathToNetwork({
+				network,
+				path,
+				useOvm,
+				file: constants.OFFCHAIN_FEEDS_FILENAME,
+			});
+		if (!fs.existsSync(pathToFeeds)) {
+			throw Error(`Cannot find off-chain feeds file.`);
+		}
+		return JSON.parse(fs.readFileSync(pathToFeeds));
+	}
 };
 
 /**
@@ -406,11 +428,11 @@ const getFuturesMarkets = ({
 		const pathToFuturesMarketsList = deploymentPath
 			? path.join(deploymentPath, constants.FUTURES_MARKETS_FILENAME)
 			: getPathToNetwork({
-					network,
-					path,
-					useOvm,
-					file: constants.FUTURES_MARKETS_FILENAME,
-			  });
+				network,
+				path,
+				useOvm,
+				file: constants.FUTURES_MARKETS_FILENAME,
+			});
 		if (!fs.existsSync(pathToFuturesMarketsList)) {
 			futuresMarkets = [];
 		} else {
@@ -432,6 +454,113 @@ const getFuturesMarkets = ({
 	});
 };
 
+const getPerpsV2ProxiedMarkets = ({ network = 'mainnet', fs, deploymentPath, path }) => {
+	const _analyzeAndIncludePerpsV2 = (target, targetData, sourceData, PerpsV2Proxied) => {
+		const proxyPrefix = 'PerpsV2Proxy';
+		const marketPrefix = 'PerpsV2Market';
+		const excludedContracts = ['PerpsV2MarketSettings', 'PerpsV2MarketData'];
+		const prefixes = ['PerpsV2MarketViews', 'PerpsV2DelayedOrder', 'PerpsV2OffchainDelayedOrder'];
+
+		if (excludedContracts.includes(target) || target.startsWith('PerpsV2MarketState')) {
+			// Markets helper or Market state. Do nothing
+			return;
+		}
+
+		// If is the proxy, get the address. Initialize object if not done yet
+		if (target.startsWith(proxyPrefix)) {
+			// get name
+			const marketName = target.slice(proxyPrefix.length);
+			if (!PerpsV2Proxied[marketName]) {
+				PerpsV2Proxied[marketName] = {};
+				PerpsV2Proxied[marketName].abi = [];
+			}
+			// get address
+			PerpsV2Proxied[marketName].address = targetData.address;
+		} else {
+			// Not proxy, is one of the components. First try with the long contract names because main component prefix is included in others
+			let nameFound = false;
+			let marketName;
+
+			// Identify the market name (after the prefix)
+			for (const prefix of prefixes) {
+				if (target.startsWith(prefix)) {
+					// get name
+					marketName = target.slice(prefix.length);
+					nameFound = true;
+				}
+			}
+
+			// if not found one the previous step, it should be PerpsV2MarketXXXXX
+			if (!nameFound) {
+				if (target.startsWith(marketPrefix)) {
+					// get name
+					marketName = target.slice(marketPrefix.length);
+					nameFound = true;
+				}
+			}
+
+			if (nameFound) {
+				// Initialize if not done yet
+				if (!PerpsV2Proxied[marketName]) {
+					PerpsV2Proxied[marketName] = {};
+					PerpsV2Proxied[marketName].abi = [];
+				}
+				// add fragments to abi
+				_consolidateAbi(sourceData.abi, PerpsV2Proxied[marketName].abi);
+			}
+		}
+	};
+
+	const _consolidateAbi = (currentAbi, consolidatedAbi) => {
+		for (const abiFragment of currentAbi) {
+			if (
+				!consolidatedAbi.find(
+					f =>
+						f.type === abiFragment.type && f.name && abiFragment.name && f.name === abiFragment.name
+				)
+			) {
+				if (abiFragment.type !== 'constructor') {
+					// don't push constructors to the consolidated abi
+					consolidatedAbi.push(abiFragment);
+				}
+			}
+		}
+	};
+
+	const deploymentData = loadDeploymentFile({ network, useOvm: false, path, fs, deploymentPath });
+
+	const targets = Object.keys(deploymentData.targets);
+
+	const PerpsV2Proxied = {};
+
+	for (const target of targets) {
+		if (!target.startsWith('PerpsV2')) {
+			continue;
+		}
+		const targetData = getTarget({
+			contract: target,
+			network,
+			useOvm: false,
+			path,
+			fs,
+			deploymentPath,
+		});
+
+		const sourceData = getSource({
+			contract: targetData.source,
+			network,
+			useOvm: false,
+			path,
+			fs,
+			deploymentPath,
+		});
+
+		_analyzeAndIncludePerpsV2(target, targetData, sourceData, PerpsV2Proxied);
+	}
+
+	return PerpsV2Proxied;
+};
+
 /**
  * Retrieve the list of staking rewards for the network - returning this names, stakingToken, and rewardToken
  */
@@ -449,11 +578,11 @@ const getStakingRewards = ({
 	const pathToStakingRewardsList = deploymentPath
 		? path.join(deploymentPath, constants.STAKING_REWARDS_FILENAME)
 		: getPathToNetwork({
-				network,
-				path,
-				useOvm,
-				file: constants.STAKING_REWARDS_FILENAME,
-		  });
+			network,
+			path,
+			useOvm,
+			file: constants.STAKING_REWARDS_FILENAME,
+		});
 	if (!fs.existsSync(pathToStakingRewardsList)) {
 		return [];
 	}
@@ -477,11 +606,11 @@ const getShortingRewards = ({
 	const pathToShortingRewardsList = deploymentPath
 		? path.join(deploymentPath, constants.SHORTING_REWARDS_FILENAME)
 		: getPathToNetwork({
-				network,
-				path,
-				useOvm,
-				file: constants.SHORTING_REWARDS_FILENAME,
-		  });
+			network,
+			path,
+			useOvm,
+			file: constants.SHORTING_REWARDS_FILENAME,
+		});
 	if (!fs.existsSync(pathToShortingRewardsList)) {
 		return [];
 	}
@@ -619,28 +748,63 @@ const getTokens = ({ network = 'mainnet', path, fs, useOvm = false } = {}) => {
 };
 
 const enhanceDecodedData = decoded => {
+	const decodedBytes32 = p => {
+		try {
+			return { ascii: fromBytes32(p).replaceAll('\x00', '') };
+		} catch (e) {
+			return { ascii: '\\error decoding\\' };
+		}
+	};
+	const formatDecimals = number => {
+		const exp = /(\d)(?=(\d{3})+(?!\d))/g;
+		const rep = '$1,';
+		return number.toString().replace(exp, rep);
+	};
+	const decodeUint = p => {
+		try {
+			const value = w3utils.toBN(p);
+			return {
+				bp: value.div(w3utils.toBN(1e14)).toString(),
+				decimal: formatDecimals(value.div(w3utils.toBN(1e18)).toString()),
+				number: formatDecimals(value.toString()),
+			};
+		} catch (e) {
+			return { ascii: '\\error decoding\\' };
+		}
+	};
 	const enhancedParams = decoded.method.params.map(p => {
 		if (p.type === 'bytes32') {
-			try {
-				return { ...p, enhanced: { ascii: fromBytes32(p.value).replaceAll('\x00', '') } };
-			} catch (e) {
-				return p;
-			}
+			return { ...p, enhanced: decodedBytes32(p.value) };
 		}
 
-		if (p.type === 'uint256') {
-			try {
-				const value = w3utils.toBN(p.value);
-				return {
-					...p,
-					enhanced: {
-						bp: value.div(w3utils.toBN(1e14)).toString(),
-						decimal: value.div(w3utils.toBN(1e18)).toString(),
-					},
-				};
-			} catch (e) {
-				return p;
+		if (p.type === 'bytes32[]') {
+			p.value = p.value.map(original => {
+				return { original, enhanced: decodedBytes32(original) };
+			});
+		}
+
+		if (/u?int[1-3][0-9]?./.test(p.type)) {
+			return { ...p, enhanced: decodeUint(p.value) };
+		}
+
+		if (p.type === 'tuple') {
+			const keys = Object.keys(p.value).filter(v => isNaN(v));
+			const values = [];
+
+			for (const key of keys) {
+				if (p.value[key].startsWith('0x')) {
+					if (p.value[key].length === 66) {
+						values[key] = { original: p.value[key], enhanced: decodedBytes32(p.value[key]) };
+						continue;
+					}
+					values[key] = p.value[key];
+					continue;
+				}
+
+				values[key] = { original: p.value[key], enhanced: decodeUint(p.value[key]) };
 			}
+
+			p.value = values;
 		}
 
 		return p;
@@ -697,9 +861,11 @@ const wrap = ({ network, deploymentPath, fs, path, useOvm = false }) =>
 		'getStakingRewards',
 		'getShortingRewards',
 		'getFeeds',
+		'getOffchainFeeds',
 		'getSynths',
 		'getTarget',
 		'getFuturesMarkets',
+		'getPerpsV2ProxiedMarkets',
 		'getTokens',
 		'getUsers',
 		'getVersions',
@@ -729,8 +895,10 @@ module.exports = {
 	getShortingRewards,
 	getSuspensionReasons,
 	getFeeds,
+	getOffchainFeeds,
 	getSynths,
 	getFuturesMarkets,
+	getPerpsV2ProxiedMarkets,
 	getTarget,
 	getTokens,
 	getUsers,

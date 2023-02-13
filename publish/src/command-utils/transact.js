@@ -39,9 +39,17 @@ const performTransactionalStep = async ({
 	useFork,
 }) => {
 	const argumentsForWriteFunction = [].concat(writeArg).filter((entry) => entry !== undefined); // reduce to array of args
-	const action = `${contract}.${write}(${argumentsForWriteFunction.map((arg) =>
-		typeof arg === 'string' && arg.length === 66 ? ethers.utils.toUtf8String(arg) : arg
-	)})`;
+
+	const action = `${contract}.${write}(${argumentsForWriteFunction.map(arg => {
+		let parsedArg = arg;
+		// bytes32 that are not string representation throw an error
+		if (typeof arg === 'string' && arg.length === 66) {
+			try {
+				parsedArg = ethers.utils.toUtf8String(arg);
+			} catch (e) { }
+		}
+		return parsedArg;
+	})})`;
 
 	// check to see if action required
 	console.log(yellow(`Attempting action: ${action}`));
@@ -127,8 +135,7 @@ const performTransactionalStep = async ({
 
 		console.log(
 			green(
-				`${
-					dryRun ? '[DRY RUN] ' : ''
+				`${dryRun ? '[DRY RUN] ' : ''
 				}Successfully completed ${action} in hash: ${hash}. Gas used: ${(gasUsed / 1e6).toFixed(
 					2
 				)}m `
@@ -178,8 +185,8 @@ const performTransactionalStep = async ({
 			await confirmAction(
 				redBright(
 					`Confirm: Invoke ${write}(${argumentsForWriteFunction}) via https://gnosis-safe.io/app/#/safes/${owner}/transactions` +
-						`to recipient ${target.address}` +
-						`with data: ${data}`
+					`to recipient ${target.address}` +
+					`with data: ${data}`
 				) + '\nPlease enter Y when the transaction has been mined and not earlier. '
 			);
 
