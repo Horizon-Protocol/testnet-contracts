@@ -18,7 +18,7 @@ module.exports = async ({
 }) => {
 	console.log(gray(`\n------ CONFIGURE PERPS V2 MARKETS ------\n`));
 
-	if (!useOvm) return;
+	// if (!useOvm) return;
 
 	const { PerpsV2MarketSettings: futuresMarketSettings, SystemStatus } = deployer.deployedContracts;
 
