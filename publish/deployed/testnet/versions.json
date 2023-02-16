@@ -1145,8 +1145,9 @@
 			},
 			"Synthetix": {
 				"address": "0xAa47206FE7a74F5A1Eb878639133863860854EAC",
-				"status": "current",
-				"keccak256": "0xa6046c40779d8fa6706d895bf5159ae1047eb5f5aaff720514820017b8b1d1e9"
+				"status": "replaced",
+				"keccak256": "0xa6046c40779d8fa6706d895bf5159ae1047eb5f5aaff720514820017b8b1d1e9",
+				"replaced_in": "v1.20.0"
 			},
 			"Exchanger": {
 				"address": "0x2525e993dbA5545Ff89ACf64112F90698E1c7147",
@@ -1167,8 +1168,9 @@
 			},
 			"Liquidator": {
 				"address": "0xE86dD9548a7Cc30B32505cc7ffCA77401b51fAC9",
-				"status": "current",
-				"keccak256": "0xa32cebb502582cb56eccf96dcbad96525b39410455a4175f69176ad1b41b2026"
+				"status": "replaced",
+				"keccak256": "0xa32cebb502582cb56eccf96dcbad96525b39410455a4175f69176ad1b41b2026",
+				"replaced_in": "v1.20.0"
 			},
 			"CircuitBreaker": {
 				"address": "0xDA43A06d6Db21B1963AD9B6c3beB7617625FD544",
@@ -1228,6 +1230,25 @@
 				"address": "0x59F2C7d5Cd82ECdeD0c13d152F6125b05325b38b",
 				"status": "current",
 				"keccak256": "0x69c8e2c172a4609df46d0503c30e7a2c7b21d3eccdef764a804e821760acb77f"
+			}
+		}
+	},
+	"v1.20.0": {
+		"tag": "v1.20.0",
+		"fulltag": "v1.20.0",
+		"network": "testnet",
+		"date": "2023-02-13T23:03:59+05:30",
+		"commit": "9955462b1b939b7b888a29225c961a873e065170",
+		"contracts": {
+			"Synthetix": {
+				"address": "0x3BF4D02DA02Cd45d8424acbf162087C76BC5f9c3",
+				"status": "current",
+				"keccak256": "0x4cd2dca5c79ef104824264ba97f4d803e5e79ea506f38771d3d5bbb50a992832"
+			},
+			"Liquidator": {
+				"address": "0xf3f9D5f8c81959e1e333B63b54DFC0ddb5461C49",
+				"status": "current",
+				"keccak256": "0xcef225b3fbaa0f11d7ee86b003ea246724c76f64d1b297675f3e348aec6777ea"
 			}
 		}
 	}
