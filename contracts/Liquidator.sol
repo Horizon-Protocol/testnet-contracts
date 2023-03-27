@@ -283,7 +283,7 @@ contract Liquidator is Owned, MixinSystemSettings, ILiquidator {
 
     /// @notice External function to allow anyone to remove an account's liquidation entry
     /// @dev This function checks if the account's c-ratio is OK and that the rate of SNX is not stale
-    function checkAndRemoveAccountInLiquidation(address account) external rateNotInvalid("SNX") {
+    function checkAndRemoveAccountInLiquidation(address account) external rateNotInvalid("HZN") {
         systemStatus().requireSystemActive();
 
         LiquidationEntry memory liquidation = _getLiquidationEntryForAccount(account);
