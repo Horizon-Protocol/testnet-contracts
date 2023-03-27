@@ -242,7 +242,7 @@ contract Liquidator is Owned, MixinSystemSettings, ILiquidator {
 
     // totalIssuedSynths checks synths for staleness
     // check snx rate is not stale
-    function flagAccountForLiquidation(address account) external rateNotInvalid("SNX") {
+    function flagAccountForLiquidation(address account) external rateNotInvalid("HZN") {
         systemStatus().requireSystemActive();
 
         require(resolver.getAddress(CONTRACT_V3_LEGACYMARKET) == address(0), "Must liquidate using V3");

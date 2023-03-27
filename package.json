@@ -1,6 +1,6 @@
 {
 	"name": "@rout-horizon/testnet-contracts",
-	"version": "2.80.5",
+	"version": "2.80.6",
 	"license": "MIT",
 	"author": "Horizon",
 	"description": "The smart contracts which make up the Horizon system.",
