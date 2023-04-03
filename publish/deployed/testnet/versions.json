@@ -432,8 +432,9 @@
 			},
 			"CollateralErc20": {
 				"address": "0x52F75C79B8b9E89373aCf0A417feB274EB9b3a80",
-				"status": "current",
-				"keccak256": "0x771247bece675f65af9372bce8430078a5717648732f39bf84749b81165b63bf"
+				"status": "replaced",
+				"keccak256": "0x771247bece675f65af9372bce8430078a5717648732f39bf84749b81165b63bf",
+				"replaced_in": "v1.21.1"
 			},
 			"CollateralStateShort": {
 				"address": "0x18856F50d24C7487D00D99c2BdB360b6AF24365F",
@@ -1248,8 +1249,9 @@
 			},
 			"Liquidator": {
 				"address": "0xf3f9D5f8c81959e1e333B63b54DFC0ddb5461C49",
-				"status": "current",
-				"keccak256": "0xcef225b3fbaa0f11d7ee86b003ea246724c76f64d1b297675f3e348aec6777ea"
+				"status": "replaced",
+				"keccak256": "0xcef225b3fbaa0f11d7ee86b003ea246724c76f64d1b297675f3e348aec6777ea",
+				"replaced_in": "v1.21.1"
 			}
 		}
 	},
@@ -1309,6 +1311,25 @@
 				"address": "0x90a6Cd7268a51f03842D754f9C12a7A796707771",
 				"status": "current",
 				"keccak256": "0x42aef39e7aed2117765b269de4035f2daab0d8adde994dc84b85216175010c7a"
+			}
+		}
+	},
+	"v1.21.1": {
+		"tag": "v1.21.1",
+		"fulltag": "v1.21.1",
+		"network": "testnet",
+		"date": "2023-03-28T02:22:16+05:30",
+		"commit": "45cc5ed276ef6a9d76d65342f72642b352fd59b2",
+		"contracts": {
+			"CollateralErc20": {
+				"address": "0x66369F7DdBBCa76D49C8B312f21407D7144Fc538",
+				"status": "current",
+				"keccak256": "0x7fcd656ee5095ae4213d739c2d6d542441437838d5a2188b2903f0d8b8e7562d"
+			},
+			"Liquidator": {
+				"address": "0x651b27525bddFC6014d3C4657940569177eDFb67",
+				"status": "current",
+				"keccak256": "0x1a2ec199b828232162e7cc8c3d704b09fe6f435368c1654d1867f852f911e2c4"
 			}
 		}
 	}
