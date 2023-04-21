@@ -1,11 +1,11 @@
 pragma solidity ^0.5.16;
 
 // Inheritance
-import "./Owned.sol";
-import "./interfaces/IAddressResolver.sol";
+import "../libraries/Owned.sol";
+import "../interfaces/IAddressResolver.sol";
 
 // Internal references
-import "./interfaces/IIssuer.sol";
+import "../interfaces/IIssuer.sol";
 import "./MixinResolver.sol";
 
 // https://docs.synthetix.io/contracts/source/contracts/addressresolver

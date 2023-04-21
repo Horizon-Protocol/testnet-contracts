@@ -5,14 +5,14 @@ pragma experimental ABIEncoderV2;
 import "./RewardEscrowV2Frozen/IRewardEscrowV2Frozen.sol";
 
 // interface
-import "./interfaces/IRewardEscrowV2.sol";
+import "../interfaces/IRewardEscrowV2.sol";
 
 // libraries
-import "./SignedSafeMath.sol";
+import "../libraries/SignedSafeMath.sol";
 import "openzeppelin-solidity-2.3.0/contracts/math/SafeMath.sol";
 
 // inheritance
-import "./State.sol";
+import "../periphery/State.sol";
 
 /// A contract for reading and writing to/from storage while falling back to values from
 /// previous RewardEscrowV2 contract.

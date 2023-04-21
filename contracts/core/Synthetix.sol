@@ -5,9 +5,9 @@ pragma experimental ABIEncoderV2;
 import "./BaseSynthetix.sol";
 
 // Internal references
-import "./interfaces/IRewardEscrow.sol";
-import "./interfaces/IRewardEscrowV2.sol";
-import "./interfaces/ISupplySchedule.sol";
+import "../interfaces/IRewardEscrow.sol";
+import "../interfaces/IRewardEscrowV2.sol";
+import "../interfaces/ISupplySchedule.sol";
 
 // https://docs.synthetix.io/contracts/source/contracts/synthetix
 contract Synthetix is BaseSynthetix {

@@ -2,14 +2,14 @@ pragma solidity ^0.5.16;
 
 // Inheritence
 import "./MixinResolver.sol";
-import "./interfaces/ISynthRedeemer.sol";
+import "../interfaces/ISynthRedeemer.sol";
 
 // Libraries
-import "./SafeDecimalMath.sol";
+import "../SafeDecimalMath.sol";
 
 // Internal references
-import "./interfaces/IERC20.sol";
-import "./interfaces/IIssuer.sol";
+import "../interfaces/IERC20.sol";
+import "../interfaces/IIssuer.sol";
 
 contract SynthRedeemer is ISynthRedeemer, MixinResolver {
     using SafeDecimalMath for uint;

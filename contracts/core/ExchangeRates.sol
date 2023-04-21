@@ -1,21 +1,21 @@
 pragma solidity ^0.5.16;
 
 // Inheritance
-import "./Owned.sol";
-import "./MixinSystemSettings.sol";
+import "../libraries/Owned.sol";
+import "../periphery/MixinSystemSettings.sol";
 import "./MixinResolver.sol";
-import "./interfaces/IERC20.sol";
-import "./interfaces/IExchangeRates.sol";
+import "../interfaces/IERC20.sol";
+import "../interfaces/IExchangeRates.sol";
 
 // Libraries
-import "./SafeDecimalMath.sol";
+import "../libraries/SafeDecimalMath.sol";
 
 // Internal references
 // AggregatorInterface from Chainlink represents a decentralized pricing network for a single currency key
 import "@chainlink/contracts-0.0.10/src/v0.5/interfaces/AggregatorV2V3Interface.sol";
 // FlagsInterface from Chainlink addresses SIP-76
 import "@chainlink/contracts-0.0.10/src/v0.5/interfaces/FlagsInterface.sol";
-import "./interfaces/ICircuitBreaker.sol";
+import "../interfaces/ICircuitBreaker.sol";
 
 // https://docs.synthetix.io/contracts/source/contracts/exchangerates
 contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {

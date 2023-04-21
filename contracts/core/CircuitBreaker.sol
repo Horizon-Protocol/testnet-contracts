@@ -1,19 +1,19 @@
 pragma solidity ^0.5.16;
 
 // Inheritance
-import "./Owned.sol";
+import "../libraries/Owned.sol";
 import "./MixinResolver.sol";
-import "./MixinSystemSettings.sol";
-import "./interfaces/ICircuitBreaker.sol";
+import "../periphery/MixinSystemSettings.sol";
+import "../interfaces/ICircuitBreaker.sol";
 
 // Libraries
-import "./SafeDecimalMath.sol";
+import "../libraries/SafeDecimalMath.sol";
 
 // Internal references
-import "./interfaces/ISynth.sol";
-import "./interfaces/ISystemStatus.sol";
-import "./interfaces/IExchangeRates.sol";
-import "./Proxyable.sol";
+import "../interfaces/ISynth.sol";
+import "../interfaces/ISystemStatus.sol";
+import "../interfaces/IExchangeRates.sol";
+import "../periphery/Proxyable.sol";
 
 // Chainlink
 import "@chainlink/contracts-0.0.10/src/v0.5/interfaces/AggregatorV2V3Interface.sol";

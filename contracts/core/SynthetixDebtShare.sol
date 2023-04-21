@@ -1,12 +1,12 @@
 pragma solidity ^0.5.16;
 
 // Inheritance
-import "./Owned.sol";
-import "./interfaces/ISynthetixDebtShare.sol";
+import "../libraries/Owned.sol";
+import "../interfaces/ISynthetixDebtShare.sol";
 import "./MixinResolver.sol";
 
 // Libraries
-import "./SafeDecimalMath.sol";
+import "../libraries/SafeDecimalMath.sol";
 
 // https://docs.synthetix.io/contracts/source/contracts/synthetixdebtshare
 contract SynthetixDebtShare is Owned, MixinResolver, ISynthetixDebtShare {

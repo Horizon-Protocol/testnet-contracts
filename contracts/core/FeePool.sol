@@ -3,33 +3,33 @@ pragma solidity ^0.5.16;
 // Inheritance
 import "./Owned.sol";
 import "./Proxyable.sol";
-import "./LimitedSetup.sol";
+import "../periphery/LimitedSetup.sol";
 import "./MixinResolver.sol";
-import "./MixinSystemSettings.sol";
-import "./interfaces/IFeePool.sol";
+import "../periphery/MixinSystemSettings.sol";
+import "../interfaces/IFeePool.sol";
 
 // Libraries
-import "./SafeDecimalMath.sol";
+import "../libraries/SafeDecimalMath.sol";
 
 import "@chainlink/contracts-0.0.10/src/v0.5/interfaces/AggregatorV2V3Interface.sol";
 
 // Internal references
-import "./interfaces/IERC20.sol";
-import "./interfaces/ISynth.sol";
-import "./interfaces/ISystemStatus.sol";
-import "./interfaces/ISynthetix.sol";
-import "./interfaces/ISynthetixDebtShare.sol";
-import "./FeePoolEternalStorage.sol";
-import "./interfaces/IExchanger.sol";
-import "./interfaces/IIssuer.sol";
-import "./interfaces/IRewardEscrowV2.sol";
-import "./interfaces/IDelegateApprovals.sol";
-import "./interfaces/IRewardsDistribution.sol";
-import "./interfaces/ICollateralManager.sol";
-import "./interfaces/IEtherWrapper.sol";
-import "./interfaces/IFuturesMarketManager.sol";
-import "./interfaces/IWrapperFactory.sol";
-import "./interfaces/ISynthetixBridgeToOptimism.sol";
+import "../interfaces/IERC20.sol";
+import "../interfaces/ISynth.sol";
+import "../interfaces/ISystemStatus.sol";
+import "../interfaces/ISynthetix.sol";
+import "../interfaces/ISynthetixDebtShare.sol";
+import "../periphery/FeePoolEternalStorage.sol";
+import "../interfaces/IExchanger.sol";
+import "../interfaces/IIssuer.sol";
+import "../interfaces/IRewardEscrowV2.sol";
+import "../interfaces/IDelegateApprovals.sol";
+import "../interfaces/IRewardsDistribution.sol";
+import "../interfaces/ICollateralManager.sol";
+import "../interfaces/IEtherWrapper.sol";
+import "../interfaces/IFuturesMarketManager.sol";
+import "../interfaces/IWrapperFactory.sol";
+import "../interfaces/ISynthetixBridgeToOptimism.sol";
 
 // https://docs.synthetix.io/contracts/source/contracts/feepool
 contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePool {

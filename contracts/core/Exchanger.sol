@@ -1,26 +1,26 @@
 pragma solidity ^0.5.16;
 
 // Inheritance
-import "./Owned.sol";
+import "../libraries/Owned.sol";
 import "./MixinResolver.sol";
-import "./MixinSystemSettings.sol";
-import "./interfaces/IExchanger.sol";
+import "../periphery/MixinSystemSettings.sol";
+import "../interfaces/IExchanger.sol";
 
 // Libraries
-import "./SafeDecimalMath.sol";
+import "../libraries/SafeDecimalMath.sol";
 
 // Internal references
-import "./interfaces/ISystemStatus.sol";
-import "./interfaces/IERC20.sol";
-import "./interfaces/IExchangeState.sol";
-import "./interfaces/IExchangeRates.sol";
-import "./interfaces/ICircuitBreaker.sol";
-import "./interfaces/ISynthetix.sol";
-import "./interfaces/IFeePool.sol";
-import "./interfaces/IDelegateApprovals.sol";
-import "./interfaces/IIssuer.sol";
-import "./interfaces/ITradingRewards.sol";
-import "./interfaces/IVirtualSynth.sol";
+import "../interfaces/ISystemStatus.sol";
+import "../interfaces/IERC20.sol";
+import "../interfaces/IExchangeState.sol";
+import "../interfaces/IExchangeRates.sol";
+import "../interfaces/ICircuitBreaker.sol";
+import "../interfaces/ISynthetix.sol";
+import "../interfaces/IFeePool.sol";
+import "../interfaces/IDelegateApprovals.sol";
+import "../interfaces/IIssuer.sol";
+import "../interfaces/ITradingRewards.sol";
+import "../interfaces/IVirtualSynth.sol";
 import "./Proxyable.sol";
 
 // Used to have strongly-typed access to internal mutative functions in Synthetix

@@ -4,9 +4,9 @@ pragma solidity ^0.5.16;
 import "./Exchanger.sol";
 
 // Internal references
-import "./MinimalProxyFactory.sol";
-import "./interfaces/IAddressResolver.sol";
-import "./interfaces/IERC20.sol";
+import "../periphery/MinimalProxyFactory.sol";
+import "../interfaces/IAddressResolver.sol";
+import "../interfaces/IERC20.sol";
 
 interface IVirtualSynthInternal {
     function initialize(

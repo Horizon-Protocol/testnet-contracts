@@ -1,17 +1,17 @@
 pragma solidity ^0.5.16;
 
 // Inheritance
-import "./Owned.sol";
-import "./interfaces/ISupplySchedule.sol";
+import "..libraries/Owned.sol";
+import "../interfaces/ISupplySchedule.sol";
 
 // Libraries
-import "./SafeDecimalMath.sol";
-import "./Math.sol";
+import "../libraries/SafeDecimalMath.sol";
+import "../libraries/Math.sol";
 
 // Internal references
-import "./Proxy.sol";
-import "./interfaces/ISynthetix.sol";
-import "./interfaces/IERC20.sol";
+import "../periphery/Proxy.sol";
+import "../interfaces/ISynthetix.sol";
+import "../interfaces/IERC20.sol";
 
 // https://docs.synthetix.io/contracts/source/contracts/supplyschedule
 contract SupplySchedule is Owned, ISupplySchedule {

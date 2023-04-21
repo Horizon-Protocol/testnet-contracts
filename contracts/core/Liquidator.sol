@@ -1,21 +1,21 @@
 pragma solidity ^0.5.16;
 
 // Inheritance
-import "./Owned.sol";
+import "../libraries/Owned.sol";
 import "./MixinResolver.sol";
-import "./MixinSystemSettings.sol";
-import "./interfaces/ILiquidator.sol";
+import "../periphery/MixinSystemSettings.sol";
+import "../interfaces/ILiquidator.sol";
 
 // Libraries
-import "./SafeDecimalMath.sol";
+import "../libraries/SafeDecimalMath.sol";
 
 // Internal references
-import "./interfaces/IERC20.sol";
-import "./interfaces/ISynthetix.sol";
-import "./interfaces/IExchangeRates.sol";
-import "./interfaces/IIssuer.sol";
-import "./interfaces/ISystemStatus.sol";
-import "./interfaces/IHasBalance.sol";
+import "../interfaces/IERC20.sol";
+import "../interfaces/ISynthetix.sol";
+import "../interfaces/IExchangeRates.sol";
+import "../interfaces/IIssuer.sol";
+import "../interfaces/ISystemStatus.sol";
+import "../interfaces/IHasBalance.sol";
 
 /// @title Upgrade Liquidation Mechanism V2 (SIP-148)
 /// @notice This contract is a modification to the existing liquidation mechanism defined in SIP-15

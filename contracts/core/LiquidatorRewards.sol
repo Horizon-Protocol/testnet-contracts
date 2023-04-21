@@ -5,18 +5,18 @@ import "openzeppelin-solidity-2.3.0/contracts/token/ERC20/SafeERC20.sol";
 import "openzeppelin-solidity-2.3.0/contracts/utils/ReentrancyGuard.sol";
 
 // Inheritance
-import "./Owned.sol";
+import "../libraries/Owned.sol";
 import "./MixinResolver.sol";
-import "./MixinSystemSettings.sol";
-import "./interfaces/ILiquidatorRewards.sol";
+import "../periphery/MixinSystemSettings.sol";
+import "../interfaces/ILiquidatorRewards.sol";
 
 // Libraries
-import "./SafeDecimalMath.sol";
+import "../libraries/SafeDecimalMath.sol";
 
 // Internal references
-import "./interfaces/IIssuer.sol";
-import "./interfaces/IRewardEscrowV2.sol";
-import "./interfaces/ISynthetixDebtShare.sol";
+import "../interfaces/IIssuer.sol";
+import "../interfaces/IRewardEscrowV2.sol";
+import "../interfaces/ISynthetixDebtShare.sol";
 
 /// @title Liquidator Rewards (SIP-148)
 /// @notice This contract holds SNX from liquidated positions.

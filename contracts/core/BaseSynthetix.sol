@@ -2,22 +2,22 @@ pragma solidity ^0.5.16;
 pragma experimental ABIEncoderV2;
 
 // Inheritance
-import "./interfaces/IERC20.sol";
-import "./ExternStateToken.sol";
+import "../interfaces/IERC20.sol";
+import "../periphery/ExternStateToken.sol";
 import "./MixinResolver.sol";
-import "./interfaces/ISynthetix.sol";
+import "../interfaces/ISynthetix.sol";
 
 // Internal references
-import "./interfaces/ISynth.sol";
-import "./TokenState.sol";
-import "./interfaces/ISystemStatus.sol";
-import "./interfaces/IExchanger.sol";
-import "./interfaces/IIssuer.sol";
-import "./interfaces/IRewardsDistribution.sol";
-import "./interfaces/ILiquidator.sol";
-import "./interfaces/ILiquidatorRewards.sol";
-import "./interfaces/IVirtualSynth.sol";
-import "./interfaces/IRewardEscrowV2.sol";
+import "../interfaces/ISynth.sol";
+import "../periphery/TokenState.sol";
+import "../interfaces/ISystemStatus.sol";
+import "../interfaces/IExchanger.sol";
+import "../interfaces/IIssuer.sol";
+import "../interfaces/IRewardsDistribution.sol";
+import "../interfaces/ILiquidator.sol";
+import "../interfaces/ILiquidatorRewards.sol";
+import "../interfaces/IVirtualSynth.sol";
+import "../interfaces/IRewardEscrowV2.sol";
 
 contract BaseSynthetix is IERC20, ExternStateToken, MixinResolver, ISynthetix {
     // ========== STATE VARIABLES ==========

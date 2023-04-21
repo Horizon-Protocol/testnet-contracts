@@ -4,13 +4,13 @@ pragma solidity ^0.5.16;
 import "openzeppelin-solidity-2.3.0/contracts/token/ERC20/ERC20.sol";
 
 // Libraries
-import "./SafeDecimalMath.sol";
+import "../libraries/SafeDecimalMath.sol";
 
 // Internal references
-import "./interfaces/ISynth.sol";
-import "./interfaces/IAddressResolver.sol";
-import "./interfaces/IVirtualSynth.sol";
-import "./interfaces/IExchanger.sol";
+import "../interfaces/ISynth.sol";
+import "../interfaces/IAddressResolver.sol";
+import "../interfaces/IVirtualSynth.sol";
+import "../interfaces/IExchanger.sol";
 
 // https://docs.synthetix.io/contracts/source/contracts/virtualsynth
 // Note: this contract should be treated as an abstract contract and should not be directly deployed.

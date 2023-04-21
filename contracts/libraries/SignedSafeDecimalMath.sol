@@ -1,6 +1,6 @@
 pragma solidity ^0.5.16;
 
-import "./SignedSafeMath.sol";
+import "../libraries/SignedSafeMath.sol";
 
 // TODO: Test suite
 

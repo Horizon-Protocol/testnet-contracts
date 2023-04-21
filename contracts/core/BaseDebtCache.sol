@@ -4,21 +4,21 @@ pragma solidity ^0.5.16;
 import "./Owned.sol";
 import "./MixinResolver.sol";
 import "./MixinSystemSettings.sol";
-import "./interfaces/IDebtCache.sol";
+import "../interfaces/IDebtCache.sol";
 
 // Libraries
-import "./SafeDecimalMath.sol";
+import "../libraries/SafeDecimalMath.sol";
 
 // Internal references
-import "./interfaces/IIssuer.sol";
-import "./interfaces/IExchanger.sol";
-import "./interfaces/IExchangeRates.sol";
-import "./interfaces/ISystemStatus.sol";
-import "./interfaces/IERC20.sol";
-import "./interfaces/ICollateralManager.sol";
-import "./interfaces/IEtherWrapper.sol";
-import "./interfaces/IWrapperFactory.sol";
-import "./interfaces/IFuturesMarketManager.sol";
+import "../interfaces/IIssuer.sol";
+import "../interfaces/IExchanger.sol";
+import "../interfaces/IExchangeRates.sol";
+import "../interfaces/ISystemStatus.sol";
+import "../interfaces/IERC20.sol";
+import "../interfaces/ICollateralManager.sol";
+import "../interfaces/IEtherWrapper.sol";
+import "../interfaces/IWrapperFactory.sol";
+import "../interfaces/IFuturesMarketManager.sol";
 
 // https://docs.synthetix.io/contracts/source/contracts/debtcache
 contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {

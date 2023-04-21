@@ -4,9 +4,9 @@ pragma solidity ^0.5.16;
 import "./Synth.sol";
 
 // Internal references
-import "./interfaces/ICollateralManager.sol";
-import "./interfaces/IEtherWrapper.sol";
-import "./interfaces/IWrapperFactory.sol";
+import "../interfaces/ICollateralManager.sol";
+import "../interfaces/IEtherWrapper.sol";
+import "../interfaces/IWrapperFactory.sol";
 
 // https://docs.synthetix.io/contracts/source/contracts/multicollateralsynth
 contract MultiCollateralSynth is Synth {

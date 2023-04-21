@@ -1,29 +1,29 @@
 pragma solidity ^0.5.16;
 
 // Inheritance
-import "./Owned.sol";
+import "../libraries/Owned.sol";
 import "./MixinResolver.sol";
-import "./MixinSystemSettings.sol";
-import "./interfaces/IIssuer.sol";
+import "../periphery/MixinSystemSettings.sol";
+import "../interfaces/IIssuer.sol";
 
 // Libraries
-import "./SafeCast.sol";
-import "./SafeDecimalMath.sol";
+import "../libraries/SafeCast.sol";
+import "../libraries/SafeDecimalMath.sol";
 
 // Internal references
-import "./interfaces/ISynth.sol";
-import "./interfaces/ISynthetixDebtShare.sol";
-import "./interfaces/IExchanger.sol";
-import "./interfaces/IDelegateApprovals.sol";
-import "./interfaces/IExchangeRates.sol";
-import "./interfaces/ICircuitBreaker.sol";
-import "./interfaces/IHasBalance.sol";
-import "./interfaces/IERC20.sol";
-import "./interfaces/ILiquidator.sol";
-import "./interfaces/ILiquidatorRewards.sol";
-import "./interfaces/ISynthRedeemer.sol";
-import "./interfaces/ISystemStatus.sol";
-import "./Proxyable.sol";
+import "../interfaces/ISynth.sol";
+import "../interfaces/ISynthetixDebtShare.sol";
+import "../interfaces/IExchanger.sol";
+import "../interfaces/IDelegateApprovals.sol";
+import "../interfaces/IExchangeRates.sol";
+import "../interfaces/ICircuitBreaker.sol";
+import "../interfaces/IHasBalance.sol";
+import "../interfaces/IERC20.sol";
+import "../interfaces/ILiquidator.sol";
+import "../interfaces/ILiquidatorRewards.sol";
+import "../interfaces/ISynthRedeemer.sol";
+import "../interfaces/ISystemStatus.sol";
+import "../periphery/Proxyable.sol";
 
 import "@chainlink/contracts-0.0.10/src/v0.5/interfaces/AggregatorV2V3Interface.sol";
 

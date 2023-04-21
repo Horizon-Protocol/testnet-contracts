@@ -4,17 +4,17 @@ pragma solidity ^0.5.16;
 import "./Owned.sol";
 import "./MixinResolver.sol";
 import "./MixinSystemSettings.sol";
-import "./interfaces/IExchangeCircuitBreaker.sol";
+import "../interfaces/IExchangeCircuitBreaker.sol";
 
 // Libraries
 import "./SafeDecimalMath.sol";
 
 // Internal references
-import "./interfaces/ISynth.sol";
-import "./interfaces/IIssuer.sol";
-import "./interfaces/ISystemStatus.sol";
-import "./interfaces/IExchangeRates.sol";
-import "./Proxyable.sol";
+import "../interfaces/ISynth.sol";
+import "../interfaces/IIssuer.sol";
+import "../interfaces/ISystemStatus.sol";
+import "../interfaces/IExchangeRates.sol";
+import "../periphery/Proxyable.sol";
 
 /**
  * Compares current exchange rate to previous, and suspends a synth if the

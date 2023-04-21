@@ -1,11 +1,11 @@
 pragma solidity ^0.5.16;
 
 // Inheritance
-import "./Owned.sol";
-import "./interfaces/IDelegateApprovals.sol";
+import "../libraries/Owned.sol";
+import "../interfaces/IDelegateApprovals.sol";
 
 // Internal references
-import "./EternalStorage.sol";
+import "../periphery/EternalStorage.sol";
 
 // https://docs.synthetix.io/contracts/source/contracts/delegateapprovals
 contract DelegateApprovals is Owned, IDelegateApprovals {
