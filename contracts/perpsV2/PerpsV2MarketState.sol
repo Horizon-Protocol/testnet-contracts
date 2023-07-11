@@ -2,12 +2,12 @@ pragma solidity ^0.5.16;
 pragma experimental ABIEncoderV2;
 
 // Inheritance
-import "./interfaces/IPerpsV2MarketBaseTypes.sol";
-import "./Owned.sol";
-import "./StateShared.sol";
+import "../interfaces/IPerpsV2MarketBaseTypes.sol";
+import "../libraries/Owned.sol";
+import "../periphery/StateShared.sol";
 
 // Libraries
-import "./AddressSetLib.sol";
+import "../libraries/AddressSetLib.sol";
 
 // https://docs.synthetix.io/contracts/source/contracts/PerpsV2MarketState
 contract PerpsV2MarketState is Owned, StateShared, IPerpsV2MarketBaseTypes {

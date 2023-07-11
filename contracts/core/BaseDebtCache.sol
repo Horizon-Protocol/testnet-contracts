@@ -1,9 +1,9 @@
 pragma solidity ^0.5.16;
 
 // Inheritance
-import "./Owned.sol";
+import "../libraries/Owned.sol";
 import "./MixinResolver.sol";
-import "./MixinSystemSettings.sol";
+import "../periphery/MixinSystemSettings.sol";
 import "../interfaces/IDebtCache.sol";
 
 // Libraries

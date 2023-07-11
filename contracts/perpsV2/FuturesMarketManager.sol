@@ -2,20 +2,20 @@ pragma solidity ^0.5.16;
 pragma experimental ABIEncoderV2;
 
 // Inheritance
-import "./Owned.sol";
-import "./MixinResolver.sol";
-import "./Proxyable.sol";
-import "./interfaces/IFuturesMarketManager.sol";
+import "../libraries/Owned.sol";
+import "../core/MixinResolver.sol";
+import "../periphery/Proxyable.sol";
+import "../interfaces/IFuturesMarketManager.sol";
 
 // Libraries
 import "openzeppelin-solidity-2.3.0/contracts/math/SafeMath.sol";
-import "./AddressSetLib.sol";
+import "../libraries/AddressSetLib.sol";
 
 // Internal references
-import "./interfaces/ISynth.sol";
-import "./interfaces/IFeePool.sol";
-import "./interfaces/IExchanger.sol";
-import "./interfaces/IERC20.sol";
+import "../interfaces/ISynth.sol";
+import "../interfaces/IFeePool.sol";
+import "../interfaces/IExchanger.sol";
+import "../interfaces/IERC20.sol";
 
 // basic views that are expected to be supported by v1 (IFuturesMarket) and v2 markets (IPerpsV2Market)
 interface IMarketViews {
