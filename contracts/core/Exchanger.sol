@@ -282,6 +282,10 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     ) public view returns (uint amountAfterSettlement) {
         amountAfterSettlement = amount;
 
+        if (refunded > 0) {
+            amountAfterSettlement = amountAfterSettlement.add(refunded);
+        }
+
         // balance of a synth will show an amount after settlement
         uint balanceOfSourceAfterSettlement = IERC20(address(issuer().synths(currencyKey))).balanceOf(from);
 
@@ -289,10 +293,6 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         if (amountAfterSettlement > balanceOfSourceAfterSettlement) {
             // then the amount to exchange is reduced to their remaining supply
             amountAfterSettlement = balanceOfSourceAfterSettlement;
-        }
-
-        if (refunded > 0) {
-            amountAfterSettlement = amountAfterSettlement.add(refunded);
         }
     }
 

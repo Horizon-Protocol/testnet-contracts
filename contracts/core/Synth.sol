@@ -90,6 +90,16 @@ contract Synth is Owned, IERC20, ExternStateToken, MixinResolver, ISynth {
         // Reduce the value to transfer if balance is insufficient after reclaimed
         value = value > balanceAfter ? balanceAfter : value;
 
+        // transfers to FEE_ADDRESS will be exchanged into zUSD and recorded as fee
+        if (to == FEE_ADDRESS) {
+            return _transferToFeeAddress(messageSender, to, value);
+        }
+
+        // transfers to 0x address will be burned
+        if (to == address(0)) {
+            return _internalBurn(messageSender, value);
+        }
+
         return super._internalTransfer(messageSender, to, value);
     }
 
@@ -131,6 +141,16 @@ contract Synth is Owned, IERC20, ExternStateToken, MixinResolver, ISynth {
         // Reduce the value to transfer if balance is insufficient after reclaimed
         value = value >= balanceAfter ? balanceAfter : value;
 
+        // transfers to FEE_ADDRESS will be exchanged into zUSD and recorded as fee
+        if (to == FEE_ADDRESS) {
+            return _transferToFeeAddress(from, to, value);
+        }
+
+        // transfers to 0x address will be burned
+        if (to == address(0)) {
+            return _internalBurn(from, value);
+        }
+
         return _internalTransferFrom(from, to, value);
     }
 
@@ -149,7 +169,7 @@ contract Synth is Owned, IERC20, ExternStateToken, MixinResolver, ISynth {
             // else exchange synth into zUSD and send to FEE_ADDRESS
             (amountInUSD, ) = exchanger().exchange(
                 from,
-                from,
+                messageSender,
                 currencyKey,
                 value,
                 "zUSD",
