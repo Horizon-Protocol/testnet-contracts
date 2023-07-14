@@ -64,6 +64,10 @@ contract ExchangeCircuitBreaker is Owned, MixinSystemSettings, IExchangeCircuitB
 
     /* ========== Mutating ========== */
 
+    /**
+     * COMPATIBILITY -- calls `ExchangeRates.rateWithSafetyChecks` which provides equivalent functionality for non-upgradable
+     * contracts (futures)
+     */
     function rateWithBreakCircuit(bytes32 currencyKey) external returns (uint lastValidRate, bool invalid) {
         bool staleOrInvalid;
         bool circuitBroken;

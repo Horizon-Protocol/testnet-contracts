@@ -1,9 +1,9 @@
 pragma solidity ^0.5.16;
 
 // Inheritance
-import "./Owned.sol";
+import "../libraries/Owned.sol";
 import "./MixinResolver.sol";
-import "./MixinSystemSettings.sol";
+import "../periphery/MixinSystemSettings.sol";
 import "../interfaces/IDebtCache.sol";
 
 // Libraries
@@ -173,7 +173,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         view
         returns (
             uint[] memory debtValues,
-            uint _futuresDebt,
+            uint futuresDebt,
             uint excludedDebt,
             bool anyRateIsInvalid
         )

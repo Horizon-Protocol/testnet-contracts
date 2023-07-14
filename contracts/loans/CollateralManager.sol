@@ -63,7 +63,7 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
     // The maximum amount of debt in zUSD that can be issued by non hzn collateral.
     uint public maxDebt;
 
-    // The rate that determines the skew li mit maximum.
+    // The rate that determines the skew limit maximum.
     uint public maxSkewRate;
 
     // The base interest rate applied to all borrows.
