@@ -173,7 +173,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         view
         returns (
             uint[] memory debtValues,
-            uint _futuresDebt,
+            uint futuresDebt,
             uint excludedDebt,
             bool anyRateIsInvalid
         )
