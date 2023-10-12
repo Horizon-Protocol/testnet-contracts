@@ -1,10 +1,11 @@
 const fs = require('fs');
 const ethers = require('ethers');
 const { gray, yellow } = require('chalk');
-const { EthersAdapter } = require('@gnosis.pm/safe-core-sdk');
-const Safe = require('@gnosis.pm/safe-core-sdk').default;
+const { EthersAdapter } = require('@safe-global/protocol-kit');
+const Safe = require('@safe-global/protocol-kit');
+// const  = require('@gnosis.pm/safe-core-sdk').default;
 
-const SafeServiceClient = require('@gnosis.pm/safe-service-client').default;
+const SafeApiKit = require('@safe-global/api-kit');
 
 require('dotenv').config();
 
@@ -51,8 +52,8 @@ const {
 	});
 
 	const safeSdk = await Safe.create({
-		ethAdapter,
 		safeAddress,
+		ethAdapter,
 	});
 
 	const transactions = Object.values(ownerActions)
@@ -89,11 +90,17 @@ const {
 	const txHash = await safeSdk.getTransactionHash(safeTransaction);
 	const signature = await safeSdk.signTransactionHash(txHash);
 
-	const safeService = new SafeServiceClient(
-		`https://safe-transaction${network === 'rinkeby' ? '.rinkeby' : ''}.gnosis.io`
-	);
+    const txServiceUrl = `https://safe-transaction${network === 'goerli' ? '-goerli' : ''}.safe.global`;
+	const safeService = new SafeApiKit({txServiceUrl,ethAdapter});
+
 	try {
-		await safeService.proposeTransaction(safeAddress, safeTransaction.data, txHash, signature);
+		await safeService.proposeTransaction({
+            safeAddress,
+            safeTransactionData: safeTransaction.data,
+            txHash,
+            senderAddress: await signer.getAddress(),
+            senderSignature: signature
+        });
 
 		console.log(
 			gray(

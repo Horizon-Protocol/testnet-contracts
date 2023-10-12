@@ -12,29 +12,33 @@ module.exports = async ({
 	deploymentPath,
 	network,
 	useOvm,
+	futuresMarketManager,
 }) => {
 	const { ReadProxyAddressResolver } = deployer.deployedContracts;
 
+	
+	// ----------------
+	// Futures market setup
+	// ----------------
+	
+	console.log(gray(`\n------ DEPLOY FUTURES MARKETS ------\n`));
+	
 	const { futuresMarkets } = loadAndCheckRequiredSources({
 		deploymentPath,
 		network,
 	});
 
-	// ----------------
-	// Futures market setup
-	// ----------------
-
-	console.log(gray(`\n------ DEPLOY FUTURES MARKETS ------\n`));
-
-	const futuresMarketManager = await deployer.deployContract({
-		name: 'FuturesMarketManager',
-		source: 'FuturesMarketManager', // useOvm ? 'FuturesMarketManager' : 'EmptyFuturesMarketManager',
-		args: [account, addressOf(ReadProxyAddressResolver)], // useOvm ? [account, addressOf(ReadProxyAddressResolver)] : [],
-		deps: ['ReadProxyAddressResolver'],
-	});
+	if (!futuresMarketManager) {
+		futuresMarketManager = await deployer.deployContract({
+			name: 'FuturesMarketManager',
+			source: 'FuturesMarketManager', // useOvm ? 'FuturesMarketManager' : 'EmptyFuturesMarketManager',
+			args: [account, addressOf(ReadProxyAddressResolver)], // useOvm ? [account, addressOf(ReadProxyAddressResolver)] : [],
+			deps: ['ReadProxyAddressResolver'],
+		});
+	}
 
 	// if (!useOvm) {
-	// 	return;
+	// return ;
 	// }
 
 	// This belongs in dapp-utils, but since we are only deploying futures on L2,
@@ -71,9 +75,8 @@ module.exports = async ({
 	// Now replace the relevant markets in the manager (if any)
 
 	if (futuresMarketManager && deployedFuturesMarkets.length > 0) {
-		const numManagerKnownMarkets = await futuresMarketManager.numMarkets();
 		const managerKnownMarkets = Array.from(
-			await futuresMarketManager.markets(0, numManagerKnownMarkets)
+			await futuresMarketManager['allMarkets(bool)'](false)
 		).sort();
 
 		const toRemove = managerKnownMarkets.filter(market => !deployedFuturesMarkets.includes(market));
@@ -84,8 +87,8 @@ module.exports = async ({
 			await runStep({
 				contract: `FuturesMarketManager`,
 				target: futuresMarketManager,
-				read: 'markets',
-				readArg: [0, numManagerKnownMarkets],
+				read: 'allMarkets(bool)',
+				readArg: [false],
 				expected: markets => JSON.stringify(markets.slice().sort()) === JSON.stringify(toKeep),
 				write: 'removeMarkets',
 				writeArg: [toRemove],
@@ -98,8 +101,8 @@ module.exports = async ({
 			await runStep({
 				contract: `FuturesMarketManager`,
 				target: futuresMarketManager,
-				read: 'markets',
-				readArg: [0, Math.max(numManagerKnownMarkets, deployedFuturesMarkets.length)],
+				read: 'allMarkets(bool)',
+				readArg: [false],
 				expected: markets =>
 					JSON.stringify(markets.slice().sort()) ===
 					JSON.stringify(deployedFuturesMarkets.slice().sort()),
@@ -109,4 +112,5 @@ module.exports = async ({
 			});
 		}
 	}
+	// return { futuresMarketManager };
 };

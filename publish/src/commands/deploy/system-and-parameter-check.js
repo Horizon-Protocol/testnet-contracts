@@ -50,9 +50,13 @@ module.exports = async ({
 	let systemSuspendedReason;
 
 	try {
+		console.log("*********REACHING HERE**********2");
+		
 		const oldSynthetix = deployer.getExistingContract({ contract: 'Synthetix' });
 		currentSynthetixSupply = await oldSynthetix.totalSupply();
-
+		
+		console.log("*********REACHING HERE**********4");
+		
 		if (config['SupplySchedule']) {
 			const oldSupplySchedule = deployer.getExistingContract({ contract: 'SupplySchedule' });
 			currentWeekOfInflation = await oldSupplySchedule.weekCounter();

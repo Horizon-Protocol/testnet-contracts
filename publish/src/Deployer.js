@@ -71,6 +71,8 @@ class Deployer {
 
 		// Keep track of newly deployed contracts
 		this.newContractsDeployed = [];
+
+		console.log("*********REACHING HERE**********1");
 	}
 
 	async evaluateNextDeployedContractAddress() {
@@ -193,15 +195,17 @@ class Deployer {
 			// Any contract after SafeDecimalMath can automatically get linked.
 			// Doing this with bytecode that doesn't require the library is a no-op.
 			let bytecode = compiled.evm.bytecode.object;
-			['SafeDecimalMath', 'Math', 'SystemSettingsLib'].forEach((contractName) => {
-				if (this.deployedContracts[contractName]) {
-					bytecode = linker.linkBytecode(bytecode, {
-						[source + '.sol']: {
-							[contractName]: this.deployedContracts[contractName].address,
-						},
-					});
+			['SafeDecimalMath', 'Math', 'SystemSettingsLib', 'ExchangeSettlementLib'].forEach(
+				contractName => {
+					if (this.deployedContracts[contractName]) {
+						bytecode = linker.linkBytecode(bytecode, {
+							[source + '.sol']: {
+								[contractName]: this.deployedContracts[contractName].address,
+							},
+						});
+					}
 				}
-			});
+			);
 
 			compiled.evm.bytecode.linkedObject = bytecode;
 			console.log(
@@ -224,8 +228,8 @@ class Deployer {
 							key === 'owner'
 								? Promise.resolve(account)
 								: key === 'resolverAddressesRequired'
-								? Promise.resolve([])
-								: undefined,
+									? Promise.resolve([])
+									: undefined,
 					});
 				});
 				deployedContract.address = '0x' + this._dryRunCounter.toString().padStart(40, '0');
@@ -267,8 +271,7 @@ class Deployer {
 
 			console.log(
 				green(
-					`${dryRun ? '[DRY RUN] - Simulated deployment of' : '- Deployed'} ${name} to ${
-						deployedContract.address
+					`${dryRun ? '[DRY RUN] - Simulated deployment of' : '- Deployed'} ${name} to ${deployedContract.address
 					} ${gasUsed ? `used ${(gasUsed / 1e6).toFixed(1)}m in gas` : ''}`
 				)
 			);
@@ -305,9 +308,8 @@ class Deployer {
 			name,
 			address,
 			source,
-			link: `${getExplorerLinkPrefix({ network, useOvm })}/address/${
-				this.deployedContracts[name].address
-			}`,
+			link: `${getExplorerLinkPrefix({ network, useOvm })}/address/${this.deployedContracts[name].address
+				}`,
 			timestamp,
 			txn,
 			network: this.network,
@@ -399,7 +401,7 @@ class Deployer {
 		return new ethers.Contract(address, abi, this.signer);
 	}
 
-	getExistingContract({ contract }) {
+	getExistingContract({ contract, useDeployment = false }) {
 		let address;
 		if (this.network === 'local') {
 			// try find the last replaced contract
@@ -409,6 +411,8 @@ class Deployer {
 			({ address } = this.replacedContracts[contract]
 				? this.replacedContracts[contract]
 				: this.deployment.targets[contract]);
+		} else if (useDeployment === true) {
+			address = this.deployment.targets[contract].address;
 		} else {
 			const contractVersion = getVersions({
 				network: this.network,
@@ -422,6 +426,14 @@ class Deployer {
 		const { source } = this.deployment.targets[contract];
 		const { abi } = this.deployment.sources[source];
 		return this.makeContract({ abi, address });
+	}
+
+	getExistingAddress({ name }) {
+		const existingAddress = this.deployment.targets[name]
+			? this.deployment.targets[name].address
+			: '';
+
+		return existingAddress;
 	}
 }
 

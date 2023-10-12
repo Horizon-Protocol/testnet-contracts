@@ -13,7 +13,7 @@ require('@nomiclabs/hardhat-etherscan');
 require('@nomiclabs/hardhat-truffle5');
 require('@nomiclabs/hardhat-ethers');
 require('hardhat-gas-reporter');
-
+// require('@eth-optimism/smock/build/src/plugins/hardhat-storagelayout');
 require('hardhat-cannon');
 
 const {
@@ -30,9 +30,23 @@ module.exports = {
 		compilers: [
 			{
 				version: '0.4.25',
+				// settings: {
+				// 	outputSelection: {
+				// 		"*": {
+				// 			"*": ["storageLayout"],
+				// 		},
+				// 	},
+				// },
 			},
 			{
 				version: '0.5.16',
+				// settings: {
+				// 	outputSelection: {
+				// 		"*": {
+				// 			"*": ["storageLayout"],
+				// 		},
+				// 	},
+				// },
 			},
 		],
 	},
@@ -76,6 +90,10 @@ module.exports = {
 			url: process.env.PROVIDER_URL || 'http://localhost:8545',
 			chainId: 97,
 		},
+		goerli: {
+			url: process.env.PROVIDER_URL?.replace('network', 'goerli') || 'http://localhost:8545',
+			chainId: 5,
+		},
 		local: {
 			url: process.env.PROVIDER_URL || 'http://localhost:8545/',
 		},
@@ -92,7 +110,7 @@ module.exports = {
 		outputFile: 'test-gas-used.log',
 	},
 	mocha: {
-		timeout: 120e3, // 120s
+		timeout: 300e3, // 300s
 		retries: 1,
 	},
 	etherscan: {
@@ -102,15 +120,9 @@ module.exports = {
 	},
 	cannon: {
 		publisherPrivateKey: process.env.PRIVATE_KEY,
-		ipfsConnection: {
-			protocol: 'https',
-			host: 'ipfs.infura.io',
-			port: 5001,
-			headers: {
-				authorization: `Basic ${Buffer.from(
-					process.env.INFURA_IPFS_ID + ':' + process.env.INFURA_IPFS_SECRET
-				).toString('base64')}`,
-			},
-		},
+		ipfsEndpoint: 'https://ipfs.infura.io:5001',
+		ipfsAuthorizationHeader: `Basic ${Buffer.from(
+			process.env.INFURA_IPFS_ID + ':' + process.env.INFURA_IPFS_SECRET
+		).toString('base64')}`,
 	},
 };

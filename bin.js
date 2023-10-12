@@ -13,6 +13,8 @@ const {
 	getSource,
 	getSynths,
 	getFeeds,
+	getOffchainFeeds,
+	getPerpsV2ProxiedMarkets,
 	getTarget,
 	getTokens,
 	getUsers,
@@ -64,6 +66,31 @@ program
 	.description('Get networks')
 	.action(async () => {
 		console.log(networks);
+	});
+
+	program
+	.command('offchain-feeds')
+	.description('Get the offchain price feeds')
+	.option('-n, --network <value>', 'The network to run off.', x => x.toLowerCase(), 'mainnet')
+	.option('-z, --use-ovm', 'Target deployment for the OVM (Optimism).')
+	.action(async ({ network, useOvm }) => {
+		const offchainFeeds = getOffchainFeeds({ network, useOvm });
+		console.log(util.inspect(offchainFeeds, false, null, true));
+	});
+
+program
+	.command('perpsv2-markets-abi')
+	.description('Get the PerpsV2 consolidated markets abis')
+	.option('-n, --network <value>', 'The network to run off.', x => x.toLowerCase(), 'mainnet')
+	.option(
+		'-d, --deployment-path <value>',
+		'(optional) The deployment file path .',
+		x => x.toLowerCase()+,
+		''
+	)
+	.action(async ({ network, deploymentPath }) => {
+		const proxiedMarkets = getPerpsV2ProxiedMarkets({ network, deploymentPath, path });
+		console.log(JSON.stringify(proxiedMarkets, null, 2));
 	});
 
 program

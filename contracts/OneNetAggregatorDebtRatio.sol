@@ -8,17 +8,14 @@ contract OneNetAggregatorDebtRatio is BaseOneNetAggregator {
     constructor(AddressResolver _resolver) public BaseOneNetAggregator(_resolver) {}
 
     function getRoundData(uint80) public view returns (uint80, int256, uint256, uint256, uint80) {
-        uint totalIssuedSynths = IIssuer(resolver.requireAndGetAddress("Issuer", "aggregate debt info")).totalIssuedSynths(
-            "zUSD",
-            true
-        );
+        (uint debt,) = IDebtCache(resolver.requireAndGetAddress("DebtCache", "aggregate debt info")).currentDebt();
         uint totalDebtShares = ISynthetixDebtShare(
             resolver.requireAndGetAddress("SynthetixDebtShare", "aggregate debt info")
         ).totalSupply();
 
         uint result = totalDebtShares == 0
             ? 10 ** 27
-            : totalIssuedSynths.decimalToPreciseDecimal().divideDecimalRound(totalDebtShares);
+            : debt.decimalToPreciseDecimal().divideDecimalRound(totalDebtShares);
 
         uint dataTimestamp = now;
 

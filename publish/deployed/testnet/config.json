@@ -301,5 +301,38 @@
 	},
 	"RewardEscrowV2Storage": {
 		"deploy": false
+	},
+	"ExchangeSettlementLib": {
+		"deploy": false
+	},
+	"DirectIntegrationManager": {
+		"deploy": false
+	},
+	"PerpsV2MarketData": {
+		"deploy": false
+	},
+	"PerpsV2MarketSettings": {
+		"deploy": false
+	},
+	"PerpsV2ExchangeRate": {
+		"deploy": false
+	},
+	"PerpsV2ProxyBNBPERP": {
+		"deploy": false
+	},
+	"PerpsV2MarketStateBNBPERP": {
+		"deploy": false
+	},
+	"PerpsV2MarketBNBPERP": {
+		"deploy": false
+	},
+	"PerpsV2MarketViewsBNBPERP": {
+		"deploy": false
+	},
+	"PerpsV2DelayedOrderBNBPERP": {
+		"deploy": false
+	},
+	"PerpsV2OffchainDelayedOrderBNBPERP": {
+		"deploy": false
 	}
 }

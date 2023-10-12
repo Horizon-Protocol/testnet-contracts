@@ -119,7 +119,7 @@ module.exports = async ({ account, addressOf, deployer, getDeployParameter, netw
 			(await getDeployParameter('COLLATERAL_RENBTC'))['MIN_CRATIO'],
 			(await getDeployParameter('COLLATERAL_RENBTC'))['MIN_COLLATERAL'],
 			RENBTC_ADDRESS, // if undefined then this will error as expected.
-			8,
+			18,
 		],
 	});
 

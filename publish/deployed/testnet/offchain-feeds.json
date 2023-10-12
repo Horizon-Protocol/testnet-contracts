@@ -1,0 +1,14 @@
+[
+	{
+		"kind": "pyth",
+		"oracle": "0xd7308b14BF4008e7C7196eC35610B1427C5702EA",
+		"asset": "zBNB",
+		"feedId": "0xecf553770d9b10965f8fb64771e93f5690a182edc32be4a3236e0caaa6e0581a"
+	},
+	{
+		"kind": "pyth",
+		"oracle": "0xd7308b14BF4008e7C7196eC35610B1427C5702EA",
+		"asset": "zBTC",
+		"feedId": "0xf9c0172ba10dfa4d19088d94f5bf61d3b54d5bd7483a322a982e1373ee8ea31b"
+	}
+]

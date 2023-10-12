@@ -15,11 +15,34 @@ contract EmptyFuturesMarketManager is IFuturesMarketManager {
         return _markets;
     }
 
+    function markets(
+        uint index,
+        uint pageSize,
+        bool proxiedMarkets
+    ) external view returns (address[] memory) {
+        index;
+        pageSize;
+        proxiedMarkets;
+        address[] memory _markets;
+        return _markets;
+    }
+
     function numMarkets() external view returns (uint) {
         return 0;
     }
 
+    function numMarkets(bool proxiedMarkets) external view returns (uint) {
+        proxiedMarkets;
+        return 0;
+    }
+
     function allMarkets() external view returns (address[] memory) {
+        address[] memory _markets;
+        return _markets;
+    }
+
+    function allMarkets(bool proxiedMarkets) external view returns (address[] memory) {
+        proxiedMarkets;
         address[] memory _markets;
         return _markets;
     }
@@ -37,5 +60,23 @@ contract EmptyFuturesMarketManager is IFuturesMarketManager {
 
     function totalDebt() external view returns (uint debt, bool isInvalid) {
         return (0, false);
+    }
+
+    function isEndorsed(address account) external view returns (bool) {
+        account;
+        return false;
+    }
+
+    function allEndorsedAddresses() external view returns (address[] memory) {
+        address[] memory _endorsedAddresses;
+        return _endorsedAddresses;
+    }
+
+    function addEndorsedAddresses(address[] calldata addresses) external {
+        addresses;
+    }
+
+    function removeEndorsedAddresses(address[] calldata addresses) external {
+        addresses;
     }
 }

@@ -1,31 +1,37 @@
 'use strict';
 
 const ethers = require('ethers');
-const { EthersAdapter } = require('@gnosis.pm/safe-core-sdk');
-const GnosisSafe = require('@gnosis.pm/safe-core-sdk').default;
-const SafeServiceClient = require('@gnosis.pm/safe-service-client').default;
+const { EthersAdapter } = require('@safe-global/protocol-kit');
+const Safe = require('@safe-global/protocol-kit').default;
+// const GnosisSafe = require('@gnosis.pm/safe-core-sdk').default;
+// const SafeServiceClient = require('@gnosis.pm/safe-service-client').default;
+const SafeApiKit = require('@safe-global/api-kit').default;
 
+// const safeService = 
 class SafeBatchSubmitter {
 	constructor({ network, signer, safeAddress }) {
 		this.network = network;
 		this.signer = signer;
 		this.safeAddress = safeAddress;
-
+		
 		this.ethAdapter = new EthersAdapter({
 			ethers,
-			signer,
+			signerOrProvider: signer,
 		});
+		
+		const txServiceUrl = `https://safe-transaction${network === 'goerli' ? '-goerli' : ''}.safe.global`;
 
-		this.service = new SafeServiceClient(
-			`https://safe-transaction${network === 'rinkeby' ? '.rinkeby' : ''}.gnosis.io`
-		);
+		this.service = new SafeApiKit({
+			txServiceUrl: `https://safe-transaction${network === 'goerli' ? '-goerli' : ''}.safe.global`,
+			ethAdapter: this.ethAdapter
+		});
 	}
 
 	async init() {
 		const { ethAdapter, service, safeAddress, signer } = this;
 		this.transactions = [];
-		this.safe = await GnosisSafe.create({
-			ethAdapter,
+		this.safe = await Safe.create({
+			ethAdapter:ethAdapter,
 			safeAddress,
 		});
 		// check if signer is on the list of owners
@@ -39,7 +45,10 @@ class SafeBatchSubmitter {
 
 	async appendTransaction({ to, value = '0', data, force }) {
 		const { safe, service, safeAddress, transactions } = this;
+
+		console.log("force1", force);
 		if (!force) {
+			console.log("force2", force);
 			// check it does not exist in the pending list
 			// Note: this means that a duplicate transaction - like an acceptOwnership on
 			// the same contract cannot be added in one batch. This could be useful in situations
@@ -75,7 +84,7 @@ class SafeBatchSubmitter {
 			}
 		}
 
-		transactions.push({ to, value, data, nonce: this.unusedNoncePosition });
+		transactions.push({ to, data, value, nonce: this.unusedNoncePosition });
 		return { appended: true };
 	}
 
@@ -87,16 +96,30 @@ class SafeBatchSubmitter {
 		if (!transactions.length) {
 			return { transactions };
 		}
-		const safeTransaction = await safe.createTransaction(transactions);
-		await safe.signTransaction(safeTransaction);
-		const safeTxHash = await safe.getTransactionHash(safeTransaction);
-		const senderAddress = await signer.getAddress();
 
+		console.log("HELLOOOOOOOO", transactions);
 		try {
-			await service.proposeTransaction({ safeAddress, senderAddress, safeTransaction, safeTxHash });
+			const safeTransaction = await safe.createTransaction({safeTransactionData: transactions});
+			console.log("PROPOSED TXNS DONE1", safeTransaction);
+			const safeTxHash = await safe.getTransactionHash(safeTransaction);
+			console.log("PROPOSED TXNS DONE2", safeTxHash);
 
+			const senderSignature = await safe.signTransactionHash(safeTxHash);
+
+			const senderAddress = await signer.getAddress();
+
+			console.log("PROPOSED TXNS DONE3", senderAddress);
+			await service.proposeTransaction({
+				safeAddress: safeAddress,
+				safeTransactionData: safeTransaction.data,
+				safeTxHash: safeTxHash,
+				senderAddress: senderAddress,
+			    senderSignature: senderSignature.data,
+			});
+			
+			console.log("PROPOSED TXNS DONE");
 			return { transactions, nonce };
-		} catch (err) {
+		} catch (e) {
 			throw Error(`Error trying to submit batch to safe.\n${err}`);
 		}
 	}

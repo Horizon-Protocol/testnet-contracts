@@ -72,7 +72,23 @@ module.exports = async ({
 	// 				'Warning: Cannot fetch logs on this network. Known limitation on OVM mainnet - cannot search back greater than 10k blocks'
 	// 			)
 	// 		);
-	// 	} else {
+	// 	} else if (/The largest supported block range is 1000/.test(err.message)) {
+		// 	console.log(
+		// 		yellow.bold(
+		// 			'Warning: Cannot fetch logs on this network. Known limitation on Tenderly Fork - cannot search back greater than 1k blocks'
+		// 		)
+		// 	);
+		// } else if (/block range is too wide/.test(err.message)) {
+		// 	console.log(
+		// 		yellow.bold(
+		// 			'Warning: Cannot fetch logs on this network. Known limitation - cannot search back greater than 10k blocks'
+		// 		)
+		// 	);
+		// } else if (/Internal server error/.test(err.message)) {
+			// console.log(
+			// 	yellow.bold('Warning: Cannot fetch logs on this network. Tenderly limitation...')
+			// );
+		// else {
 	// 		throw err;
 	// 	}
 	// }
@@ -80,29 +96,29 @@ module.exports = async ({
 	// OVM pre-regenesis // Horizon - Add wrapper addresses manually
 	// if (network === 'mainnet' && useOvm) {
 	// console.log(gray('Adding 3 known OVM wrapper pre-regenesis'));
-	wrappers.push(
-		[
-			'TESTAADAWrapper',
-			new ethers.Contract(
-				'0xd88689eba8ed3f3e84c94d3ea21c640fdf095988',
-				WrapperFactory.interface,
-				deployer.provider
-			),
-		],
-		[
-			'TESTABNBWrapper',
-			new ethers.Contract(
-				'0xd2f370d78a8d1b42a201515b16e9ca48d367be07',
-				WrapperFactory.interface,
-				deployer.provider
-			),
-		]
-	);
+	// wrappers.push(
+	// 	[
+	// 		'TESTAADAWrapper',
+	// 		new ethers.Contract(
+	// 			'0xd88689eba8ed3f3e84c94d3ea21c640fdf095988',
+	// 			WrapperFactory.interface,
+	// 			deployer.provider
+	// 		),
+	// 	],
+	// 	[
+	// 		'TESTABNBWrapper',
+	// 		new ethers.Contract(
+	// 			'0xd2f370d78a8d1b42a201515b16e9ca48d367be07',
+	// 			WrapperFactory.interface,
+	// 			deployer.provider
+	// 		),
+	// 	]
+	// );
 	// }
 
-	console.log(gray(`found ${yellow(wrappers.length)} wrapper addresses`));
+	// console.log(gray(`found ${yellow(wrappers.length)} wrapper addresses`));
 
-	wrappers.forEach(([label, target]) => console.log(gray(label, 'at', yellow(target.address))));
+	// wrappers.forEach(([label, target]) => console.log(gray(label, 'at', yellow(target.address))));
 
 	contractsWithRebuildableCache.push(...wrappers);
 

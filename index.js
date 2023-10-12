@@ -7,13 +7,14 @@ const abiDecoder = require('abi-decoder');
 const data = {
 	testnet: require('./publish/deployed/testnet'),
 	mainnet: require('./publish/deployed/mainnet'),
+	goerli: require('./publish/deployed/goerli'),
 };
 
 const assets = require('./publish/assets.json');
 const nonUpgradeable = require('./publish/non-upgradeable.json');
 const releases = require('./publish/releases.json');
 
-const networks = ['local', 'testnet', 'mainnet'];
+const networks = ['local', 'testnet', 'mainnet', 'goerli'];
 
 const chainIdMapping = Object.entries({
 	56: {
@@ -21,6 +22,9 @@ const chainIdMapping = Object.entries({
 	},
 	97: {
 		network: 'testnet',
+	},
+	5: {
+		network: 'goerli',
 	},
 	// Hardhat fork of mainnet: https://hardhat.org/config/#hardhat-network
 	31337: {
@@ -34,8 +38,11 @@ const chainIdMapping = Object.entries({
 	return memo;
 }, {});
 
-const getNetworkFromId = ({ id }) => chainIdMapping[id];
-
+/** @type {(obj: {id: number} | number) => number} */
+const getNetworkFromId = obj => {
+	const id = typeof obj === 'number' ? obj : obj.id;
+	return chainIdMapping[id];
+};
 const networkToChainId = Object.entries(chainIdMapping).reduce(
 	(memo, [id, { network, useOvm, fork }]) => {
 		memo[network + (useOvm ? '-ovm' : '') + (fork ? '-fork' : '')] = id;
@@ -129,10 +136,12 @@ const defaults = {
 	RENBTC_ERC20_ADDRESSES: {
 		mainnet: '0xfCe146bF3146100cfe5dB4129cf6C82b0eF4Ad8c',
 		testnet: '0x765b1e342734fA9001C7497190BAbd8f706f47db',
+		goerli: '0x9B2fE385cEDea62D839E4dE89B0A23EF4eacC717',
 	},
 	WETH_ERC20_ADDRESSES: {
 		mainnet: '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c',
 		testnet: '0x094616f0bdfb0b526bd735bf66eca0ad254ca81f',
+		goerli: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
 	},
 	INITIAL_ISSUANCE: w3utils.toWei(`${100e6}`),
 	CROSS_DOMAIN_DEPOSIT_GAS_LIMIT: `${3e6}`,
@@ -179,6 +188,7 @@ const defaults = {
 	FUTURES_LIQUIDATION_FEE_RATIO: w3utils.toWei('0.0035'), // 35 basis points liquidation incentive
 	FUTURES_LIQUIDATION_BUFFER_RATIO: w3utils.toWei('0.0025'), // 25 basis points liquidation buffer
 	FUTURES_MIN_INITIAL_MARGIN: w3utils.toWei('40'), // minimum initial margin for all markets
+	PERPSV2_KEEPER_LIQUIDATION_FEE: w3utils.toWei('2'), // 2 zUSD keeper liquidation fee (not flagger)
 
 	// SIP-120
 	ATOMIC_MAX_VOLUME_PER_BLOCK: w3utils.toWei(`${2e5}`), // 200k
@@ -431,6 +441,163 @@ const getFuturesMarkets = ({
 	});
 };
 
+const getPerpsMarkets = ({
+	network = 'mainnet',
+	useOvm = false,
+	path,
+	fs,
+	deploymentPath,
+} = {}) => {
+	let perpsMarkets;
+
+	if (!deploymentPath && (!path || !fs)) {
+		perpsMarkets = data[getFolderNameForNetwork({ network, useOvm })].perpsv2Markets;
+	} else {
+		const pathToPerpsMarketsList = deploymentPath
+			? path.join(deploymentPath, constants.PERPS_V2_MARKETS_FILENAME)
+			: getPathToNetwork({
+					network,
+					path,
+					useOvm,
+					file: constants.PERPS_V2_MARKETS_FILENAME,
+			  });
+
+		if (!fs.existsSync(pathToPerpsMarketsList)) {
+			perpsMarkets = [];
+		} else {
+			perpsMarkets = JSON.parse(fs.readFileSync(pathToPerpsMarketsList)) || [];
+		}
+	}
+	return perpsMarkets.map(perpsMarket => {
+		/**
+		 * We expect the asset key to not start with an 's'. ie. AVAX rather than sAVAX
+		 * Unfortunately due to some historical reasons 'sBTC' and 'sETH' does not follow this format
+		 * We adjust for that here.
+		 */
+		const marketsWithIncorrectAssetKey = ['zBTC', 'zETH'];
+		const assetKeyNeedsAdjustment = marketsWithIncorrectAssetKey.includes(perpsMarket.asset);
+		const assetKey = assetKeyNeedsAdjustment ? perpsMarket.asset.slice(1) : perpsMarket.asset;
+		// mixin the asset details
+		return Object.assign({}, assets[assetKey], perpsMarket);
+	});
+};
+
+const getPerpsV2ProxiedMarkets = ({ network = 'mainnet', fs, deploymentPath, path }) => {
+	const _analyzeAndIncludePerpsV2 = (target, targetData, sourceData, PerpsV2Proxied) => {
+		const proxyPrefix = 'PerpsV2Proxy';
+		const marketPrefix = 'PerpsV2Market';
+		const excludedContracts = ['PerpsV2MarketSettings', 'PerpsV2MarketData', 'PerpsV2ExchangeRate'];
+		const excludedLegacyContracts = ['PerpsV2DelayedOrder', 'PerpsV2OffchainDelayedOrder'];
+		const prefixes = [
+			'PerpsV2MarketViews',
+			'PerpsV2DelayedIntent',
+			'PerpsV2DelayedExecution',
+			'PerpsV2MarketLiquidate',
+		];
+		if (
+			excludedContracts.includes(target) ||
+			target.startsWith('PerpsV2MarketState') ||
+			excludedLegacyContracts.some(prefix => target.startsWith(prefix))
+		) {
+			// Markets helper or Market state. Do nothing
+			return;
+		}
+
+		// If is the proxy, get the address. Initialize object if not done yet
+		if (target.startsWith(proxyPrefix)) {
+			// get name
+			const marketName = target.slice(proxyPrefix.length);
+			if (!PerpsV2Proxied[marketName]) {
+				PerpsV2Proxied[marketName] = {};
+				PerpsV2Proxied[marketName].abi = [];
+			}
+			// get address
+			PerpsV2Proxied[marketName].address = targetData.address;
+		} else {
+			// Not proxy, is one of the components. First try with the long contract names because main component prefix is included in others
+			let nameFound = false;
+			let marketName;
+
+			// Identify the market name (after the prefix)
+			for (const prefix of prefixes) {
+				if (target.startsWith(prefix)) {
+					// get name
+					marketName = target.slice(prefix.length);
+					nameFound = true;
+				}
+			}
+
+			// if not found one the previous step, it should be PerpsV2MarketXXXXX
+			if (!nameFound) {
+				if (target.startsWith(marketPrefix)) {
+					// get name
+					marketName = target.slice(marketPrefix.length);
+					nameFound = true;
+				}
+			}
+
+			if (nameFound) {
+				// Initialize if not done yet
+				if (!PerpsV2Proxied[marketName]) {
+					PerpsV2Proxied[marketName] = {};
+					PerpsV2Proxied[marketName].abi = [];
+				}
+				// add fragments to abi
+				_consolidateAbi(sourceData.abi, PerpsV2Proxied[marketName].abi);
+			}
+		}
+	};
+
+	const _consolidateAbi = (currentAbi, consolidatedAbi) => {
+		for (const abiFragment of currentAbi) {
+			if (
+				!consolidatedAbi.find(
+					f =>
+						f.type === abiFragment.type && f.name && abiFragment.name && f.name === abiFragment.name
+				)
+			) {
+				if (abiFragment.type !== 'constructor') {
+					// don't push constructors to the consolidated abi
+					consolidatedAbi.push(abiFragment);
+				}
+			}
+		}
+	};
+
+	const deploymentData = loadDeploymentFile({ network, useOvm: false, path, fs, deploymentPath });
+
+	const targets = Object.keys(deploymentData.targets);
+
+	const PerpsV2Proxied = {};
+
+	for (const target of targets) {
+		if (!target.startsWith('PerpsV2')) {
+			continue;
+		}
+		const targetData = getTarget({
+			contract: target,
+			network,
+			useOvm: false,
+			path,
+			fs,
+			deploymentPath,
+		});
+
+		const sourceData = getSource({
+			contract: targetData.source,
+			network,
+			useOvm: false,
+			path,
+			fs,
+			deploymentPath,
+		});
+
+		_analyzeAndIncludePerpsV2(target, targetData, sourceData, PerpsV2Proxied);
+	}
+
+	return PerpsV2Proxied;
+};
+
 /**
  * Retrieve the list of staking rewards for the network - returning this names, stakingToken, and rewardToken
  */
@@ -509,6 +676,7 @@ const getUsers = ({ network = 'mainnet', user, useOvm = false } = {}) => {
 			oracle: '0xaC1ED4Fabbd5204E02950D68b6FC8c446AC95362',
 		}),
 		testnet: Object.assign({}, base),
+		goerli: Object.assign({}, base),
 		local: Object.assign({}, base, {
 			// Deterministic account #0 when using `npx hardhat node`
 			owner: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
@@ -699,6 +867,7 @@ const wrap = ({ network, deploymentPath, fs, path, useOvm = false }) =>
 		'getSynths',
 		'getTarget',
 		'getFuturesMarkets',
+		'getPerpsMarkets',
 		'getTokens',
 		'getUsers',
 		'getVersions',
@@ -730,6 +899,7 @@ module.exports = {
 	getFeeds,
 	getSynths,
 	getFuturesMarkets,
+	getPerpsMarkets,
 	getTarget,
 	getTokens,
 	getUsers,

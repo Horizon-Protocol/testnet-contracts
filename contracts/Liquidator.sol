@@ -34,6 +34,8 @@ contract Liquidator is Owned, MixinSystemSettings, ILiquidator {
     bytes32 private constant CONTRACT_SYNTHETIX = "Synthetix";
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_EXRATES = "ExchangeRates";
+    bytes32 private constant CONTRACT_SYNTHETIXESCROW = "SynthetixEscrow";
+    bytes32 private constant CONTRACT_V3_LEGACYMARKET = "LegacyMarket";
 
     /* ========== CONSTANTS ========== */
 
@@ -240,8 +242,10 @@ contract Liquidator is Owned, MixinSystemSettings, ILiquidator {
 
     // totalIssuedSynths checks synths for staleness
     // check snx rate is not stale
-    function flagAccountForLiquidation(address account) external rateNotInvalid("SNX") {
+    function flagAccountForLiquidation(address account) external rateNotInvalid("HZN") {
         systemStatus().requireSystemActive();
+
+        require(resolver.getAddress(CONTRACT_V3_LEGACYMARKET) == address(0), "Must liquidate using V3");
 
         require(getLiquidationRatio() > 0, "Liquidation ratio not set");
         require(getLiquidationDelay() > 0, "Liquidation delay not set");
@@ -279,7 +283,7 @@ contract Liquidator is Owned, MixinSystemSettings, ILiquidator {
 
     /// @notice External function to allow anyone to remove an account's liquidation entry
     /// @dev This function checks if the account's c-ratio is OK and that the rate of SNX is not stale
-    function checkAndRemoveAccountInLiquidation(address account) external rateNotInvalid("SNX") {
+    function checkAndRemoveAccountInLiquidation(address account) external rateNotInvalid("HZN") {
         systemStatus().requireSystemActive();
 
         LiquidationEntry memory liquidation = _getLiquidationEntryForAccount(account);

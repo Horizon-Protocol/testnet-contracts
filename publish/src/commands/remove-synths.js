@@ -37,12 +37,13 @@ const removeSynths = async ({
 	gasLimit = DEFAULTS.gasLimit,
 	synthsToRemove = [],
 	yes,
+	useOvm,
 	useFork,
 	dryRun = false,
 	privateKey,
 }) => {
 	ensureNetwork(network);
-	deploymentPath = deploymentPath || getDeploymentPathForNetwork({ network });
+	deploymentPath = deploymentPath || getDeploymentPathForNetwork({ network, useOvm });
 	ensureDeploymentPath(deploymentPath);
 
 	const {
@@ -71,7 +72,7 @@ const removeSynths = async ({
 			process.exitCode = 1;
 			return;
 		} else if (['zUSD'].indexOf(synth) >= 0) {
-			console.error(red(`Synth ${synth} cannot be removed`));
+			console.error(red(`Zasset ${synth} cannot be removed`));
 			process.exitCode = 1;
 			return;
 		}
@@ -84,6 +85,7 @@ const removeSynths = async ({
 	} = loadConnections({
 		network,
 		useFork,
+		useOvm,
 	});
 
 	// if not specified, or in a local network, override the private key passed as a CLI option, with the one specified in .env
@@ -94,7 +96,7 @@ const removeSynths = async ({
 	const provider = new ethers.providers.JsonRpcProvider(providerUrl);
 	let wallet;
 	if (!privateKey) {
-		const account = getUsers({ network, user: 'owner' }).address; // protocolDAO
+		const account = getUsers({ network, useOvm, user: 'owner' }).address; // protocolDAO on L1, Owner Relay on L2
 		wallet = provider.getSigner(account);
 		wallet.address = await wallet.getAddress();
 	} else {
@@ -307,6 +309,7 @@ module.exports = {
 				'Perform the deployment on a forked chain running on localhost (see fork command).',
 				false
 			)
+			.option('-z, --use-ovm', 'Target deployment for the OVM (Optimism).')
 			.option('-y, --yes', 'Dont prompt, just reply yes.')
 			.option(
 				'-s, --synths-to-remove <value>',

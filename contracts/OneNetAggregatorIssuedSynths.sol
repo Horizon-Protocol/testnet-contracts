@@ -18,8 +18,8 @@ contract OneNetAggregatorIssuedSynths is BaseOneNetAggregator {
             uint80
         )
     {
-        uint totalIssuedSynths =
-            IIssuer(resolver.requireAndGetAddress("Issuer", "aggregate debt info")).totalIssuedSynths("zUSD", true);
+        (uint debt,) =
+            IDebtCache(resolver.requireAndGetAddress("DebtCache", "aggregate debt info")).currentDebt();
 
         uint dataTimestamp = now;
 
@@ -27,6 +27,6 @@ contract OneNetAggregatorIssuedSynths is BaseOneNetAggregator {
             dataTimestamp = overrideTimestamp;
         }
 
-        return (1, int256(totalIssuedSynths), dataTimestamp, dataTimestamp, 1);
+        return (1, int256(debt), dataTimestamp, dataTimestamp, 1);
     }
 }

@@ -25,5 +25,25 @@
 	{
 		"name": "LIQUIDATE_REWARD",
 		"value": "2000000000000000000"
+	},
+	{
+		"name": "FUTURES_LIQUIDATION_BUFFER_RATIO",
+		"value": "10000000000000000"
+	},
+	{
+		"name": "WAITING_PERIOD_SECS",
+		"value": "0"
+	},
+	{
+		"name": "FUTURES_MIN_KEEPER_FEE",
+		"value": "4000000000000000000"
+	},
+	{
+		"name": "FUTURES_MAX_KEEPER_FEE",
+		"value": "100000000000000000000"
+	},
+	{
+		"name": "FUTURES_LIQUIDATION_FEE_RATIO",
+		"value": "200000000000000"
 	}
 ]

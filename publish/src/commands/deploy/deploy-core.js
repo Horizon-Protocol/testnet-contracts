@@ -36,6 +36,11 @@ module.exports = async ({
 		library: true,
 	});
 
+	await deployer.deployContract({
+		name: 'ExchangeSettlementLib',
+		library: true,
+	});
+
 	console.log(gray(`\n------ DEPLOY ADDRESS RESOLVER ------\n`));
 
 	await deployer.deployContract({
@@ -62,10 +67,10 @@ module.exports = async ({
 	});
 
 	// SIP-243: Deprecate sDEFI
-	await deployer.deployContract({
-		name: 'OneNetAggregatorzDEFI',
-		args: [addressOf(readProxyForResolver)],
-	});
+	// await deployer.deployContract({
+	// 	name: 'OneNetAggregatorzDEFI',
+	// 	args: [addressOf(readProxyForResolver)],
+	// });
 
 	console.log(gray(`\n------ DEPLOY CORE PROTOCOL ------\n`));
 
@@ -313,6 +318,18 @@ module.exports = async ({
 		args: [addressOf(readProxyForResolver), account, TEMP_OWNER_DEFAULT_DURATION],
 	});
 
+	// await deployer.deployContract({
+	// 	name: 'DebtMigratorOnEthereum',
+	// 	deps: ['AddressResolver'],
+	// 	args: [account, addressOf(readProxyForResolver)],
+	// });
+
+	// await deployer.deployContract({
+	// 	name: 'DebtMigratorOnOptimism',
+	// 	deps: ['AddressResolver'],
+	// 	args: [account, addressOf(readProxyForResolver)],
+	// });
+
 	await deployer.deployContract({
 		name: 'SynthRedeemer',
 		deps: ['AddressResolver'],
@@ -322,6 +339,13 @@ module.exports = async ({
 	await deployer.deployContract({
 		name: 'WrapperFactory',
 		source: 'WrapperFactory',
+		deps: ['AddressResolver'],
+		args: [account, addressOf(readProxyForResolver)],
+	});
+
+	await deployer.deployContract({
+		name: 'DirectIntegrationManager',
+		source: 'DirectIntegrationManager',
 		deps: ['AddressResolver'],
 		args: [account, addressOf(readProxyForResolver)],
 	});

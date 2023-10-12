@@ -36,7 +36,8 @@ contract BaseSynthetix is IERC20, ExternStateToken, MixinResolver, ISynthetix {
     bytes32 private constant CONTRACT_LIQUIDATORREWARDS = "LiquidatorRewards";
     bytes32 private constant CONTRACT_LIQUIDATOR = "Liquidator";
     bytes32 private constant CONTRACT_REWARDESCROW_V2 = "RewardEscrowV2";
-
+    bytes32 private constant CONTRACT_V3_LEGACYMARKET = "LegacyMarket";
+    bytes32 private constant CONTRACT_DEBT_MIGRATOR_ON_ETHEREUM = "DebtMigratorOnEthereum";
 
     // ========== CONSTRUCTOR ==========
 
@@ -181,6 +182,13 @@ contract BaseSynthetix is IERC20, ExternStateToken, MixinResolver, ISynthetix {
     }
 
     function _canTransfer(address account, uint value) internal view returns (bool) {
+        // Always allow legacy market to transfer
+        // note if legacy market is not yet available this will just return 0 address and it  will never be true
+        address legacyMarketAddress = resolver.getAddress(CONTRACT_V3_LEGACYMARKET);
+        if ((messageSender != address(0) && messageSender == legacyMarketAddress) || account == legacyMarketAddress) {
+            return true;
+        }
+
         if (issuer().debtBalanceOf(account, zUSD) > 0) {
             (uint transferable, bool anyRateIsInvalid) =
                 issuer().transferableSynthetixAndAnyRateIsInvalid(account, tokenState.balanceOf(account));
@@ -442,6 +450,38 @@ contract BaseSynthetix is IERC20, ExternStateToken, MixinResolver, ISynthetix {
         return success;
     }
     
+    /**
+     * @notice allows for migration from v2x to v3 when an account has pending escrow entries
+     */
+    function revokeAllEscrow(address account) external systemActive {
+        address legacyMarketAddress = resolver.getAddress(CONTRACT_V3_LEGACYMARKET);
+        require(msg.sender == legacyMarketAddress, "Only LegacyMarket can revoke escrow");
+        rewardEscrowV2().revokeFrom(account, legacyMarketAddress, rewardEscrowV2().totalEscrowedAccountBalance(account), 0);
+        // rewardEscrowV2().revokeFrom(account, msg.sender, rewardEscrowV2().totalEscrowedAccountBalance(account), 0);
+    }
+    
+    function migrateAccountBalances(address account)
+        external
+        systemActive
+        returns (uint totalEscrowRevoked, uint totalLiquidBalance)
+    {
+        address debtMigratorOnEthereum = resolver.getAddress(CONTRACT_DEBT_MIGRATOR_ON_ETHEREUM);
+        require(msg.sender == debtMigratorOnEthereum, "Only L1 DebtMigrator");
+
+        // get their liquid HZN balance and transfer it to the migrator contract
+        totalLiquidBalance = tokenState.balanceOf(account);
+        if (totalLiquidBalance > 0) {
+            bool succeeded = _transferByProxy(account, debtMigratorOnEthereum, totalLiquidBalance);
+            require(succeeded, "hzn transfer failed");
+        }
+
+        // get their escrowed HZN balance and revoke it all
+        totalEscrowRevoked = rewardEscrowV2().totalEscrowedAccountBalance(account);
+        if (totalEscrowRevoked > 0) {
+            rewardEscrowV2().revokeFrom(account, debtMigratorOnEthereum, totalEscrowRevoked, 0);
+        }
+    }
+
     function exchangeWithTrackingForInitiator(
         bytes32,
         uint,
@@ -552,13 +592,13 @@ contract BaseSynthetix is IERC20, ExternStateToken, MixinResolver, ISynthetix {
         // These entries are not required or cached in order to allow them to not exist (==address(0))
         // e.g. due to not being available on L2 or at some future point in time.
         return
-            // ordered to reduce gas for more frequent calls, bridge first, vesting after, legacy last
+            // ordered to reduce gas for more frequent calls, bridge first, vesting and migrating after, legacy last
             caller == resolver.getAddress("SynthetixBridgeToOptimism") ||
             caller == resolver.getAddress("RewardEscrowV2") ||
+            // caller == resolver.getAddress("DebtMigratorOnOptimism") ||
             // legacy contracts
             caller == resolver.getAddress("RewardEscrow") ||
             caller == resolver.getAddress("SynthetixEscrow") ||
-            caller == resolver.getAddress("TradingRewards") ||
             caller == resolver.getAddress("Depot");
     }
 

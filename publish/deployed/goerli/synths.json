@@ -1,0 +1,23 @@
+[
+	{
+		"asset": "USD",
+		"category": "forex",
+		"sign": "$",
+		"description": "US Dollars",
+		"name": "zUSD",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"asset": "BNB",
+		"category": "crypto",
+		"sign": "",
+		"description": "Binance Coin",
+		"name": "zBNB",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"name": "zBTC",
+		"asset": "BTC",
+		"subclass": "MultiCollateralSynth"
+	}
+]
