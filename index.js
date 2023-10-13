@@ -69,7 +69,9 @@ const constants = {
 	DEPLOYMENT_FILENAME: 'deployment.json',
 	VERSIONS_FILENAME: 'versions.json',
 	FEEDS_FILENAME: 'feeds.json',
+	OFFCHAIN_FEEDS_FILENAME: 'offchain-feeds.json',
 	FUTURES_MARKETS_FILENAME: 'futures-markets.json',
+	PERPS_V2_MARKETS_FILENAME: 'perpsv2-markets.json',
 
 	AST_FILENAME: 'asts.json',
 
@@ -185,6 +187,7 @@ const defaults = {
 	ETHER_WRAPPER_BURN_FEE_RATE: w3utils.toWei('0'), // 0 bps
 
 	FUTURES_MIN_KEEPER_FEE: w3utils.toWei('1'), // 1 zUSD liquidation fee
+	FUTURES_MAX_KEEPER_FEE: w3utils.toWei('1000'), // 1000 zUSD min keeper fee
 	FUTURES_LIQUIDATION_FEE_RATIO: w3utils.toWei('0.0035'), // 35 basis points liquidation incentive
 	FUTURES_LIQUIDATION_BUFFER_RATIO: w3utils.toWei('0.0025'), // 25 basis points liquidation buffer
 	FUTURES_MIN_INITIAL_MARGIN: w3utils.toWei('40'), // minimum initial margin for all markets
@@ -335,6 +338,25 @@ const getFeeds = ({ network, path, fs, deploymentPath, useOvm = false } = {}) =>
 		memo[asset] = Object.assign(assets[asset], entry);
 		return memo;
 	}, {});
+};
+
+const getOffchainFeeds = ({ network, path, fs, deploymentPath, useOvm = false } = {}) => {
+	if (!deploymentPath && (!path || !fs)) {
+		return data[getFolderNameForNetwork({ network, useOvm })].offchainFeeds;
+	} else {
+		const pathToFeeds = deploymentPath
+			? path.join(deploymentPath, constants.OFFCHAIN_FEEDS_FILENAME)
+			: getPathToNetwork({
+				network,
+				path,
+				useOvm,
+				file: constants.OFFCHAIN_FEEDS_FILENAME,
+			});
+		if (!fs.existsSync(pathToFeeds)) {
+			throw Error(`Cannot find off-chain feeds file.`);
+		}
+		return JSON.parse(fs.readFileSync(pathToFeeds));
+	}
 };
 
 /**
@@ -786,28 +808,63 @@ const getTokens = ({ network = 'mainnet', path, fs, useOvm = false } = {}) => {
 };
 
 const enhanceDecodedData = decoded => {
+	const decodedBytes32 = p => {
+		try {
+			return { ascii: fromBytes32(p).replaceAll('\x00', '') };
+		} catch (e) {
+			return { ascii: '\\error decoding\\' };
+		}
+	};
+	const formatDecimals = number => {
+		const exp = /(\d)(?=(\d{3})+(?!\d))/g;
+		const rep = '$1,';
+		return number.toString().replace(exp, rep);
+	};
+	const decodeUint = p => {
+		try {
+			const value = w3utils.toBN(p);
+			return {
+				bp: value.div(w3utils.toBN(1e14)).toString(),
+				decimal: formatDecimals(value.div(w3utils.toBN(1e18)).toString()),
+				number: formatDecimals(value.toString()),
+			};
+		} catch (e) {
+			return { ascii: '\\error decoding\\' };
+		}
+	};
 	const enhancedParams = decoded.method.params.map(p => {
 		if (p.type === 'bytes32') {
-			try {
-				return { ...p, enhanced: { ascii: fromBytes32(p.value).replaceAll('\x00', '') } };
-			} catch (e) {
-				return p;
-			}
+			return { ...p, enhanced: decodedBytes32(p.value) };
 		}
 
-		if (p.type === 'uint256') {
-			try {
-				const value = w3utils.toBN(p.value);
-				return {
-					...p,
-					enhanced: {
-						bp: value.div(w3utils.toBN(1e14)).toString(),
-						decimal: value.div(w3utils.toBN(1e18)).toString(),
-					},
-				};
-			} catch (e) {
-				return p;
+		if (p.type === 'bytes32[]') {
+			p.value = p.value.map(original => {
+				return { original, enhanced: decodedBytes32(original) };
+			});
+		}
+
+		if (/u?int[1-3][0-9]?./.test(p.type)) {
+			return { ...p, enhanced: decodeUint(p.value) };
+		}
+
+		if (p.type === 'tuple') {
+			const keys = Object.keys(p.value).filter(v => isNaN(v));
+			const values = [];
+
+			for (const key of keys) {
+				if (p.value[key].startsWith('0x')) {
+					if (p.value[key].length === 66) {
+						values[key] = { original: p.value[key], enhanced: decodedBytes32(p.value[key]) };
+						continue;
+					}
+					values[key] = p.value[key];
+					continue;
+				}
+
+				values[key] = { original: p.value[key], enhanced: decodeUint(p.value[key]) };
 			}
+
+			p.value = values;
 		}
 
 		return p;
@@ -864,10 +921,12 @@ const wrap = ({ network, deploymentPath, fs, path, useOvm = false }) =>
 		'getStakingRewards',
 		'getShortingRewards',
 		'getFeeds',
+		'getOffchainFeeds',
 		'getSynths',
 		'getTarget',
 		'getFuturesMarkets',
 		'getPerpsMarkets',
+		'getPerpsV2ProxiedMarkets',
 		'getTokens',
 		'getUsers',
 		'getVersions',
@@ -897,9 +956,11 @@ module.exports = {
 	getShortingRewards,
 	getSuspensionReasons,
 	getFeeds,
+	getOffchainFeeds,
 	getSynths,
 	getFuturesMarkets,
 	getPerpsMarkets,
+	getPerpsV2ProxiedMarkets,
 	getTarget,
 	getTokens,
 	getUsers,

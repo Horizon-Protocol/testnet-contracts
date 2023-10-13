@@ -1,4 +1,7 @@
 const ethers = require('ethers');
+const { gray, green, yellow } = require('chalk');
+const { toBytes32 } = require('../../..');
+
 
 // Perps V2 Proxy
 const excludedFunctions = [

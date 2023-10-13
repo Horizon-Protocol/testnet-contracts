@@ -50,9 +50,5 @@
 	"DAI": {
 		"asset": "DAI",
 		"feed": "0xE4eE17114774713d2De0eC0f035d4F7665fc025D"
-	},
-	"CREAM": {
-		"asset": "CREAM",
-		"feed": "0xB8eADfD8B78aDA4F85680eD96e0f50e1B5762b0a"
 	}
 }

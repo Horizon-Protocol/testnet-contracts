@@ -101,6 +101,7 @@ const loadAndCheckRequiredSources = ({ deploymentPath, network, freshDeploy }) =
 	const futuresMarketsFile = path.join(deploymentPath, FUTURES_MARKETS_FILENAME);
 	const futuresMarkets = JSON.parse(fs.readFileSync(futuresMarketsFile));
 
+	console.log(gray(`$$$$$$$$$$$$$$$$perpsv2 markets ${deploymentPath}... ${PERPS_V2_MARKETS_FILENAME}`));
 	console.log(gray(`Loading the list of perpsv2 markets on ${network.toUpperCase()}...`));
 	const perpsv2MarketsFile = path.join(deploymentPath, PERPS_V2_MARKETS_FILENAME);
 	const perpsv2Markets = JSON.parse(fs.readFileSync(perpsv2MarketsFile));

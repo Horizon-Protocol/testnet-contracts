@@ -71,8 +71,6 @@ class Deployer {
 
 		// Keep track of newly deployed contracts
 		this.newContractsDeployed = [];
-
-		console.log("*********REACHING HERE**********1");
 	}
 
 	async evaluateNextDeployedContractAddress() {

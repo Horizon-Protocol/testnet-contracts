@@ -219,8 +219,6 @@ const deploy = async ({
 	nonceManager.provider = deployer.provider;
 	nonceManager.account = account;
 
-	console.log("*********REACHING HERE**********3", deployer);
-
 	const {
 		currentSynthetixSupply,
 		currentLastMintEvent,
