@@ -768,5 +768,89 @@
 				"keccak256": "0x4a543b76fafa941578dac4d45dabe9c2ac676c8a8f0cf071ecae8ce3ccd18033"
 			}
 		}
+	},
+	"v2.3.0": {
+		"tag": "v2.3.0",
+		"fulltag": "v2.3.0",
+		"network": "mainnet",
+		"date": "2022-04-10T17:20:51+08:00",
+		"commit": "f0007b7902c40f89e5d26fb45776450997d1a2b0",
+		"contracts": {
+			"TokenStatezAMZN": {
+				"address": "0x000C9811A580D21C91F47A6eB44EA6789D8CbEEE",
+				"status": "current",
+				"keccak256": "0xdb7148211c37bcb4f779c0b4296bb6b17c2b69a124238fece74d15995c49e7af"
+			},
+			"ProxyzAMZN": {
+				"address": "0x3a42e7abdbcEa4A4DBeeB7c80bF0E3D65a0229eB",
+				"status": "current",
+				"keccak256": "0xae29627d9662e9e7c9a0253c4bd8b8753d5ace46bb8043c5ca5149912c5de8a4"
+			},
+			"ZassetzAMZN": {
+				"address": "0x87f4e0AC230Cb43Ff5179A2E39e5A2cC77d1665c",
+				"status": "current",
+				"keccak256": "0x4a543b76fafa941578dac4d45dabe9c2ac676c8a8f0cf071ecae8ce3ccd18033"
+			},
+			"TokenStatezMSFT": {
+				"address": "0x5D1C2C6052f69dA1281132a8B09F5B315BC01D0D",
+				"status": "current",
+				"keccak256": "0xdb7148211c37bcb4f779c0b4296bb6b17c2b69a124238fece74d15995c49e7af"
+			},
+			"ProxyzMSFT": {
+				"address": "0x8A72d406C70750b85bB432Dcf6277F45A2459BE9",
+				"status": "current",
+				"keccak256": "0xae29627d9662e9e7c9a0253c4bd8b8753d5ace46bb8043c5ca5149912c5de8a4"
+			},
+			"ZassetzMSFT": {
+				"address": "0x4Bb23f4e5c2EDE1d24A996583292a03A01bF01Fd",
+				"status": "current",
+				"keccak256": "0x4a543b76fafa941578dac4d45dabe9c2ac676c8a8f0cf071ecae8ce3ccd18033"
+			},
+			"TokenStatezNVDA": {
+				"address": "0xa2269490504c422D46185B7E5F6A5B23Df150b2F",
+				"status": "current",
+				"keccak256": "0xdb7148211c37bcb4f779c0b4296bb6b17c2b69a124238fece74d15995c49e7af"
+			},
+			"ProxyzNVDA": {
+				"address": "0x8E044e7D25FCC62d5a07Fa0Bb056Fc5fc572F56b",
+				"status": "current",
+				"keccak256": "0xae29627d9662e9e7c9a0253c4bd8b8753d5ace46bb8043c5ca5149912c5de8a4"
+			},
+			"ZassetzNVDA": {
+				"address": "0xc1cF9AfC63b22BA8f3FA25A77E1102A89D0CC5A1",
+				"status": "current",
+				"keccak256": "0x4a543b76fafa941578dac4d45dabe9c2ac676c8a8f0cf071ecae8ce3ccd18033"
+			},
+			"TokenStatezAVAX": {
+				"address": "0xf8d6DA65702CbA2723aA17256C7313560f03078b",
+				"status": "current",
+				"keccak256": "0xdb7148211c37bcb4f779c0b4296bb6b17c2b69a124238fece74d15995c49e7af"
+			},
+			"ProxyzAVAX": {
+				"address": "0x916Fa4Bb6Bc60831B33565AD5c132BeFb84B0745",
+				"status": "current",
+				"keccak256": "0xae29627d9662e9e7c9a0253c4bd8b8753d5ace46bb8043c5ca5149912c5de8a4"
+			},
+			"ZassetzAVAX": {
+				"address": "0x77866ef746a5E353ecB19867BB1CC5D91d4430F9",
+				"status": "current",
+				"keccak256": "0x4a543b76fafa941578dac4d45dabe9c2ac676c8a8f0cf071ecae8ce3ccd18033"
+			},
+			"TokenStatezMATIC": {
+				"address": "0x783d7281EA92F5D04Fa8B5b39647a7ed151dd61E",
+				"status": "current",
+				"keccak256": "0xdb7148211c37bcb4f779c0b4296bb6b17c2b69a124238fece74d15995c49e7af"
+			},
+			"ProxyzMATIC": {
+				"address": "0x25B012a4a839849F06273fCbf1AB001387e1cDB6",
+				"status": "current",
+				"keccak256": "0xae29627d9662e9e7c9a0253c4bd8b8753d5ace46bb8043c5ca5149912c5de8a4"
+			},
+			"ZassetzMATIC": {
+				"address": "0xFD3afC0E1DB65c3615153FFf86052CDC5569203b",
+				"status": "current",
+				"keccak256": "0x4a543b76fafa941578dac4d45dabe9c2ac676c8a8f0cf071ecae8ce3ccd18033"
+			}
+		}
 	}
 }

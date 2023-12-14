@@ -82,5 +82,25 @@
 	"COIN": {
 		"asset": "COIN",
 		"feed": "0x2d1AB79D059e21aE519d88F978cAF39d74E31AEB"
+	},
+	"AMZN": {
+		"asset": "AMZN",
+		"feed": "0x51d08ca89d3e8c12535BA8AEd33cDf2557ab5b2a"
+	},
+	"MSFT": {
+		"asset": "MSFT",
+		"feed": "0x5D209cE1fBABeAA8E6f9De4514A74FFB4b34560F"
+	},
+	"NVDA": {
+		"asset": "NVDA",
+		"feed": "0xea5c2Cbb5cD57daC24E26180b19a929F3E9699B8"
+	},
+	"AVAX": {
+		"asset": "AVAX",
+		"feed": "0x5974855ce31EE8E1fff2e76591CbF83D7110F151"
+	},
+	"MATIC": {
+		"asset": "MATIC",
+		"feed": "0x7CA57b0cA6367191c94C8914d7Df09A57655905f"
 	}
 }

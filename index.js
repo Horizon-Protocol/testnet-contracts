@@ -90,7 +90,7 @@ const knownAccounts = {
 		},
 		{
 			name: 'renBTCWallet', // KeeperDAO wallet (has renBTC and ETH)
-			address: '0x35ffd6e268610e764ff6944d07760d0efe5e40e5',
+			address: '0xfCe146bF3146100cfe5dB4129cf6C82b0eF4Ad8c',
 		},
 		{
 			name: 'loansAccount',
@@ -692,8 +692,8 @@ const getUsers = ({ network = 'mainnet', user, useOvm = false } = {}) => {
 
 	const map = {
 		mainnet: Object.assign({}, base, {
-			owner: '0xEb3107117FEAd7de89Cd14D463D340A2E6917769',
-			deployer: '0xDe910777C787903F78C89e7a0bf7F4C435cBB1Fe',
+			owner: '0x81752bC7D54a45bdB9005223d61D2CBd33d04857',
+			deployer: '0x3a10A18Ca6d9378010D446068d2Fd4dE5D272915',
 			marketClosure: '0xC105Ea57Eb434Fbe44690d7Dec2702e4a2FBFCf7',
 			oracle: '0xaC1ED4Fabbd5204E02950D68b6FC8c446AC95362',
 		}),

@@ -109,5 +109,30 @@
 		"name": "zCOIN",
 		"asset": "COIN",
 		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"name": "zAMZN",
+		"asset": "AMZN",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"name": "zMSFT",
+		"asset": "MSFT",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"name": "zNVDA",
+		"asset": "NVDA",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"name": "zAVAX",
+		"asset": "AVAX",
+		"subclass": "MultiCollateralSynth"
+	},
+	{
+		"name": "zMATIC",
+		"asset": "MATIC",
+		"subclass": "MultiCollateralSynth"
 	}
 ]

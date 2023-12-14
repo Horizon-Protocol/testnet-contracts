@@ -408,14 +408,14 @@ const deploy = async ({
 		useOvm,
 	});
 
-	await rebuildLegacyResolverCaches({
-		addressOf,
-		compiled,
-		deployer,
-		network,
-		runStep,
-		useOvm,
-	});
+	// await rebuildLegacyResolverCaches({
+	// 	addressOf,
+	// 	compiled,
+	// 	deployer,
+	// 	network,
+	// 	runStep,
+	// 	useOvm,
+	// });
 
 	await configureLegacySettings({
 		account,
@@ -447,11 +447,12 @@ const deploy = async ({
 		yes,
 	});
 
-	await importExcludedDebt({
-		deployer,
-		freshDeploy,
-		runStep,
-	});
+	// // Not needed for horizon-protocol
+	// await importExcludedDebt({
+	// 	deployer,
+	// 	freshDeploy,
+	// 	runStep,
+	// });
 
 	// Configure all feeds as standalone in case they are being used as synth currency keys (through synth),
 	// or directly (e.g. futures). Adding just one or the other may cause issues if e.g. initially futures

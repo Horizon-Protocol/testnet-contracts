@@ -246,27 +246,36 @@ module.exports = async ({
 	if (config['Synthetix'].deploy || config['SynthetixEscrow'].deploy) {
 		// Note: currently on mainnet SynthetixEscrow.Synthetix() does NOT exist
 		// it is "havven" and the ABI we have here is not sufficient
-		if (network === 'mainnet' && !useOvm) {
-			await runStep({
-				contract: 'SynthetixEscrow',
-				target: SynthetixEscrow,
-				read: 'havven',
-				expected: input => input === addressOf(ProxySynthetix),
-				write: 'setHavven',
-				writeArg: addressOf(ProxySynthetix),
-				comment:
-					'Ensure the legacy token sale escrow can find the Synthetix proxy to read and transfer',
-			});
-		} else {
-			await runStep({
-				contract: 'SynthetixEscrow',
-				target: SynthetixEscrow,
-				read: 'synthetix',
-				expected: input => input === addressOf(ProxySynthetix),
-				write: 'setSynthetix',
-				writeArg: addressOf(ProxySynthetix),
-				comment: 'Ensure the token sale escrow can find the Synthetix proxy to read and transfer',
-			});
-		}
+		// if (network === 'mainnet' && !useOvm) {
+		// 	await runStep({
+		// 		contract: 'SynthetixEscrow',
+		// 		target: SynthetixEscrow,
+		// 		read: 'havven',
+		// 		expected: input => input === addressOf(ProxySynthetix),
+		// 		write: 'setHavven',
+		// 		writeArg: addressOf(ProxySynthetix),
+		// 		comment:
+		// 			'Ensure the legacy token sale escrow can find the Synthetix proxy to read and transfer',
+		// 	});
+		// } else {
+		// 	await runStep({
+		// 		contract: 'SynthetixEscrow',
+		// 		target: SynthetixEscrow,
+		// 		read: 'synthetix',
+		// 		expected: input => input === addressOf(ProxySynthetix),
+		// 		write: 'setSynthetix',
+		// 		writeArg: addressOf(ProxySynthetix),
+		// 		comment: 'Ensure the token sale escrow can find the Synthetix proxy to read and transfer',
+		// 	});
+		// }
+		await runStep({
+			contract: 'SynthetixEscrow',
+			target: SynthetixEscrow,
+			read: 'synthetix',
+			expected: input => input === addressOf(ProxySynthetix),
+			write: 'setSynthetix',
+			writeArg: addressOf(ProxySynthetix),
+			comment: 'Ensure the token sale escrow can find the Synthetix proxy to read and transfer',
+		});
 	}
 };

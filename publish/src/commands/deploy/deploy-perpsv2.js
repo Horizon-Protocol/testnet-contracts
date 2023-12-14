@@ -436,7 +436,7 @@ const cleanupPerpsV2 = async ({
 
 const configurePerpsV2GenericParams = async ({ deployer, getDeployParameter, runStep, useOvm }) => {
 	console.log(gray(`\n------ CONFIGURE PERPS V2 GENERICS (ALL MARKETS) ------\n`));
-	if (!useOvm) return;
+	// if (!useOvm) return;
 
 	const { PerpsV2MarketSettings: futuresMarketSettings } = deployer.deployedContracts;
 

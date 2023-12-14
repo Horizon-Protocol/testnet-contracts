@@ -138,10 +138,12 @@ contract Synthetix is BaseSynthetix {
         emitTransfer(address(0), address(this), supplyToMint);
 
         // record minting event before mutation to token supply
-        uint minterReward = _supplySchedule.recordMintEvent(supplyToMint);
+        _supplySchedule.recordMintEvent(supplyToMint);
 
         // Set minted HZN balance to RewardEscrow's balance
         // Minus the minterReward and set balance of minter to add reward
+        uint minterReward = _supplySchedule.minterReward();
+        // Get the remainder
         uint amountToDistribute = supplyToMint.sub(minterReward);
 
         // Set the token balance to the RewardsDistribution contract

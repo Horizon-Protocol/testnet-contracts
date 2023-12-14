@@ -19,6 +19,7 @@ const {
 const { performTransactionalStep } = require('../command-utils/transact');
 
 const { getUsers } = require('../../..');
+const Deployer = require('../Deployer');
 
 const migrateDebtShares = async ({
 	network,
@@ -26,20 +27,16 @@ const migrateDebtShares = async ({
 	privateKey,
 	useOvm,
 	useFork,
+	maxFeePerGas,
+	maxPriorityFeePerGas,
 	providerUrl,
 	etherscanAddressCsv,
 	threshold,
 	batchSize,
-	reapportion,
 }) => {
 	ensureNetwork(network);
 	deploymentPath = deploymentPath || getDeploymentPathForNetwork({ network, useOvm });
 	ensureDeploymentPath(deploymentPath);
-
-	const factor = ethers.utils.parseEther(reapportion);
-	const ONE = ethers.utils.parseEther('1');
-
-	console.log(factor.toString(), reapportion);
 
 	const { providerUrl: envProviderUrl, privateKey: envPrivateKey } = loadConnections({
 		network,
@@ -47,7 +44,7 @@ const migrateDebtShares = async ({
 		useOvm,
 	});
 
-	const { deployment, ownerActions, ownerActionsFile } = loadAndCheckRequiredSources({
+	const { deployment, ownerActions, ownerActionsFile, deploymentFile } = loadAndCheckRequiredSources({
 		deploymentPath,
 		network,
 	});
@@ -65,6 +62,8 @@ const migrateDebtShares = async ({
 		privateKey = envPrivateKey;
 	}
 
+    console.log(gray(`Using account with public key ${providerUrl}`));
+
 	const provider = new ethers.providers.JsonRpcProvider(providerUrl);
 
 	let signer;
@@ -78,9 +77,34 @@ const migrateDebtShares = async ({
 
 	console.log(gray(`Using account with public key ${signer.address}`));
 
+	const deployer = new Deployer({
+		// compiled,
+		config: {},
+		configFile: null, // null configFile so it doesn't overwrite config.json
+		deployment,
+		deploymentFile,
+		maxFeePerGas,
+		maxPriorityFeePerGas,
+		network,
+		privateKey,
+		providerUrl,
+		useFork,
+		// dryRun,
+		useOvm,
+	});
+
+	// get synthetix system contract
+	const previousSynthetix = deployer.getExistingContract({ contract: 'Synthetix' }); 
+	console.log(previousSynthetix);
+	// const { address: synthetixAddress } = deployment.targets['ProxySynthetix'];
+
+	const { abi: synthetixABI } = deployment.sources[deployment.targets['Synthetix'].source];
+	const Synthetix = new ethers.Contract(previousSynthetix.address, synthetixABI, provider);
+
 	const { address: debtSharesAddress } = deployment.targets['SynthetixDebtShare'];
-	const { abi: debtSharesABI } =
-		deployment.sources[deployment.targets['SynthetixDebtShare'].source];
+	const { abi: debtSharesABI } = deployment.sources[
+		deployment.targets['SynthetixDebtShare'].source
+	];
 	const SynthetixDebtShare = new ethers.Contract(debtSharesAddress, debtSharesABI, signer);
 
 	// get a list of addresses
@@ -90,31 +114,28 @@ const migrateDebtShares = async ({
 
 	const addressCollateralAmounts = [];
 
+	const sUSD = ethers.utils.formatBytes32String('zUSD');
+
 	let totalDebtAccounted = ethers.BigNumber.from(0);
 	let totalDebtForgiven = ethers.BigNumber.from(0);
-	let totalDebtAfter = ethers.BigNumber.from(0);
 
 	await async.eachOfLimit(lines, 50, async (line, i) => {
 		if (line === '') return;
 
-		const address = JSON.parse(line.split(',')[0]);
+		const address = line.split(',')[0];
 
 		if (i % 100 === 0) {
 			console.log('scanning address', i, 'of', lines.length);
 		}
-
+        
 		try {
-			const debtBalanceOf = await SynthetixDebtShare.balanceOf(address);
-
+            const debtBalanceOf = await Synthetix.debtBalanceOf(address, sUSD);
+            console.log('debtBalanceOf' + address + debtBalanceOf.toString());
+            
 			if (debtBalanceOf.gt(ethers.utils.parseEther(threshold))) {
-				const debtAfter = debtBalanceOf.mul(factor).div(ONE);
-
-				addressCollateralAmounts.push({
-					address,
-					debtBalanceOf: debtAfter,
-				});
+                // console.log('debtBalanceOf' + address + debtBalanceOf.toString());
+				addressCollateralAmounts.push({ address, debtBalanceOf });
 				totalDebtAccounted = totalDebtAccounted.add(debtBalanceOf);
-				totalDebtAfter = totalDebtAfter.add(debtAfter);
 			} else {
 				totalDebtForgiven = totalDebtForgiven.add(debtBalanceOf);
 			}
@@ -126,19 +147,17 @@ const migrateDebtShares = async ({
 	console.log(
 		'recorded',
 		addressCollateralAmounts.length,
-		'addresses with debt shares totalling',
+		'addresses with debt totalling',
 		ethers.utils.formatEther(totalDebtAccounted),
 		'forgiving',
-		ethers.utils.formatEther(totalDebtForgiven),
-		'adjusting to total amount of',
-		ethers.utils.formatEther(totalDebtAfter)
+		ethers.utils.formatEther(totalDebtForgiven)
 	);
 
 	for (let i = 0; i < addressCollateralAmounts.length; i += batchSize) {
 		const batch = addressCollateralAmounts.slice(i, i + batchSize);
 
-		const addrs = batch.map((a) => a.address);
-		const amounts = batch.map((a) => a.debtBalanceOf);
+		const addrs = batch.map(a => a.address);
+		const amounts = batch.map(a => a.debtBalanceOf);
 
 		console.log('write action for import of addresses', i, 'through', i + batchSize);
 
@@ -161,13 +180,13 @@ const migrateDebtShares = async ({
 
 module.exports = {
 	migrateDebtShares,
-	cmd: (program) =>
+	cmd: program =>
 		program
 			.command('migrate-debt-shares')
 			.description('Migrate to Debt Shares from debtLedger')
 			.option('-g, --max-fee-per-gas <value>', 'Maximum base gas fee price in GWEI')
 			.option('--max-priority-fee-per-gas <value>', 'Priority gas fee price in GWEI', '2')
-			.option('-n, --network <value>', 'The network to run off.', (x) => x.toLowerCase(), 'testnet')
+			.option('-n, --network <value>', 'The network to run off.', x => x.toLowerCase(), 'kovan')
 			.option(
 				'-k, --use-fork',
 				'Perform the deployment on a forked chain running on localhost (see fork command).',
@@ -186,10 +205,5 @@ module.exports = {
 				'0'
 			)
 			.option('--batch-size <value>', 'Number of addresses per import transaction', 200)
-			.option(
-				'--reapportion <value>',
-				'Set the debt shares to be a proportion of the existing value',
-				'1'
-			)
 			.action(migrateDebtShares),
 };
