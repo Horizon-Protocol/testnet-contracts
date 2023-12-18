@@ -31,7 +31,7 @@ const checkCollateralBeforeMigration = async () => {
         );
 
 
-        fs.writeFileSync('files/collaterals.json', JSON.stringify(collaterals), err => {
+        fs.writeFileSync('files/data/collaterals.json', JSON.stringify(collaterals), err => {
             if (err) {
                 throw err;
             }

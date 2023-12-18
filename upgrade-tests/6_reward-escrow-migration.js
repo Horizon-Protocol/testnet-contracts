@@ -5,23 +5,23 @@ const { multicall, zUSD, readMulticall, rewardEscrowV2 } = require('./utils.js')
 const users = JSON.parse(fs.readFileSync('./files/sources/subgraph-users.json'));
 console.log("rewardescrowv2 address", rewardEscrowV2.address);
 
-const checktotalEscrowedAccountBalanceBeforeMigration = async () => {
+const checktotalVestedAccountBalanceBeforeMigration = async () => {
 
-    console.log(`Reading function totalEscrowedAccountBalance using multicall from synthetix  for ${users.length}`);
+    console.log(`Reading function totalVestedAccountBalance using multicall from synthetix  for ${users.length}`);
 
-    let totalEscrowedAccountBalances = [];
+    let totalVestedAccountBalances = [];
 
     try {
         await readMulticall(
             users,
-            (address) => rewardEscrowV2.populateTransaction.totalEscrowedAccountBalance(address),
+            (address) => rewardEscrowV2.populateTransaction.totalVestedAccountBalance(address),
             // (a, r) => {},
             (address, response) => {
                 const output = ethers.utils.defaultAbiCoder.decode(['uint256'], response.returnData);
-                console.log(`User ${address} has ${output[0]} totalEscrowedAccountBalance`);
-                totalEscrowedAccountBalances.push({
+                console.log(`User ${address} has ${output[0]} totalVestedAccountBalance`);
+                totalVestedAccountBalances.push({
                     wallet: address,
-                    totalEscrowedAccountBalances: output[0].toString(),
+                    totalVestedAccountBalances: output[0].toString(),
                 })
                 // if (output[0].gt(0)) {
                 //     filteredAddresses.push(a);
@@ -32,7 +32,7 @@ const checktotalEscrowedAccountBalanceBeforeMigration = async () => {
         );
 
 
-        fs.writeFileSync('files/data/totalEscrowedAccountBalances.json', JSON.stringify(totalEscrowedAccountBalances), err => {
+        fs.writeFileSync('files/data/totalVestedAccountBalances.json', JSON.stringify(totalVestedAccountBalances), err => {
             if (err) {
                 throw err;
             }
@@ -47,7 +47,7 @@ const checktotalEscrowedAccountBalanceBeforeMigration = async () => {
 }
 
 module.exports = {
-    checktotalEscrowedAccountBalanceBeforeMigration,
+    checktotalVestedAccountBalanceBeforeMigration
 }
 
-checktotalEscrowedAccountBalanceBeforeMigration();
+checktotalVestedAccountBalanceBeforeMigration();

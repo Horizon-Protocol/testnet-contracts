@@ -1,6 +1,6 @@
 const MULTICALL_ADDRESS = '0xcA11bde05977b3631167028862bE2a173976CA11';
-// const RPC_URL = 'http://127.0.0.1:8545/';
-const RPC_URL = 'https://rpc.ankr.com/bsc/95b3d954e100484050177ec4f7cf6c4c1c68b5b5c38a08020839e63b57958feb'
+const RPC_URL = 'http://127.0.0.1:8545/';
+// const RPC_URL = 'https://rpc.ankr.com/bsc/95b3d954e100484050177ec4f7cf6c4c1c68b5b5c38a08020839e63b57958feb'
 
 const SYNTHETIX_ABI_ETHERS = [
     'function debtBalanceOf(address,bytes32) view returns (uint256)',
@@ -8,6 +8,7 @@ const SYNTHETIX_ABI_ETHERS = [
     'function totalVestedAccountBalance(address) view returns (uint256)',
     'function collateral(address) external view returns (uint)',
     'function balanceOf(address) external view returns (uint)',
+    'function target() external view returns (address)',
 
 ]
 const MULTICALL_ABI_ETHERS =

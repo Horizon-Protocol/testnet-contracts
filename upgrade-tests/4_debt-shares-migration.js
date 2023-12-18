@@ -2,8 +2,9 @@ const { ethers } = require('ethers');
 const fs = require('fs');
 const { synthetix, multicall, zUSD, readMulticall } = require('./utils.js');
 
-// const users = JSON.parse(fs.readFileSync('./files/horizon-stakers2.json'));
+// const users = JSON.parse(fs.readFileSync('./files/positiveDebtBalances-users.json'));
 const users = JSON.parse(fs.readFileSync('./files/sources/subgraph-users.json'));
+
 // console.log('users', users);
 
 const checkDebtBeforeMigration = async () => {
@@ -29,11 +30,11 @@ const checkDebtBeforeMigration = async () => {
                 // }
             },
             0, // 0 = READ; 1 = WRITE;
-            50, // L1 max size = ~200; L2 max size = ~150;
+            25, // L1 max size = ~200; L2 max size = ~150;
         );
 
 
-        fs.writeFileSync('files/debtBalances.json', JSON.stringify(debtBalances), err => {
+        fs.writeFileSync('files/data/debtBalances.json', JSON.stringify(debtBalances), err => {
             if (err) {
                 throw err;
             }
@@ -51,4 +52,4 @@ module.exports = {
     checkDebtBeforeMigration,
 }
 
-// checkDebtBeforeMigration();
+checkDebtBeforeMigration();
