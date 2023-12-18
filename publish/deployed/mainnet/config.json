@@ -385,5 +385,77 @@
 	},
 	"ZassetzMATIC": {
 		"deploy": false
+	},
+	"WrapperFactory": {
+		"deploy": false
+	},
+	"SignedSafeDecimalMath": {
+		"deploy": false
+	},
+	"OneNetAggregatorIssuedSynths": {
+		"deploy": false
+	},
+	"OneNetAggregatorDebtRatio": {
+		"deploy": false
+	},
+	"ExchangeCircuitBreaker": {
+		"deploy": false
+	},
+	"FuturesMarketManager": {
+		"deploy": false
+	},
+	"PerpsV2MarketData": {
+		"deploy": false
+	},
+	"PerpsV2MarketSettings": {
+		"deploy": false
+	},
+	"PerpsV2ExchangeRate": {
+		"deploy": false
+	},
+	"Liquidator": {
+		"deploy": false
+	},
+	"LiquidatorRewards": {
+		"deploy": false
+	},
+	"CircuitBreaker": {
+		"deploy": false
+	},
+	"RewardEscrowV2Storage": {
+		"deploy": false
+	},
+	"ExchangeSettlementLib": {
+		"deploy": false
+	},
+	"DirectIntegrationManager": {
+		"deploy": false
+	},
+	"SystemSettingsLib": {
+		"deploy": false
+	},
+	"SynthetixDebtShare": {
+		"deploy": false
+	},
+	"PerpsV2ProxyBNBPERP": {
+		"deploy": false
+	},
+	"PerpsV2MarketStateBNBPERP": {
+		"deploy": false
+	},
+	"PerpsV2MarketBNBPERP": {
+		"deploy": false
+	},
+	"PerpsV2MarketLiquidateBNBPERP": {
+		"deploy": false
+	},
+	"PerpsV2DelayedIntentBNBPERP": {
+		"deploy": false
+	},
+	"PerpsV2DelayedExecutionBNBPERP": {
+		"deploy": false
+	},
+	"PerpsV2MarketViewsBNBPERP": {
+		"deploy": false
 	}
 }
