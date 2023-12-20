@@ -1,7 +1,7 @@
 const { program } = require('commander');
 const { ethers } = require('ethers');
 const fs = require('fs');
-const { synthetix, multicall, zUSD, readMulticall } = require('./utils.js');
+const { synthetix, readMulticall, getContractFromDeployment, provider } = require('./utils.js');
 
 // const users = JSON.parse(fs.readFileSync('./files/positiveDebtBalances-users.json'));
 const users = JSON.parse(fs.readFileSync('./files/sources/subgraph-users.json'));
@@ -12,7 +12,13 @@ const checkDebtBeforeMigration = async () => {
     const options = program.opts();
     console.log('FolderName', options.folder);
 
-    console.log(`Reading function debtBalanceOf using multicall from synthetix  for ${users.length}`);
+    console.log(`Reading function balanceOf using multicall from SynthetixDebtShare  for ${users.length}`);
+
+    const abi = [
+        'function balanceOf(address) external view returns (uint)',
+    ]
+    const synthetixDebtShare = new ethers.Contract(getContractFromDeployment('SynthetixDebtShare'), abi, provider);
+    
 
     let debtBalances = [];
     let filteredAddresses = [];
@@ -20,11 +26,11 @@ const checkDebtBeforeMigration = async () => {
     try {
         await readMulticall(
             users,
-            (address) => synthetix.populateTransaction.debtBalanceOf(address, zUSD),
+            (address) => synthetixDebtShare.populateTransaction.balanceOf(address),
             // (a, r) => {},
             (address, response) => {
                 const output = ethers.utils.defaultAbiCoder.decode(['uint256'], response.returnData);
-                console.log(`User ${address} has ${output[0]} debtbalance`);
+                console.log(`User ${address} has ${output[0]} debt share balance`);
                 debtBalances.push({
                     wallet: address,
                     debtBalance: output[0].toString(),
@@ -38,19 +44,7 @@ const checkDebtBeforeMigration = async () => {
         );
 
 
-        fs.writeFileSync(`files/${options.folder}/debtBalances.json`, JSON.stringify(debtBalances), err => {
-            if (err) {
-                throw err;
-            }
-        })
-
-        fs.writeFileSync(`files/${options.folder}/positiveDebtBalances-users.json`, JSON.stringify(filteredAddresses), err => {
-            if (err) {
-                throw err;
-            }
-        })
-
-        fs.writeFileSync(`../positiveDebtBalances-users.json`, JSON.stringify(filteredAddresses), err => {
+        fs.writeFileSync(`files/${options.folder}/debtShareBalances.json`, JSON.stringify(debtBalances), err => {
             if (err) {
                 throw err;
             }

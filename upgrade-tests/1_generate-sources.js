@@ -1,9 +1,15 @@
+const { program } = require('commander');
+
 const { bscscan } = require('./sources/bscscan');
 const { bitquery } = require('./sources/bitquery');
 const { covalent } = require('./sources/covalent');
 const { subgraph } = require('./sources/subgraph');
 
-const generateSource = async (source) => {
+const generateSource = async () => {
+    const options = program.opts();
+    console.log('SourceName', options.source);
+    const source = options.source;
+
     switch (source) {
         case "bscscan":
             console.log("Generating bscscan holder list");
