@@ -340,5 +340,50 @@
 	},
 	"ZassetzCOIN": {
 		"deploy": false
+	},
+	"TokenStatezAMZN": {
+		"deploy": false
+	},
+	"ProxyzAMZN": {
+		"deploy": false
+	},
+	"ZassetzAMZN": {
+		"deploy": false
+	},
+	"TokenStatezMSFT": {
+		"deploy": false
+	},
+	"ProxyzMSFT": {
+		"deploy": false
+	},
+	"ZassetzMSFT": {
+		"deploy": false
+	},
+	"TokenStatezNVDA": {
+		"deploy": false
+	},
+	"ProxyzNVDA": {
+		"deploy": false
+	},
+	"ZassetzNVDA": {
+		"deploy": false
+	},
+	"TokenStatezAVAX": {
+		"deploy": false
+	},
+	"ProxyzAVAX": {
+		"deploy": false
+	},
+	"ZassetzAVAX": {
+		"deploy": false
+	},
+	"TokenStatezMATIC": {
+		"deploy": false
+	},
+	"ProxyzMATIC": {
+		"deploy": false
+	},
+	"ZassetzMATIC": {
+		"deploy": false
 	}
 }
