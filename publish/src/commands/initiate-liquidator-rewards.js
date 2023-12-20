@@ -323,35 +323,10 @@ const initiateLiquidatorRewards = async ({
 	const MultiCall = new ethers.Contract(multiCallAddress, multiCallABI, signer);
 
 	// Get a list of addresses from the csv file
-	const addrs = fs.readFileSync(etherscanAddressCsv).toString('utf8');
-	const lines = addrs.split('\n');
-
-	const filteredAddresses = [];
-
-	// Filter out unwanted text
-	const unFilteredAddresses = lines
-		.slice(1)
-		.filter((l) => l)
-		.map((l) => JSON.parse(l.split(',')[0]));
-
-	console.log(
-		'********unFilteredAddresses updating entries for ',
-		unFilteredAddresses,
-		'addresses'
-	);
-	// Check for accounts with debt shares and add them to the `filteredAddresses` list.
-	await readMulticall(
-		unFilteredAddresses,
-		(a) => SynthetixDebtShare.populateTransaction.balanceOf(a),
-		(a, r) => {
-			const output = ethers.utils.defaultAbiCoder.decode(['uint256'], r.returnData);
-			if (output[0].gt(0)) {
-				filteredAddresses.push(a);
-			}
-		},
-		0,
-		2000
-	);
+	// const addrs = fs.readFileSync(etherscanAddressCsv).toString('utf8');
+	// const lines = addrs.split('\n');
+	
+	let filteredAddresses = JSON.parse(fs.readFileSync('./positiveDebtBalances-users.json'));
 
 	console.log('filteredAddresses updating entries for ', filteredAddresses, 'addresses');
 	console.log('filteredAddresses updating entries for ', filteredAddresses.length, 'addresses');

@@ -1,3 +1,4 @@
+const { program } = require('commander');
 const { ethers } = require('ethers');
 const fs = require('fs');
 const { multicall, zUSD, readMulticall, rewardEscrowV2 } = require('./utils.js');
@@ -6,6 +7,8 @@ const users = JSON.parse(fs.readFileSync('./files/sources/subgraph-users.json'))
 console.log("rewardescrowv2 address", rewardEscrowV2.address);
 
 const checktotalEscrowedAccountBalanceBeforeMigration = async () => {
+    const options = program.opts();
+    console.log('FolderName', options.folder);
 
     console.log(`Reading function totalEscrowedAccountBalance using multicall from synthetix  for ${users.length}`);
 
@@ -32,7 +35,7 @@ const checktotalEscrowedAccountBalanceBeforeMigration = async () => {
         );
 
 
-        fs.writeFileSync('files/data/totalEscrowedAccountBalances.json', JSON.stringify(totalEscrowedAccountBalances), err => {
+        fs.writeFileSync(`files/${options.folder}/totalEscrowedAccountBalances.json`, JSON.stringify(totalEscrowedAccountBalances), err => {
             if (err) {
                 throw err;
             }
@@ -46,8 +49,13 @@ const checktotalEscrowedAccountBalanceBeforeMigration = async () => {
     }
 }
 
+
+program
+    .requiredOption('-f, --folder <value>', 'Folder to save the output')
+    .action(checktotalEscrowedAccountBalanceBeforeMigration)
+
+program.parse();
+
 module.exports = {
     checktotalEscrowedAccountBalanceBeforeMigration,
 }
-
-checktotalEscrowedAccountBalanceBeforeMigration();

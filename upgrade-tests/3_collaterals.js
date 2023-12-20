@@ -1,3 +1,4 @@
+const { program } = require('commander');
 const { ethers } = require('ethers');
 const fs = require('fs');
 const { synthetix, multicall, zUSD, readMulticall } = require('./utils.js');
@@ -5,10 +6,13 @@ const { synthetix, multicall, zUSD, readMulticall } = require('./utils.js');
 const users = JSON.parse(fs.readFileSync('./files/sources/subgraph-users.json'));
 
 const checkCollateralBeforeMigration = async () => {
+    const options = program.opts();
+    console.log('FolderName', options.folder);
 
     console.log(`Reading function collateral using multicall from synthetix  for ${users.length}`);
 
     let collaterals = [];
+
 
     try {
         await readMulticall(
@@ -31,7 +35,7 @@ const checkCollateralBeforeMigration = async () => {
         );
 
 
-        fs.writeFileSync('files/data/collaterals.json', JSON.stringify(collaterals), err => {
+        fs.writeFileSync(`files/${options.folder}/collaterals.json`, JSON.stringify(collaterals), err => {
             if (err) {
                 throw err;
             }
@@ -45,8 +49,13 @@ const checkCollateralBeforeMigration = async () => {
     }
 }
 
+
+program
+    .requiredOption('-f, --folder <value>', 'Folder to save the output')
+    .action(checkCollateralBeforeMigration)
+
+program.parse();
+
 module.exports = {
     checkCollateralBeforeMigration,
 }
-
-checkCollateralBeforeMigration();

@@ -1,3 +1,4 @@
+const { program } = require('commander');
 const { ethers } = require('ethers');
 const fs = require('fs');
 const { multicall, zUSD, readMulticall, rewardEscrowV2 } = require('./utils.js');
@@ -6,6 +7,8 @@ const users = JSON.parse(fs.readFileSync('./files/sources/subgraph-users.json'))
 console.log("rewardescrowv2 address", rewardEscrowV2.address);
 
 const checktotalVestedAccountBalanceBeforeMigration = async () => {
+    const options = program.opts();
+    console.log('FolderName', options.folder);
 
     console.log(`Reading function totalVestedAccountBalance using multicall from synthetix  for ${users.length}`);
 
@@ -21,7 +24,7 @@ const checktotalVestedAccountBalanceBeforeMigration = async () => {
                 console.log(`User ${address} has ${output[0]} totalVestedAccountBalance`);
                 totalVestedAccountBalances.push({
                     wallet: address,
-                    totalVestedAccountBalances: output[0].toString(),
+                    totalVestedAccountBalance: output[0].toString(),
                 })
                 // if (output[0].gt(0)) {
                 //     filteredAddresses.push(a);
@@ -32,7 +35,7 @@ const checktotalVestedAccountBalanceBeforeMigration = async () => {
         );
 
 
-        fs.writeFileSync('files/data/totalVestedAccountBalances.json', JSON.stringify(totalVestedAccountBalances), err => {
+        fs.writeFileSync(`files/${options.folder}/totalVestedAccountBalances.json`, JSON.stringify(totalVestedAccountBalances), err => {
             if (err) {
                 throw err;
             }
@@ -46,8 +49,12 @@ const checktotalVestedAccountBalanceBeforeMigration = async () => {
     }
 }
 
+program
+    .requiredOption('-f, --folder <value>', 'Folder to save the output')
+    .action(checktotalVestedAccountBalanceBeforeMigration)
+
+program.parse();
+
 module.exports = {
     checktotalVestedAccountBalanceBeforeMigration
 }
-
-checktotalVestedAccountBalanceBeforeMigration();
