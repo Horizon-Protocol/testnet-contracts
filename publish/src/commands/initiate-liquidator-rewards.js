@@ -349,7 +349,7 @@ const initiateLiquidatorRewards = async ({
 			const calls = [];
 
 			for (let j = i; j < Math.min(i + batch, items.length); j++) {
-				const populatedCall = await call(items[j]);
+				const populatedCall = await call(items[j].wallet);
 				calls.push({
 					target: populatedCall.to,
 					callData: populatedCall.data,

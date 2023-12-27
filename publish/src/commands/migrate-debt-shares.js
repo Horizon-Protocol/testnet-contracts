@@ -121,9 +121,11 @@ const migrateDebtShares = async ({
 	for (let i = 0; i < addressCollateralAmounts.length; i += Number(batchSize)) {
 		const batch = addressCollateralAmounts.slice(i, i + Number(batchSize));
 
-		const addrs = batch.map(a => a.address);
-		const amounts = batch.map(a => a.debtBalanceOf);
+		const addrs = batch.map(a => a.wallet);
+		const amounts = batch.map(a => a.debtBalance);
 
+		console.log('write action for import of addresses', addrs);
+				console.log('write action for import of addresses', amounts);
 		console.log('write action for import of addresses', i, 'through', i + Number(batchSize));
 
 		await performTransactionalStep({

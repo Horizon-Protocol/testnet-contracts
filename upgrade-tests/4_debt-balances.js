@@ -30,11 +30,14 @@ const checkDebtBeforeMigration = async () => {
                     debtBalance: output[0].toString(),
                 })
                 if (output[0].gt(0)) {
-                    filteredAddresses.push(address);
+                    filteredAddresses.push({
+		       wallet: address,
+		       debtBalance: output[0].toString(),
+		    });
                 }
             },
             0, // 0 = READ; 1 = WRITE;
-            40, // L1 max size = ~200; L2 max size = ~150;
+            50, // L1 max size = ~200; L2 max size = ~150;
         );
 
 
