@@ -13,7 +13,7 @@ const liquidatorEntries = async () => {
     console.log(`Reading function initiated using multicall from LiquidatorRewards  for ${users.length}`);
 
     const abi = [
-        'function balanceOf(address) external view returns (uint)',
+        'function initiated(address) external view returns (bool)',
     ]
     const LiquidatorRewards = new ethers.Contract(getContractFromDeployment('LiquidatorRewards'), abi, provider);
     
