@@ -103,26 +103,26 @@ const knownAccounts = {
 // numbers are converted to strings and those with 18 decimals are also converted to wei amounts
 const defaults = {
 	TEMP_OWNER_DEFAULT_DURATION: 60 * 60 * 24 * 60, // 60 days
-	WAITING_PERIOD_SECS: (60 * 5).toString(), // 5 mins
+	WAITING_PERIOD_SECS: '0', // (60 * 5).toString(), // 5 mins
 	PRICE_DEVIATION_THRESHOLD_FACTOR: w3utils.toWei('3'),
 	TRADING_REWARDS_ENABLED: false,
 	ISSUANCE_RATIO: w3utils.toBN(1).mul(w3utils.toBN(1e18)).div(w3utils.toBN(3)).toString(), // 1/3 = 0.3333333333  // 300% ratio
 	FEE_PERIOD_DURATION: (3600 * 24 * 7).toString(), // 1 week
 	TARGET_THRESHOLD: '1', // 1% target threshold (it will be converted to a decimal when set)
-	LIQUIDATION_DELAY: (3600 * 24).toString(), // 24 hours
+	LIQUIDATION_DELAY: (3600 * 8).toString(), // 8 hours
 	LIQUIDATION_RATIO: w3utils.toBN(1).mul(w3utils.toBN(2e18)).div(w3utils.toBN(3)).toString(), // 2/3 = 0.6666666667 // 150% ratio
-	LIQUIDATION_ESCROW_DURATION: (3600 * 24 * 365).toString(), // 1 year
+	LIQUIDATION_ESCROW_DURATION: (3600 * 24 * 30 * 6).toString(), // 6 months
 	LIQUIDATION_PENALTY: w3utils.toWei('0.1'), // 10% penalty (used for Collateral liquidations)
-	SNX_LIQUIDATION_PENALTY: w3utils.toWei('0.3'), // 30% penalty (used for SNX Liquidations)
-	SELF_LIQUIDATION_PENALTY: w3utils.toWei('0.2'), // 20% penalty
-	FLAG_REWARD: w3utils.toWei('10'), // 10 HZN
-	LIQUIDATE_REWARD: w3utils.toWei('20'), // 20 HZN
-	RATE_STALE_PERIOD: (3600 * 25).toString(), // 25 hours
+	SNX_LIQUIDATION_PENALTY: w3utils.toWei('0.6'), // 60% penalty (used for SNX Liquidations)
+	SELF_LIQUIDATION_PENALTY: w3utils.toWei('0.5'), // 50% penalty
+	FLAG_REWARD: w3utils.toWei('100'), // 100 HZN
+	LIQUIDATE_REWARD: w3utils.toWei('200'), // 200 HZN
+	RATE_STALE_PERIOD: (3600 * 24).toString(), // 24 hours
 	EXCHANGE_FEE_RATES: {
 		forex: w3utils.toWei('0.003'),
 		commodity: w3utils.toWei('0.003'),
 		equities: w3utils.toWei('0.003'),
-		crypto: w3utils.toWei('0.01'),
+		crypto: w3utils.toWei('0.025'),
 		index: w3utils.toWei('0.01'),
 	},
 	EXCHANGE_DYNAMIC_FEE_THRESHOLD: w3utils.toWei('0.0025'), // 40 bps
@@ -699,16 +699,16 @@ const getUsers = ({ network = 'mainnet', user, useOvm = false } = {}) => {
 		}),
 		testnet: Object.assign({}, base),
 		goerli: Object.assign({}, base),
-		local: Object.assign({}, base, {
-			// Deterministic account #0 when using `npx hardhat node`
-			owner: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-		}),
-		'local-ovm': Object.assign({}, base, {
-			// Deterministic account #0 when using `npx hardhat node`
-			owner: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-			deployer: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-			oracle: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-		}),
+		// local: Object.assign({}, base, {
+		// 	// Deterministic account #0 when using `npx hardhat node`
+		// 	owner: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+		// }),
+		// 'local-ovm': Object.assign({}, base, {
+		// 	// Deterministic account #0 when using `npx hardhat node`
+		// 	owner: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+		// 	deployer: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+		// 	oracle: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+		// }),
 	};
 
 	const users = Object.entries(map[getFolderNameForNetwork({ network, useOvm })]).map(
@@ -777,6 +777,7 @@ const getSuspensionReasons = ({ code = undefined } = {}) => {
  */
 const getTokens = ({ network = 'mainnet', path, fs, useOvm = false } = {}) => {
 	const synths = getSynths({ network, useOvm, path, fs });
+	console.log("**************SYNTHS************", synths);
 	const targets = getTarget({ network, useOvm, path, fs });
 	const feeds = getFeeds({ network, useOvm, path, fs });
 

@@ -57,21 +57,22 @@ module.exports = async ({
 		)
 	);
 
-	const exchangeFeeRates = await getDeployParameter('EXCHANGE_FEE_RATES');
+	// const exchangeFeeRates = await getDeployParameter('EXCHANGE_FEE_RATES');
 
 	// update all synths with 0 current rate, except zUSD
 	const synthsRatesToUpdate = synths
 		.map((synth, i) =>
 			Object.assign(
 				{
-					currentRate: parseUnits((synthRates[i] || '').toString() || '0').toString(),
-					targetRate: exchangeFeeRates[synth.category],
+					currentRate: ((synthRates[i] || '').toString() || '0').toString(),
+					targetRate: (parseUnits(synth.exchangeFeeRate)).toString(),
 				},
 				synth
 			)
 		)
-		.filter(({ currentRate }) => currentRate === '0')
-		.filter(({ name }) => name !== 'zUSD'); // SCCP-190: zUSD rate is 0 despite it being in forex category
+	// .filter(({ currentRate }) => currentRate === '0')
+	.filter(({ currentRate, targetRate }) => currentRate != targetRate)
+	// .filter(({ name }) => name !== 'zUSD'); // SCCP-190: zUSD rate is 0 despite it being in forex category
 
 	console.log(gray(`Found ${synthsRatesToUpdate.length} synths needs exchange rate pricing`));
 
@@ -82,7 +83,7 @@ module.exports = async ({
 				synthsRatesToUpdate
 					.map(
 						({ name, targetRate, currentRate }) =>
-							`\t${name} from ${currentRate * 100}% to ${formatUnits(targetRate) * 100}%`
+							`\t${name} from ${formatUnits(currentRate) * 100}% to ${formatUnits(targetRate) * 100}%`
 					)
 					.join('\n')
 			)

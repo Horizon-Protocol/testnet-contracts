@@ -5,7 +5,8 @@
 		"sign": "$",
 		"description": "US Dollars",
 		"name": "zUSD",
-		"subclass": "MultiCollateralSynth"
+		"subclass": "MultiCollateralSynth",
+		"exchangeFeeRate": "0"
 	},
 	{
 		"asset": "BNB",
@@ -13,126 +14,155 @@
 		"sign": "",
 		"description": "Binance Coin",
 		"name": "zBNB",
-		"subclass": "MultiCollateralSynth"
+		"subclass": "MultiCollateralSynth",
+		"exchangeFeeRate": "0.001"
 	},
 	{
 		"name": "zBTC",
 		"asset": "BTC",
-		"subclass": "MultiCollateralSynth"
+		"category": "crypto",
+		"subclass": "MultiCollateralSynth",
+		"exchangeFeeRate": "0.001"
 	},
 	{
 		"name": "zETH",
 		"asset": "ETH",
-		"subclass": "MultiCollateralSynth"
+		"category": "crypto",
+		"subclass": "MultiCollateralSynth",
+		"exchangeFeeRate": "0.001"
 	},
 	{
 		"name": "zADA",
 		"asset": "ADA",
-		"subclass": "MultiCollateralSynth"
+		"category": "crypto",
+		"subclass": "MultiCollateralSynth",
+		"exchangeFeeRate": "0.002"
 	},
 	{
 		"name": "zDOT",
 		"asset": "DOT",
-		"subclass": "MultiCollateralSynth"
+		"category": "crypto",
+		"subclass": "MultiCollateralSynth",
+		"exchangeFeeRate": "0.002"
 	},
 	{
 		"name": "zSOL",
 		"asset": "SOL",
-		"subclass": "MultiCollateralSynth"
+		"subclass": "MultiCollateralSynth",
+		"exchangeFeeRate": "0.002"
 	},
 	{
 		"name": "zXRP",
 		"asset": "XRP",
-		"subclass": "MultiCollateralSynth"
+		"subclass": "MultiCollateralSynth",
+		"exchangeFeeRate": "0.002"
 	},
 	{
 		"name": "zCAKE",
 		"asset": "CAKE",
-		"subclass": "MultiCollateralSynth"
+		"subclass": "MultiCollateralSynth",
+		"exchangeFeeRate": "0.002"
 	},
 	{
 		"name": "zLINK",
 		"asset": "LINK",
-		"subclass": "MultiCollateralSynth"
+		"subclass": "MultiCollateralSynth",
+		"exchangeFeeRate": "0.002"
 	},
 	{
 		"name": "zXAU",
 		"asset": "XAU",
-		"subclass": "MultiCollateralSynth"
+		"subclass": "MultiCollateralSynth",
+		"exchangeFeeRate": "0.002"
 	},
 	{
 		"name": "zXAG",
 		"asset": "XAG",
-		"subclass": "MultiCollateralSynth"
+		"subclass": "MultiCollateralSynth",
+		"exchangeFeeRate": "0.002"
 	},
 	{
 		"name": "zWTI",
 		"asset": "WTI",
-		"subclass": "MultiCollateralSynth"
+		"subclass": "MultiCollateralSynth",
+		"exchangeFeeRate": "0.002"
 	},
 	{
 		"name": "zEUR",
 		"asset": "EUR",
-		"subclass": "MultiCollateralSynth"
+		"subclass": "MultiCollateralSynth",
+		"exchangeFeeRate": "0.002"
 	},
 	{
 		"name": "zJPY",
 		"asset": "JPY",
-		"subclass": "MultiCollateralSynth"
+		"subclass": "MultiCollateralSynth",
+		"exchangeFeeRate": "0.002"
 	},
 	{
 		"name": "zSPY",
 		"asset": "SPY",
-		"subclass": "MultiCollateralSynth"
+		"subclass": "MultiCollateralSynth",
+		"exchangeFeeRate": "0.005"
 	},
 	{
 		"name": "zQQQ",
 		"asset": "QQQ",
-		"subclass": "MultiCollateralSynth"
+		"subclass": "MultiCollateralSynth",
+		"exchangeFeeRate": "0.005"
 	},
 	{
 		"name": "zGOOGL",
 		"asset": "GOOGL",
-		"subclass": "MultiCollateralSynth"
+		"subclass": "MultiCollateralSynth",
+		"exchangeFeeRate": "0.005"
 	},
 	{
 		"name": "zAAPL",
 		"asset": "AAPL",
-		"subclass": "MultiCollateralSynth"
+		"subclass": "MultiCollateralSynth",
+		"exchangeFeeRate": "0.005"
 	},
 	{
 		"name": "zTSLA",
 		"asset": "TSLA",
-		"subclass": "MultiCollateralSynth"
+		"subclass": "MultiCollateralSynth",
+		"exchangeFeeRate": "0.005"
 	},
 	{
 		"name": "zCOIN",
 		"asset": "COIN",
-		"subclass": "MultiCollateralSynth"
+		"subclass": "MultiCollateralSynth",
+		"exchangeFeeRate": "0.005"
 	},
 	{
 		"name": "zAMZN",
 		"asset": "AMZN",
-		"subclass": "MultiCollateralSynth"
+		"subclass": "MultiCollateralSynth",
+		"exchangeFeeRate": "0.005"
 	},
 	{
 		"name": "zMSFT",
 		"asset": "MSFT",
-		"subclass": "MultiCollateralSynth"
+		"subclass": "MultiCollateralSynth",
+		"exchangeFeeRate": "0.005"
 	},
 	{
 		"name": "zNVDA",
 		"asset": "NVDA",
-		"subclass": "MultiCollateralSynth"
+		"subclass": "MultiCollateralSynth",
+		"exchangeFeeRate": "0.005"
 	},
 	{
 		"name": "zAVAX",
 		"asset": "AVAX",
-		"subclass": "MultiCollateralSynth"
+		"subclass": "MultiCollateralSynth",
+		"exchangeFeeRate": "0.005"
 	},
 	{
 		"name": "zMATIC",
 		"asset": "MATIC",
-		"subclass": "MultiCollateralSynth"
+		"subclass": "MultiCollateralSynth",
+		"exchangeFeeRate": "0.002"
 	}
 ]
